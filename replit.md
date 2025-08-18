@@ -26,11 +26,14 @@ Preferred communication style: Simple, everyday language.
   - `wsgi.py`: WSGI-compatible entry point for production servers (Gunicorn, uWSGI)
   - `main.py`: Alternative entry point with enhanced logging and environment detection
   - `run.py`: Universal run script for deployment platforms with debug status
+  - `server.py`: Production-optimized entry point specifically for Replit deployment
   - `Procfile`: Heroku-style process file specifying `python app.py` as web startup command
+  - `Dockerfile`: Container configuration for Docker-based deployments
 - **Entry Point**: Web calendar application (`web_calendar.py`) serves as the main web interface
 - **Host Configuration**: All entry points configured to bind to `0.0.0.0` with PORT environment variable support
 - **Environment Variables**: Support for `PORT`, `FLASK_DEBUG`, and `ENVIRONMENT` variables for deployment flexibility
 - **Deployment Target**: Configured for Google Cloud Run via Replit deployment system
+- **Verification**: All entry points tested and confirmed working with HTTP 200 responses
 
 # System Architecture
 

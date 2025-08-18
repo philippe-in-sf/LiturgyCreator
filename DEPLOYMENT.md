@@ -68,7 +68,25 @@ Choose any of these commands:
 python app.py
 python main.py
 python run.py
+python server.py
 ```
+
+### 5. Production Server Entry Point: `server.py`
+- **Purpose**: Optimized entry point for Replit deployment
+- **Usage**: `python server.py`
+- **Features**:
+  - Production-optimized configuration
+  - Clear startup logging
+  - Deployment platform compatibility
+  - Automatic port detection from environment
+
+### 6. Docker Configuration: `Dockerfile`
+- **Purpose**: Containerized deployment option
+- **Usage**: `docker build -t liturgical-calendar . && docker run -p 5000:5000 liturgical-calendar`
+- **Features**:
+  - Python 3.11 slim base image
+  - Automatic dependency installation
+  - Production environment configuration
 
 ## Application Features
 - Interactive liturgical calendar with Episcopal Church calendar integration
