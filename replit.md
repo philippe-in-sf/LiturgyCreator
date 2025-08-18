@@ -8,7 +8,18 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
-## Deployment Configuration Fixes (August 18, 2025)
+## API and Deployment Fixes (August 18, 2025)
+
+### Readings API Resolution
+- **Issue**: External liturgical APIs (Vanderbilt, lectionarypage.net) returning 403 Forbidden errors
+- **Resolution**: Enhanced fallback system with priority order:
+  1. Local readings database (primary)
+  2. External APIs (secondary)  
+  3. Closest Sunday readings (tertiary)
+- **Coverage**: Added comprehensive Sunday readings for August 2025
+- **User Preference**: Focus on Sunday readings rather than weekdays (per user request)
+
+### Deployment Configuration Fixes
 - **Issue**: Deployment failed due to undefined `$file` variable in run command
 - **Resolution**: Created comprehensive deployment configuration:
   - `app.py`: Primary Flask application entry point with proper main() function
