@@ -1,7 +1,7 @@
 [project]
-name = "repl-nix-workspace"
+name = "liturgical-calendar-web"
 version = "0.1.0"
-description = "Add your description here"
+description = "Daily Liturgical Scripture Calendar with OBS Integration - Episcopal Church liturgical readings from the Revised Common Lectionary"
 requires-python = ">=3.11"
 dependencies = [
     "beautifulsoup4>=4.13.4",
@@ -10,3 +10,13 @@ dependencies = [
     "requests>=2.32.4",
     "trafilatura>=2.0.0",
 ]
+
+[project.scripts]
+liturgical-calendar = "main:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["."]

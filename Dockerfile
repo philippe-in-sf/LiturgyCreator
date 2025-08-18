@@ -18,4 +18,4 @@ ENV PORT=5000
 ENV FLASK_ENV=production
 
 # Run the application
-CMD ["python", "app.py"]
+CMD ["python", "main.py"]

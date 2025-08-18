@@ -19,21 +19,24 @@ Preferred communication style: Simple, everyday language.
 - **Coverage**: Added comprehensive Sunday readings for August 2025
 - **User Preference**: Focus on Sunday readings rather than weekdays (per user request)
 
-### Deployment Configuration Fixes
-- **Issue**: Deployment failed due to undefined `$file` variable in run command
-- **Resolution**: Created comprehensive deployment configuration:
-  - `app.py`: Primary Flask application entry point with proper main() function
-  - `wsgi.py`: WSGI-compatible entry point for production servers (Gunicorn, uWSGI)
-  - `main.py`: Alternative entry point with enhanced logging and environment detection
-  - `run.py`: Universal run script for deployment platforms with debug status
-  - `server.py`: Production-optimized entry point specifically for Replit deployment
-  - `Procfile`: Heroku-style process file specifying `python app.py` as web startup command
-  - `Dockerfile`: Container configuration for Docker-based deployments
+### Deployment Configuration Fixes (Updated August 18, 2025)
+- **Issue**: Deployment failed due to undefined `$file` variable in run command and missing entry point specification
+- **Root Cause**: `.replit` configuration missing explicit `run` command, causing deployment system to reference undefined variables
+- **Resolution**: Comprehensive deployment configuration update:
+  - **Primary Entry Points**:
+    - `main.py`: Primary deployment entry point with enhanced error handling
+    - `start.py`: Universal fallback entry point for various deployment platforms
+    - `index.py`: Alternative entry point for platforms expecting index.py
+    - `server.py`: Production-optimized entry point specifically for Replit deployment
+  - **Configuration Files**:
+    - `pyproject.toml`: Updated with proper project metadata, entry point scripts, and build system configuration
+    - `Procfile`: Updated to use `python main.py` instead of `python app.py`
+    - `run.sh`: Bash script providing shell-based entry point alternative
+  - **Verification**: All entry points tested and confirmed working with successful imports and HTTP 200 responses
 - **Entry Point**: Web calendar application (`web_calendar.py`) serves as the main web interface
 - **Host Configuration**: All entry points configured to bind to `0.0.0.0` with PORT environment variable support
-- **Environment Variables**: Support for `PORT`, `FLASK_DEBUG`, and `ENVIRONMENT` variables for deployment flexibility
+- **Environment Variables**: Support for `PORT`, `FLASK_DEBUG`, `DEBUG`, and `ENVIRONMENT` variables for deployment flexibility
 - **Deployment Target**: Configured for Google Cloud Run via Replit deployment system
-- **Verification**: All entry points tested and confirmed working with HTTP 200 responses
 
 # System Architecture
 
