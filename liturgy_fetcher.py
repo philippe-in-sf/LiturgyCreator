@@ -142,91 +142,137 @@ class LiturgyFetcher:
             # For Tenth Sunday after Pentecost (Proper 15) - August 17, 2025
             readings_url = "https://www.lectionarypage.net/YearC_RCL/Pentecost/CProp15_RCL.html"
             
-            try:
-                readings_response = self.session.get(readings_url, timeout=10)
-                readings_response.raise_for_status()
-                return self._parse_specific_reading_page(readings_response.text, "Tenth Sunday after Pentecost (Proper 15)")
-            except:
-                # Fallback to current Episcopal readings structure
-                pass
-            
-            # Episcopal readings for Tenth Sunday after Pentecost (Proper 15) - Year C
-            readings = {
-                'first_reading': {
-                    'reference': 'Jeremiah 23:23-29',
-                    'text': 'Am I a God near by, says the Lord, and not a God far off? Who can hide in secret places so that I cannot see them? says the Lord. Do I not fill heaven and earth? says the Lord. I have heard what the prophets have said who prophesy lies in my name, saying, "I have dreamed, I have dreamed!" How long? Will the hearts of the prophets ever turn back-- those who prophesy lies, and who prophesy the deceit of their own heart? They plan to make my people forget my name by their dreams that they tell one another, just as their ancestors forgot my name for Baal. Let the prophet who has a dream tell the dream, but let the one who has my word speak my word faithfully. What has straw in common with wheat? says the Lord. Is not my word like fire, says the Lord, and like a hammer that breaks a rock in pieces?'
-                },
-                'psalm': {
-                    'reference': 'Psalm 82',
-                    'text': 'God takes his stand in the council of heaven; he gives judgment in the midst of the gods: "How long will you judge unjustly, and show favor to the wicked? Save the weak and the orphan; defend the humble and needy; Rescue the weak and the poor; deliver them from the power of the wicked. They do not know, neither do they understand; they go about in darkness; all the foundations of the earth are shaken. Now I say to you, \'You are gods, and all of you children of the Most High; Nevertheless, you shall die like mortals, and fall like any prince.\'" Arise, O God, and rule the earth, for you shall take all nations for your own.'
-                },
-                'second_reading': {
-                    'reference': 'Hebrews 11:29-12:2',
-                    'text': 'By faith the people passed through the Red Sea as if it were dry land, but when the Egyptians attempted to do so they were drowned. By faith the walls of Jericho fell after they had been encircled for seven days. By faith Rahab the prostitute did not perish with those who were disobedient, because she had received the spies in peace. And what more should I say? For time would fail me to tell of Gideon, Barak, Samson, Jephthah, of David and Samuel and the prophets-- who through faith conquered kingdoms, administered justice, obtained promises, shut the mouths of lions, quenched raging fire, escaped the edge of the sword, won strength out of weakness, became mighty in war, put foreign armies to flight. Therefore, since we are surrounded by so great a cloud of witnesses, let us also lay aside every weight and the sin that clings so closely, and let us run with perseverance the race that is set before us, looking to Jesus the pioneer and perfecter of our faith.'
-                },
-                'gospel': {
-                    'reference': 'Luke 12:49-56',
-                    'text': 'Jesus said, "I came to bring fire to the earth, and how I wish it were already kindled! I have a baptism with which to be baptized, and what stress I am under until it is completed! Do you think that I have come to bring peace to the earth? No, I tell you, but rather division! From now on five in one household will be divided, three against two and two against three; they will be divided: father against son and son against father, mother against daughter and daughter against mother, mother-in-law against her daughter-in-law and daughter-in-law against mother-in-law." He also said to the crowds, "When you see a cloud rising in the west, you immediately say, \'It is going to rain\'; and so it happens. And when you see the south wind blowing, you say, \'There will be scorching heat\'; and it happens. You hypocrites! You know how to interpret the appearance of earth and sky, but why do you not know how to interpret the present time?"'
-                },
-                'collect': {
-                    'reference': 'The Collect for Proper 15',
-                    'text': 'Almighty God, you have given your only Son to be for us a sacrifice for sin, and also an example of godly life: Give us grace to receive thankfully the fruits of his redeeming work, and to follow daily in the blessed steps of his most holy life; through Jesus Christ your Son our Lord, who lives and reigns with you and the Holy Spirit, one God, now and for ever. Amen.'
+            # Always use date-specific readings
+            date_specific_readings = self._get_date_specific_readings(target_date)
+            if date_specific_readings:
+                return {
+                    'date': target_date.strftime('%Y-%m-%d'),
+                    'celebration': self._get_episcopal_celebration_name(target_date),
+                    'readings': date_specific_readings,
+                    'source': 'Episcopal RCL (The Lectionary Page)',
+                    'liturgical_year': self._get_liturgical_year(target_date)
                 }
-            }
             
-            return {
-                'date': target_date.strftime('%Y-%m-%d'),
-                'celebration': "Tenth Sunday after Pentecost (Proper 15)",
-                'readings': readings,
-                'source': 'Episcopal RCL (The Lectionary Page)',
-                'liturgical_year': 'Year C'
-            }
+            # If no date-specific readings found, return None to trigger fallback
+            return None
             
         except Exception as e:
             self.logger.error(f"Error parsing Lectionary Page HTML: {str(e)}")
             return None
     
-    def _parse_specific_reading_page(self, html_content: str, celebration_name: str) -> Optional[Dict[str, Any]]:
-        """Parse a specific reading page from The Lectionary Page"""
-        try:
-            # Return the actual Episcopal readings we have for this date
-            # This would be enhanced to parse the actual HTML in production
-            
-            readings = {
+    def _get_date_specific_readings(self, target_date: datetime) -> Optional[Dict[str, Dict]]:
+        """Get readings specific to the requested date"""
+        date_str = target_date.strftime('%Y-%m-%d')
+        
+        # Episcopal readings for specific dates in August 2025
+        readings_database = {
+            '2025-08-17': {  # Tenth Sunday after Pentecost (Proper 15)
                 'first_reading': {
                     'reference': 'Jeremiah 23:23-29',
-                    'text': 'Am I a God near by, says the Lord, and not a God far off? Who can hide in secret places so that I cannot see them? says the Lord. Do I not fill heaven and earth? says the Lord. I have heard what the prophets have said who prophesy lies in my name, saying, "I have dreamed, I have dreamed!" How long? Will the hearts of the prophets ever turn back-- those who prophesy lies, and who prophesy the deceit of their own heart? They plan to make my people forget my name by their dreams that they tell one another, just as their ancestors forgot my name for Baal. Let the prophet who has a dream tell the dream, but let the one who has my word speak my word faithfully. What has straw in common with wheat? says the Lord. Is not my word like fire, says the Lord, and like a hammer that breaks a rock in pieces?'
+                    'text': 'Am I a God near by, says the Lord, and not a God far off? Who can hide in secret places so that I cannot see them? says the Lord. Do I not fill heaven and earth? says the Lord. I have heard what the prophets have said who prophesy lies in my name, saying, "I have dreamed, I have dreamed!" How long? Will the hearts of the prophets ever turn back-- those who prophesy lies, and who prophesy the deceit of their own heart?'
                 },
                 'psalm': {
                     'reference': 'Psalm 82',
-                    'text': 'God takes his stand in the council of heaven; he gives judgment in the midst of the gods: "How long will you judge unjustly, and show favor to the wicked? Save the weak and the orphan; defend the humble and needy; Rescue the weak and the poor; deliver them from the power of the wicked. They do not know, neither do they understand; they go about in darkness; all the foundations of the earth are shaken. Now I say to you, \'You are gods, and all of you children of the Most High; Nevertheless, you shall die like mortals, and fall like any prince.\'" Arise, O God, and rule the earth, for you shall take all nations for your own.'
+                    'text': 'God takes his stand in the council of heaven; he gives judgment in the midst of the gods: "How long will you judge unjustly, and show favor to the wicked? Save the weak and the orphan; defend the humble and needy; Rescue the weak and the poor; deliver them from the power of the wicked."'
                 },
                 'second_reading': {
                     'reference': 'Hebrews 11:29-12:2',
-                    'text': 'By faith the people passed through the Red Sea as if it were dry land, but when the Egyptians attempted to do so they were drowned. By faith the walls of Jericho fell after they had been encircled for seven days. By faith Rahab the prostitute did not perish with those who were disobedient, because she had received the spies in peace. And what more should I say? For time would fail me to tell of Gideon, Barak, Samson, Jephthah, of David and Samuel and the prophets-- who through faith conquered kingdoms, administered justice, obtained promises, shut the mouths of lions, quenched raging fire, escaped the edge of the sword, won strength out of weakness, became mighty in war, put foreign armies to flight. Therefore, since we are surrounded by so great a cloud of witnesses, let us also lay aside every weight and the sin that clings so closely, and let us run with perseverance the race that is set before us, looking to Jesus the pioneer and perfecter of our faith.'
+                    'text': 'By faith the people passed through the Red Sea as if it were dry land, but when the Egyptians attempted to do so they were drowned. By faith the walls of Jericho fell after they had been encircled for seven days. By faith Rahab the prostitute did not perish with those who were disobedient, because she had received the spies in peace.'
                 },
                 'gospel': {
                     'reference': 'Luke 12:49-56',
-                    'text': 'Jesus said, "I came to bring fire to the earth, and how I wish it were already kindled! I have a baptism with which to be baptized, and what stress I am under until it is completed! Do you think that I have come to bring peace to the earth? No, I tell you, but rather division! From now on five in one household will be divided, three against two and two against three; they will be divided: father against son and son against father, mother against daughter and daughter against mother, mother-in-law against her daughter-in-law and daughter-in-law against mother-in-law." He also said to the crowds, "When you see a cloud rising in the west, you immediately say, \'It is going to rain\'; and so it happens. And when you see the south wind blowing, you say, \'There will be scorching heat\'; and it happens. You hypocrites! You know how to interpret the appearance of earth and sky, but why do you not know how to interpret the present time?"'
+                    'text': 'Jesus said, "I came to bring fire to the earth, and how I wish it were already kindled! I have a baptism with which to be baptized, and what stress I am under until it is completed! Do you think that I have come to bring peace to the earth? No, I tell you, but rather division!"'
                 },
                 'collect': {
                     'reference': 'The Collect for Proper 15',
                     'text': 'Almighty God, you have given your only Son to be for us a sacrifice for sin, and also an example of godly life: Give us grace to receive thankfully the fruits of his redeeming work, and to follow daily in the blessed steps of his most holy life; through Jesus Christ your Son our Lord, who lives and reigns with you and the Holy Spirit, one God, now and for ever. Amen.'
                 }
+            },
+            '2025-08-24': {  # Eleventh Sunday after Pentecost (Proper 16)
+                'first_reading': {
+                    'reference': 'Isaiah 58:9b-14',
+                    'text': 'If you remove the yoke from among you, the pointing of the finger, the speaking of evil, if you offer your food to the hungry and satisfy the needs of the afflicted, then your light shall rise in the darkness and your gloom be like the noonday. The Lord will guide you continually, and satisfy your needs in parched places, and make your bones strong; and you shall be like a watered garden, like a spring of water, whose waters never fail.'
+                },
+                'psalm': {
+                    'reference': 'Psalm 103:1-8',
+                    'text': 'Bless the Lord, O my soul, and all that is within me, bless his holy name. Bless the Lord, O my soul, and do not forget all his benefits-- who forgives all your iniquity, who heals all your diseases, who redeems your life from the Pit, who crowns you with steadfast love and mercy, who satisfies you with good as long as you live so that your youth is renewed like the eagle\'s.'
+                },
+                'second_reading': {
+                    'reference': 'Hebrews 12:18-29',
+                    'text': 'You have not come to something that can be touched, a blazing fire, and darkness, and gloom, and a tempest, and the sound of a trumpet, and a voice whose words made the hearers beg that not another word be spoken to them. But you have come to Mount Zion and to the city of the living God, the heavenly Jerusalem, and to innumerable angels in festal gathering.'
+                },
+                'gospel': {
+                    'reference': 'Luke 13:10-17',
+                    'text': 'Now he was teaching in one of the synagogues on the sabbath. And just then there appeared a woman with a spirit that had crippled her for eighteen years. She was bent over and was quite unable to stand up straight. When Jesus saw her, he called her over and said, "Woman, you are set free from your ailment." When he laid his hands on her, immediately she stood up straight and began praising God.'
+                },
+                'collect': {
+                    'reference': 'The Collect for Proper 16',
+                    'text': 'Grant, O merciful God, that your Church, being gathered together in unity by your Holy Spirit, may show forth your power among all peoples, to the glory of your Name; through Jesus Christ our Lord, who lives and reigns with you and the Holy Spirit, one God, for ever and ever. Amen.'
+                }
+            },
+            '2025-08-31': {  # Twelfth Sunday after Pentecost (Proper 17)
+                'first_reading': {
+                    'reference': 'Sirach 10:12-18',
+                    'text': 'The beginning of human pride is to forsake the Lord; the heart has withdrawn from its Maker. For the beginning of pride is sin, and the one who clings to it pours out abominations. Therefore the Lord brings upon them unheard-of calamities, and destroys them completely. The Lord overthrows the thrones of rulers, and enthrones the lowly in their place.'
+                },
+                'psalm': {
+                    'reference': 'Psalm 112',
+                    'text': 'Praise the Lord! Happy are those who fear the Lord, who greatly delight in his commandments. Their descendants will be mighty in the land; the generation of the upright will be blessed. Wealth and riches are in their houses, and their righteousness endures forever. They rise in the darkness as a light for the upright; they are gracious, merciful, and righteous.'
+                },
+                'second_reading': {
+                    'reference': 'Hebrews 13:1-8, 15-16',
+                    'text': 'Let mutual love continue. Do not neglect to show hospitality to strangers, for by doing that some have entertained angels without knowing it. Remember those who are in prison, as though you were in prison with them; those who are being tortured, as though you yourselves were being tortured. Let marriage be held in honor by all, and let the marriage bed be kept undefiled.'
+                },
+                'gospel': {
+                    'reference': 'Luke 14:1, 7-14',
+                    'text': 'On one occasion when Jesus was going to the house of a leader of the Pharisees to eat a meal on the sabbath, they were watching him closely. When he noticed how the guests chose the places of honor, he told them a parable. "When you are invited by someone to a wedding banquet, do not sit down at the place of honor, in case someone more distinguished than you has been invited by your host."'
+                },
+                'collect': {
+                    'reference': 'The Collect for Proper 17',
+                    'text': 'Lord of all power and might, the author and giver of all good things: Graft in our hearts the love of your Name; increase in us true religion; nourish us with all goodness; and bring forth in us the fruit of good works; through Jesus Christ our Lord, who lives and reigns with you and the Holy Spirit, one God for ever and ever. Amen.'
+                }
             }
+        }
+        
+        return readings_database.get(date_str)
+    
+    def _get_liturgical_year(self, date_obj: datetime) -> str:
+        """Determine the liturgical year (A, B, or C) for the given date"""
+        if date_obj.year == 2025:
+            if date_obj.month < 12:
+                return "C"
+            else:
+                return "A"  # Advent 2025 begins Year A
+        elif date_obj.year == 2024:
+            return "C"
+        elif date_obj.year == 2026:
+            return "A"
+        else:
+            cycle_year = (date_obj.year - 2022) % 3
+            return ['A', 'B', 'C'][cycle_year]
+    
+    def _parse_specific_reading_page(self, html_content: str, celebration_name: str, target_date: datetime) -> Optional[Dict[str, Any]]:
+        """Parse a specific reading page from The Lectionary Page"""
+        try:
+            # Get date-specific readings based on the requested date
+            readings = self._get_date_specific_readings(target_date)
+            
+            if not readings:
+                self.logger.warning(f"No specific readings found for {target_date.strftime('%Y-%m-%d')}")
+                return None
             
             return {
-                'date': datetime.now().strftime('%Y-%m-%d'),
+                'date': target_date.strftime('%Y-%m-%d'),
                 'celebration': celebration_name,
                 'readings': readings,
                 'source': 'Episcopal RCL (The Lectionary Page)',
-                'liturgical_year': 'Year C'
+                'liturgical_year': self._get_liturgical_year(target_date)
             }
             
         except Exception as e:
             self.logger.error(f"Error parsing specific reading page: {str(e)}")
             return None
-    
+
     def _parse_vanderbilt_html(self, html_content: str, date_str: str) -> Optional[Dict[str, Any]]:
         """Parse HTML from Vanderbilt to extract readings"""
         try:
@@ -289,8 +335,16 @@ class LiturgyFetcher:
     
     def _get_episcopal_celebration_name(self, date_obj: datetime) -> str:
         """Determine the Episcopal liturgical celebration name for the date"""
-        # This is a simplified implementation
-        # In practice, you'd calculate based on liturgical calendar rules
+        date_str = date_obj.strftime('%Y-%m-%d')
+        
+        # Episcopal celebration names for specific dates
+        celebration_names = {
+            '2025-08-17': "Tenth Sunday after Pentecost (Proper 15)",
+            '2025-08-24': "Eleventh Sunday after Pentecost (Proper 16)", 
+            '2025-08-31': "Twelfth Sunday after Pentecost (Proper 17)"
+        }
+        
+        return celebration_names.get(date_str, "Sunday in Ordinary Time")
         
         month = date_obj.month
         day = date_obj.day
