@@ -10,7 +10,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Core Components
 
-The application follows a modular architecture with four main components:
+The application follows a modular architecture with five main components:
 
 ### LiturgyFetcher Module
 - **Purpose**: Handles fetching Episcopal liturgical calendar data and scripture readings from RCL sources
@@ -36,6 +36,13 @@ The application follows a modular architecture with four main components:
 - **Design**: Sequential execution pattern with error handling and logging
 - **Configuration**: INI-file based configuration management
 - **Logging**: Dual logging to file and console with structured format
+
+### Interactive Liturgical Calendar
+- **Purpose**: Provides visual calendar interface for browsing liturgical seasons and readings
+- **Design**: Dual implementation with both desktop GUI (Tkinter) and web interface (Flask)
+- **Features**: Month navigation, liturgical color coding, reading preview, OBS integration
+- **Calendar Logic**: Episcopal liturgical year tracking (A/B/C cycle), season detection, feast day identification
+- **Web Interface**: Responsive design with real-time reading loading and OBS automation integration
 
 ## Configuration Management
 

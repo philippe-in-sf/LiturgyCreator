@@ -21,6 +21,14 @@ args = "Liturgy OBS Automation"
 task = "workflow.run"
 args = "liturgy_automation"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Liturgical Calendar GUI"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Web Calendar"
+
 [[workflows.workflow]]
 name = "Liturgy OBS Automation"
 author = "agent"
@@ -39,3 +47,30 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "pip install obsws-python requests configparser && python run_automation.py"
+
+[[workflows.workflow]]
+name = "Liturgical Calendar GUI"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python liturgical_calendar.py"
+
+[workflows.workflow.metadata]
+outputType = "vnc"
+
+[[workflows.workflow]]
+name = "Web Calendar"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python web_calendar.py"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[ports]]
+localPort = 5000
+externalPort = 80

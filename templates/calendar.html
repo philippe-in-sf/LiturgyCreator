@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Episcopal Liturgical Calendar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .nav-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .month-year {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .liturgical-info {
+            text-align: center;
+            font-size: 1rem;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .calendar-container {
+            background: white;
+        }
+        
+        .calendar {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .calendar th {
+            background: #343a40;
+            color: white;
+            padding: 15px 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .calendar td {
+            border: 1px solid #e9ecef;
+            padding: 0;
+            height: 100px;
+            vertical-align: top;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .calendar td:hover {
+            background: #f8f9fa;
+            transform: scale(1.02);
+        }
+        
+        .day-cell {
+            width: 100%;
+            height: 100%;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .day-number {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .day-info {
+            font-size: 0.7rem;
+            margin-top: 5px;
+            line-height: 1.2;
+        }
+        
+        .today {
+            background: #ffc107 !important;
+            color: black;
+            font-weight: bold;
+        }
+        
+        .selected {
+            background: #007bff !important;
+            color: white;
+        }
+        
+        .sunday {
+            font-weight: bold;
+        }
+        
+        .details-panel {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 25px;
+            height: fit-content;
+        }
+        
+        .details-header {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .selected-date {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .celebration {
+            font-size: 1rem;
+            color: #667eea;
+            font-weight: 500;
+        }
+        
+        .readings-content {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .reading-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .reading-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .reading-reference {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+        
+        .reading-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #444;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .nav-controls {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Episcopal Liturgical Calendar</h1>
+            <div class="subtitle">Revised Common Lectionary - Interactive Visualization</div>
+        </div>
+        
+        <div class="nav-controls">
+            <button class="nav-btn" onclick="navigateMonth(-1)">◀ Previous</button>
+            <div>
+                <div class="month-year" id="monthYear">Loading...</div>
+                <div class="liturgical-info" id="liturgicalInfo">Loading...</div>
+            </div>
+            <button class="nav-btn" onclick="navigateMonth(1)">Next ▶</button>
+            <button class="nav-btn" onclick="goToToday()">Today</button>
+        </div>
+        
+        <div class="main-content">
+            <div class="calendar-container">
+                <table class="calendar" id="calendar">
+                    <thead>
+                        <tr>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                            <th>Sunday</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calendarBody">
+                        <!-- Calendar will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="details-panel">
+                <div class="details-header">
+                    <div class="selected-date" id="selectedDate">Select a date</div>
+                    <div class="celebration" id="celebration"></div>
+                </div>
+                
+                <div class="readings-content" id="readingsContent">
+                    <div class="loading">Click on a date to view liturgical information</div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn btn-primary" onclick="loadReadings()">Load Reading</button>
+                    <button class="action-btn btn-success" onclick="sendToOBS()">Send to OBS</button>
+                    <button class="action-btn btn-info" onclick="exportReading()">Export</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let selectedDate = new Date();
+        let calendarData = null;
+        let selectedReadings = null;
+
+        // Initialize calendar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCalendar();
+        });
+
+        function loadCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth() + 1;
+            
+            fetch(`/api/calendar/${year}/${month}`)
+                .then(response => response.json())
+                .then(data => {
+                    calendarData = data;
+                    renderCalendar(data);
+                })
+                .catch(error => {
+                    console.error('Error loading calendar:', error);
+                    showError('Failed to load calendar data');
+                });
+        }
+
+        function renderCalendar(data) {
+            // Update header
+            document.getElementById('monthYear').textContent = `${data.month_name} ${data.year}`;
+            document.getElementById('liturgicalInfo').textContent = 
+                `Liturgical Year ${data.liturgical_year} • ${data.season}`;
+
+            // Render calendar grid
+            const calendarBody = document.getElementById('calendarBody');
+            calendarBody.innerHTML = '';
+
+            data.weeks.forEach(week => {
+                const row = document.createElement('tr');
+                
+                week.forEach(day => {
+                    const cell = document.createElement('td');
+                    
+                    if (day.day === 0) {
+                        cell.innerHTML = '';
+                        cell.style.background = '#f8f9fa';
+                    } else {
+                        const button = document.createElement('button');
+                        button.className = 'day-cell';
+                        button.onclick = () => selectDate(day.date);
+                        
+                        // Set background color based on liturgical season
+                        if (day.liturgical_info) {
+                            button.style.backgroundColor = day.liturgical_info.hex_color;
+                            button.style.color = getTextColor(day.liturgical_info.hex_color);
+                        }
+                        
+                        // Add special classes
+                        if (day.is_today) {
+                            button.classList.add('today');
+                        }
+                        if (day.liturgical_info && day.liturgical_info.is_sunday) {
+                            button.classList.add('sunday');
+                        }
+                        
+                        const dayNumber = document.createElement('div');
+                        dayNumber.className = 'day-number';
+                        dayNumber.textContent = day.day;
+                        
+                        const dayInfo = document.createElement('div');
+                        dayInfo.className = 'day-info';
+                        
+                        if (day.liturgical_info) {
+                            if (day.liturgical_info.is_sunday) {
+                                dayInfo.textContent = 'Sunday';
+                            } else if (day.liturgical_info.feast_day) {
+                                dayInfo.textContent = day.liturgical_info.feast_day.substring(0, 12) + '...';
+                            }
+                        }
+                        
+                        button.appendChild(dayNumber);
+                        button.appendChild(dayInfo);
+                        cell.appendChild(button);
+                    }
+                    
+                    row.appendChild(cell);
+                });
+                
+                calendarBody.appendChild(row);
+            });
+        }
+
+        function getTextColor(backgroundColor) {
+            // Simple contrast calculation
+            const hex = backgroundColor.replace('#', '');
+            const r = parseInt(hex.substr(0, 2), 16);
+            const g = parseInt(hex.substr(2, 2), 16);
+            const b = parseInt(hex.substr(4, 2), 16);
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            return brightness > 128 ? 'black' : 'white';
+        }
+
+        function selectDate(dateStr) {
+            selectedDate = new Date(dateStr);
+            
+            // Update selected date display
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('selectedDate').textContent = 
+                selectedDate.toLocaleDateString('en-US', options);
+            
+            // Clear previous selection styling
+            document.querySelectorAll('.day-cell').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            
+            // Add selection styling to clicked date
+            event.target.classList.add('selected');
+            
+            // Load readings for selected date
+            loadReadingsForDate(dateStr);
+        }
+
+        function loadReadingsForDate(dateStr) {
+            document.getElementById('readingsContent').innerHTML = '<div class="loading">Loading readings...</div>';
+            
+            fetch(`/api/readings/${dateStr}`)
+                .then(response => response.json())
+                .then(data => {
+                    selectedReadings = data;
+                    displayReadings(data);
+                })
+                .catch(error => {
+                    console.error('Error loading readings:', error);
+                    document.getElementById('readingsContent').innerHTML = 
+                        '<div class="error">Failed to load readings</div>';
+                });
+        }
+
+        function displayReadings(data) {
+            const content = document.getElementById('readingsContent');
+            
+            if (!data.has_readings) {
+                content.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #666;">
+                        <p>${data.message}</p>
+                        <p style="margin-top: 10px; font-size: 0.9rem;">
+                            Liturgical Season: ${data.liturgical_info.season}<br>
+                            Liturgical Color: ${data.liturgical_info.color.charAt(0).toUpperCase() + data.liturgical_info.color.slice(1)}
+                        </p>
+                    </div>
+                `;
+                document.getElementById('celebration').textContent = data.liturgical_info.season;
+                return;
+            }
+            
+            // Update celebration info
+            document.getElementById('celebration').textContent = data.celebration;
+            
+            // Display readings
+            let html = `
+                <div style="margin-bottom: 15px; padding: 10px; background: #e9ecef; border-radius: 6px; font-size: 0.9rem;">
+                    <strong>Source:</strong> ${data.source}<br>
+                    <strong>Liturgical Year:</strong> ${data.liturgical_year}<br>
+                    <strong>Season:</strong> ${data.liturgical_info.season}
+                </div>
+            `;
+            
+            const readingOrder = ['first_reading', 'psalm', 'second_reading', 'gospel', 'collect'];
+            
+            readingOrder.forEach(readingType => {
+                if (data.readings && data.readings[readingType]) {
+                    const reading = data.readings[readingType];
+                    const title = readingType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    
+                    html += `
+                        <div class="reading-section">
+                            <div class="reading-title">${title}</div>
+                            <div class="reading-reference">${reading.reference || 'N/A'}</div>
+                            <div class="reading-text">${reading.text ? reading.text.substring(0, 300) + (reading.text.length > 300 ? '...' : '') : 'N/A'}</div>
+                        </div>
+                    `;
+                }
+            });
+            
+            content.innerHTML = html;
+        }
+
+        function navigateMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            loadCalendar();
+        }
+
+        function goToToday() {
+            currentDate = new Date();
+            selectedDate = new Date();
+            loadCalendar();
+        }
+
+        function loadReadings() {
+            if (!selectedDate) {
+                showError('Please select a date first');
+                return;
+            }
+            
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            loadReadingsForDate(dateStr);
+        }
+
+        function sendToOBS() {
+            if (!selectedReadings || !selectedReadings.has_readings) {
+                showError('No readings available to send to OBS');
+                return;
+            }
+            
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            
+            fetch('/api/send_to_obs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ date: dateStr, readings: selectedReadings })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess('Readings sent to OBS successfully!');
+                } else {
+                    showError('Failed to send readings to OBS');
+                }
+            })
+            .catch(error => {
+                console.error('Error sending to OBS:', error);
+                showError('Error connecting to OBS');
+            });
+        }
+
+        function exportReading() {
+            if (!selectedReadings || !selectedReadings.has_readings) {
+                showError('No readings available to export');
+                return;
+            }
+            
+            showSuccess('Export functionality coming soon!');
+        }
+
+        function showError(message) {
+            // Simple error display - could be enhanced with a proper notification system
+            alert('Error: ' + message);
+        }
+
+        function showSuccess(message) {
+            // Simple success display - could be enhanced with a proper notification system
+            alert('Success: ' + message);
+        }
+    </script>
+</body>
+</html>
