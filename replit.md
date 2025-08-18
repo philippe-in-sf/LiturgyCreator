@@ -10,14 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Deployment Configuration Fixes (August 18, 2025)
 - **Issue**: Deployment failed due to undefined `$file` variable in run command
-- **Resolution**: Created multiple entry point files for deployment compatibility:
-  - `app.py`: Primary Flask application entry point
-  - `main.py`: Alternative entry point with enhanced logging
-  - `run.py`: Universal run script for deployment platforms
-  - `Procfile`: Heroku-style process file specifying web application startup
+- **Resolution**: Created comprehensive deployment configuration:
+  - `app.py`: Primary Flask application entry point with proper main() function
+  - `wsgi.py`: WSGI-compatible entry point for production servers (Gunicorn, uWSGI)
+  - `main.py`: Alternative entry point with enhanced logging and environment detection
+  - `run.py`: Universal run script for deployment platforms with debug status
+  - `Procfile`: Heroku-style process file specifying `python app.py` as web startup command
 - **Entry Point**: Web calendar application (`web_calendar.py`) serves as the main web interface
-- **Host Configuration**: All entry points configured to bind to `0.0.0.0:5000` for external access
-- **Environment Variables**: Support for `PORT` and `DEBUG` environment variables for deployment flexibility
+- **Host Configuration**: All entry points configured to bind to `0.0.0.0` with PORT environment variable support
+- **Environment Variables**: Support for `PORT`, `FLASK_DEBUG`, and `ENVIRONMENT` variables for deployment flexibility
+- **Deployment Target**: Configured for Google Cloud Run via Replit deployment system
 
 # System Architecture
 
