@@ -1,2 +1,41 @@
+modules = ["python-3.11"]
 [agent]
 expertMode = true
+
+[nix]
+channel = "stable-25_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Liturgy OBS Automation"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "liturgy_automation"
+
+[[workflows.workflow]]
+name = "Liturgy OBS Automation"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pip install obsws-python requests && python run_automation.py"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "liturgy_automation"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pip install obsws-python requests configparser && python run_automation.py"
