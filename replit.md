@@ -6,6 +6,19 @@ This project is a Daily Liturgical Scripture OBS Automation system that fetches 
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Changes
+
+## Deployment Configuration Fixes (August 18, 2025)
+- **Issue**: Deployment failed due to undefined `$file` variable in run command
+- **Resolution**: Created multiple entry point files for deployment compatibility:
+  - `app.py`: Primary Flask application entry point
+  - `main.py`: Alternative entry point with enhanced logging
+  - `run.py`: Universal run script for deployment platforms
+  - `Procfile`: Heroku-style process file specifying web application startup
+- **Entry Point**: Web calendar application (`web_calendar.py`) serves as the main web interface
+- **Host Configuration**: All entry points configured to bind to `0.0.0.0:5000` for external access
+- **Environment Variables**: Support for `PORT` and `DEBUG` environment variables for deployment flexibility
+
 # System Architecture
 
 ## Core Components

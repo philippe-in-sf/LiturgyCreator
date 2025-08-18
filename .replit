@@ -15,38 +15,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Liturgy OBS Automation"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "liturgy_automation"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Liturgical Calendar GUI"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "Web Calendar"
-
-[[workflows.workflow]]
-name = "Liturgy OBS Automation"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "pip install obsws-python requests && python run_automation.py"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow]]
-name = "liturgy_automation"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "pip install obsws-python requests configparser && python run_automation.py"
 
 [[workflows.workflow]]
 name = "Liturgical Calendar GUI"

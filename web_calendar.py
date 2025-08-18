@@ -110,6 +110,7 @@ class WebLiturgicalCalendar:
         month = date_obj.month
         day = date_obj.day
         
+        # Dictionary mapping (month, day) tuples to feast day names
         feast_days = {
             (1, 1): "New Year's Day",
             (1, 6): "Epiphany",
@@ -122,7 +123,11 @@ class WebLiturgicalCalendar:
             (12, 26): "St Stephen, Deacon and Martyr"
         }
         
-        return feast_days.get((month, day))
+        # Use explicit key lookup to avoid type issues
+        key = (month, day)
+        if key in feast_days:
+            return feast_days[key]
+        return None
         
     def get_sunday_name(self, date_obj: datetime) -> str:
         """Get the proper name for Sunday in the liturgical calendar"""
