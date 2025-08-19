@@ -7,7 +7,7 @@ Episcopal Church Calendar with Revised Common Lectionary integration
 from flask import Flask, render_template, jsonify, request
 import calendar
 from datetime import datetime, timedelta, date
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 import json
 from liturgy_fetcher import LiturgyFetcher
 from scripture_parser import ScriptureParser
@@ -185,6 +185,34 @@ class WebLiturgicalCalendar:
             calendar_info['weeks'].append(week_info)
             
         return calendar_info
+        
+    def get_readings_for_date(self, date_str: str) -> Dict[str, Any]:
+        """Get readings for a specific date in OBS-compatible format"""
+        try:
+            # Parse date
+            selected_date = datetime.fromisoformat(date_str)
+            
+            # Check if it's a Sunday or feast day
+            liturgical_info = self.get_liturgical_info(selected_date.date())
+            
+            if not (liturgical_info['is_sunday'] or liturgical_info['feast_day']):
+                return {}
+            
+            # Fetch readings
+            readings_data = self.liturgy_fetcher.fetch_daily_readings(selected_date)
+            
+            if not readings_data:
+                return {}
+            
+            # Parse readings
+            parsed_readings = self.scripture_parser.parse_readings(readings_data)
+            
+            # Return in the format expected by OBS controller
+            return parsed_readings
+            
+        except Exception as e:
+            print(f"Error getting readings for {date_str}: {e}")
+            return {}
 
 # Initialize the calendar
 web_calendar = WebLiturgicalCalendar()
