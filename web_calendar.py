@@ -253,16 +253,78 @@ def send_to_obs():
         data = request.get_json()
         date_str = data.get('date')
         
-        # This would integrate with the existing OBS automation
-        # For now, return a success message
+        # Check if config.ini exists
+        import os
+        if not os.path.exists('config.ini'):
+            return jsonify({
+                'success': False,
+                'error': 'OBS configuration not found',
+                'message': 'Please create a config.ini file with your OBS settings. Use obs_setup_guide.py to create one.'
+            }), 400
         
-        return jsonify({
-            'success': True,
-            'message': f'Readings for {date_str} would be sent to OBS'
-        })
+        # Try to connect to OBS and send readings
+        try:
+            import configparser
+            from obs_controller import OBSController
+            
+            config = configparser.ConfigParser()
+            config.read('config.ini')
+            
+            obs = OBSController(config)
+            
+            if not obs.connect():
+                return jsonify({
+                    'success': False,
+                    'error': 'Could not connect to OBS',
+                    'message': 'Make sure OBS Studio is running with WebSocket server enabled'
+                }), 400
+            
+            # Get readings for the date
+            calendar_instance = WebLiturgicalCalendar()
+            readings = calendar_instance.get_readings_for_date(date_str)
+            
+            if readings:
+                # Send readings to OBS
+                if obs.update_scripture_sources(readings):
+                    obs.disconnect()
+                    return jsonify({
+                        'success': True,
+                        'message': f'Successfully sent readings for {date_str} to OBS'
+                    })
+                else:
+                    obs.disconnect()
+                    return jsonify({
+                        'success': False,
+                        'error': 'Failed to update some OBS sources',
+                        'message': 'Check your scene and source names in config.ini'
+                    }), 400
+            else:
+                obs.disconnect()
+                return jsonify({
+                    'success': False,
+                    'error': 'No readings found',
+                    'message': f'No readings available for {date_str}'
+                }), 400
+                
+        except ImportError:
+            return jsonify({
+                'success': False,
+                'error': 'OBS controller not available',
+                'message': 'OBS integration module not properly configured'
+            }), 500
+        except Exception as obs_error:
+            return jsonify({
+                'success': False,
+                'error': f'OBS error: {str(obs_error)}',
+                'message': 'Check your OBS configuration and connection'
+            }), 500
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Unexpected error occurred'
+        }), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -60,7 +60,7 @@ class OBSController:
             
             # Test connection by getting version info
             version_info = self.client.get_version()
-            self.logger.info(f"Connected to OBS version {version_info.obs_version}")
+            self.logger.info(f"Connected to OBS version {version_info.obs_version if hasattr(version_info, 'obs_version') else 'Unknown'}")
             
             return True
             
@@ -140,7 +140,7 @@ class OBSController:
         try:
             # Check if scene exists
             scenes = self.client.get_scene_list()
-            scene_exists = any(scene['sceneName'] == scene_name for scene in scenes.scenes)
+            scene_exists = any(scene.get('sceneName') == scene_name for scene in getattr(scenes, 'scenes', []))
             
             if not scene_exists:
                 self.logger.warning(f"Scene '{scene_name}' not found in OBS")
@@ -150,8 +150,8 @@ class OBSController:
             try:
                 scene_items = self.client.get_scene_item_list(scene_name)
                 source_exists = any(
-                    item['sourceName'] == source_name 
-                    for item in scene_items.scene_items
+                    item.get('sourceName') == source_name 
+                    for item in getattr(scene_items, 'scene_items', [])
                 )
                 
                 if not source_exists:
@@ -218,18 +218,18 @@ class OBSController:
             scenes_data = {}
             scenes = self.client.get_scene_list()
             
-            for scene in scenes.scenes:
-                scene_name = scene['sceneName']
+            for scene in getattr(scenes, 'scenes', []):
+                scene_name = scene.get('sceneName')
                 try:
                     scene_items = self.client.get_scene_item_list(scene_name)
                     text_sources = []
                     
-                    for item in scene_items.scene_items:
+                    for item in getattr(scene_items, 'scene_items', []):
                         # Check if this is a text source
-                        source_name = item['sourceName']
+                        source_name = item.get('sourceName')
                         try:
                             source_settings = self.client.get_input_settings(source_name)
-                            if 'text' in source_settings.input_settings:
+                            if 'text' in getattr(source_settings, 'input_settings', {}):
                                 text_sources.append(source_name)
                         except:
                             # Not a text source
