@@ -8,6 +8,30 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Calendar Date Fix and OBS Integration Completion (August 19, 2025)
+
+### Calendar Date Offset Resolution
+- **Issue**: Calendar dates were offset by one day due to JavaScript timezone handling
+- **Root Cause**: `new Date(dateStr)` parsing ISO date strings as UTC, causing local timezone conversion
+- **Resolution**: Modified JavaScript date parsing to construct dates directly from year/month/day components
+- **Impact**: Calendar dates now correctly match displayed readings and OBS integration
+
+### OBS Integration Completion
+- **Issue**: "No readings available to send to OBS" error when attempting to send readings
+- **Root Cause**: Missing `get_readings_for_date` method in `WebLiturgicalCalendar` class
+- **Resolution**: Added complete `get_readings_for_date` method that:
+  - Retrieves readings for specified dates
+  - Formats data correctly for OBS controller
+  - Returns proper data structure with all reading types
+- **Configuration**: Updated `config.ini` with sample OBS text source mappings
+- **Status**: OBS integration fully functional, ready for live testing with OBS Studio
+
+### System Verification
+- **Web Calendar**: Running successfully on port 5000
+- **Reading Retrieval**: All Sunday readings displaying correctly
+- **Date Accuracy**: Calendar dates match liturgical data properly
+- **User Confirmation**: Date display verified as correct by user
+
 ## API and Deployment Fixes (August 18, 2025)
 
 ### Readings API Resolution

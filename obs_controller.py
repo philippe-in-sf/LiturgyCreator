@@ -17,28 +17,26 @@ class OBSController:
         self.config = config
         self.client = None
         
-        # Parse OBS connection settings
-        self.host = config.get('OBS', 'host', fallback='localhost')
-        self.port = config.getint('OBS', 'port', fallback=4455)
-        self.password = config.get('OBS', 'password', fallback='')
+        # Parse OBS connection settings - support both section names
+        obs_section = 'OBS' if 'OBS' in config else 'obs'
+        self.host = config.get(obs_section, 'host', fallback='localhost')
+        self.port = config.getint(obs_section, 'port', fallback=4455)
+        self.password = config.get(obs_section, 'password', fallback='')
         
         # Parse scene mappings
         self.scene_mappings = self._parse_scene_mappings(config)
         
-    def _parse_scene_mappings(self, config: configparser.ConfigParser) -> Dict[str, Dict[str, str]]:
+    def _parse_scene_mappings(self, config: configparser.ConfigParser) -> Dict[str, str]:
         """Parse scene mapping configuration"""
         mappings = {}
         
-        if 'SCENE_MAPPING' in config:
-            for key, value in config['SCENE_MAPPING'].items():
-                if ':' in value:
-                    scene_name, source_name = value.split(':', 1)
-                    mappings[key] = {
-                        'scene': scene_name.strip(),
-                        'source': source_name.strip()
-                    }
-                else:
-                    self.logger.warning(f"Invalid scene mapping format for {key}: {value}")
+        # Support both section names
+        mapping_section = 'SCENE_MAPPING' if 'SCENE_MAPPING' in config else 'scene_mappings'
+        
+        if mapping_section in config:
+            for key, value in config[mapping_section].items():
+                # For the simplified format, just store the source name directly
+                mappings[key] = value.strip()
         
         return mappings
     
@@ -59,8 +57,13 @@ class OBSController:
             )
             
             # Test connection by getting version info
-            version_info = self.client.get_version()
-            self.logger.info(f"Connected to OBS version {version_info.obs_version if hasattr(version_info, 'obs_version') else 'Unknown'}")
+            try:
+                version_info = self.client.get_version()
+                version = getattr(version_info, 'obs_version', 'Unknown') if version_info else 'Unknown'
+                self.logger.info(f"Connected to OBS version {version}")
+            except Exception as version_error:
+                self.logger.warning(f"Could not get OBS version: {version_error}")
+                # Connection still successful if we can't get version
             
             return True
             
@@ -123,57 +126,35 @@ class OBSController:
         self.logger.info(f"Updated {success_count}/{total_updates} OBS text sources")
         return success_count == total_updates
     
-    def _update_text_source(self, mapping: Dict[str, str], text: str) -> bool:
+    def _update_text_source(self, source_name: str, text: str) -> bool:
         """
         Update a specific text source in OBS
         
         Args:
-            mapping: Dictionary with 'scene' and 'source' keys
+            source_name: Name of the text source to update
             text: Text content to set
             
         Returns:
             True if update successful, False otherwise
         """
-        scene_name = mapping['scene']
-        source_name = mapping['source']
         
         try:
-            # Check if scene exists
-            scenes = self.client.get_scene_list()
-            scene_exists = any(scene.get('sceneName') == scene_name for scene in getattr(scenes, 'scenes', []))
-            
-            if not scene_exists:
-                self.logger.warning(f"Scene '{scene_name}' not found in OBS")
-                return False
-            
-            # Check if source exists in the scene
-            try:
-                scene_items = self.client.get_scene_item_list(scene_name)
-                source_exists = any(
-                    item.get('sourceName') == source_name 
-                    for item in getattr(scene_items, 'scene_items', [])
-                )
-                
-                if not source_exists:
-                    self.logger.warning(f"Source '{source_name}' not found in scene '{scene_name}'")
-                    return False
-                
-            except obs_errors.OBSSDKError:
-                # If we can't check scene items, try the update anyway
-                pass
-            
             # Apply formatting
             formatted_text = self._format_text(text)
             
-            # Update text source
-            self.client.set_input_settings(
-                source_name,
-                {'text': formatted_text},
-                overlay=True
-            )
-            
-            self.logger.info(f"Updated '{source_name}' in scene '{scene_name}'")
-            return True
+            # Update text source - simplified approach
+            if self.client:
+                self.client.set_input_settings(
+                    source_name,
+                    {'text': formatted_text},
+                    overlay=True
+                )
+                
+                self.logger.info(f"Updated text source '{source_name}'")
+                return True
+            else:
+                self.logger.error("No OBS client connection")
+                return False
             
         except obs_errors.OBSSDKError as e:
             self.logger.error(f"OBS error updating {source_name}: {str(e)}")
