@@ -254,6 +254,11 @@
             color: white;
         }
         
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
         .btn-info {
             background: #17a2b8;
             color: white;
@@ -273,6 +278,126 @@
         .error {
             background: #f8d7da;
             color: #721c24;
+        }
+        
+        /* Service Details Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .form-section h3 {
+            font-size: 1.2rem;
+            color: #667eea;
+            margin-bottom: 15px;
+            margin-top: 0;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .btn-save {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
             padding: 15px;
             border-radius: 6px;
             margin: 10px 0;
@@ -354,10 +479,95 @@
                 
                 <div class="action-buttons">
                     <button class="action-btn btn-primary" onclick="loadReadings()">Load Reading</button>
+                    <button class="action-btn btn-secondary" onclick="showServiceDetails()">Service Details</button>
                     <button class="action-btn btn-success" onclick="sendToOBS()">Send to OBS</button>
                     <button class="action-btn btn-info" onclick="exportReading()">Export</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Service Details Modal -->
+    <div id="serviceDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeServiceDetails()">&times;</span>
+                <h2 class="modal-title">Service Details</h2>
+            </div>
+            
+            <form id="serviceDetailsForm">
+                <div class="form-section">
+                    <h3>Hymns & Music</h3>
+                    
+                    <div class="form-group">
+                        <label for="openingHymn">Opening Hymn</label>
+                        <input type="text" id="openingHymn" name="openingHymn" placeholder="e.g., Hymn 362 - Holy, Holy, Holy">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sequenceHymn">Sequence Hymn</label>
+                        <input type="text" id="sequenceHymn" name="sequenceHymn" placeholder="e.g., Hymn 632 - O Christ, the Word Incarnate">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="communionMotet">Communion Motet</label>
+                        <input type="text" id="communionMotet" name="communionMotet" placeholder="e.g., Ave Verum Corpus - Mozart">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="closingHymn">Closing Hymn</label>
+                        <input type="text" id="closingHymn" name="closingHymn" placeholder="e.g., Hymn 432 - O praise ye the Lord!">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Musicians</h3>
+                    
+                    <div class="form-group">
+                        <label for="organistName">Organist Name</label>
+                        <input type="text" id="organistName" name="organistName" placeholder="e.g., Dr. Sarah Johnson">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="preludeName">Prelude Title</label>
+                        <input type="text" id="preludeName" name="preludeName" placeholder="e.g., Jesu, Joy of Man's Desiring">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="preludeComposer">Prelude Composer</label>
+                        <input type="text" id="preludeComposer" name="preludeComposer" placeholder="e.g., J.S. Bach">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="postludeName">Postlude Title</label>
+                        <input type="text" id="postludeName" name="postludeName" placeholder="e.g., Toccata in D Minor">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="postludeComposer">Postlude Composer</label>
+                        <input type="text" id="postludeComposer" name="postludeComposer" placeholder="e.g., J.S. Bach">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Clergy</h3>
+                    
+                    <div class="form-group">
+                        <label for="preacherName">Preacher's Name</label>
+                        <input type="text" id="preacherName" name="preacherName" placeholder="e.g., The Rev. Dr. Michael Smith">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="presiderName">Presider's Name</label>
+                        <input type="text" id="presiderName" name="presiderName" placeholder="e.g., The Rev. Canon Susan Brown">
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeServiceDetails()">Cancel</button>
+                    <button type="button" class="btn-save" onclick="saveServiceDetails()">Save Details</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -366,6 +576,7 @@
         let selectedDate = new Date();
         let calendarData = null;
         let selectedReadings = null;
+        let serviceDetails = {};
 
         // Initialize calendar
         document.addEventListener('DOMContentLoaded', function() {
@@ -584,19 +795,26 @@
             
             const dateStr = selectedDate.toISOString().split('T')[0];
             
+            // Include service details in OBS send
+            const currentServiceDetails = serviceDetails[dateStr] || {};
+            
             fetch('/api/send_to_obs', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ date: dateStr, readings: selectedReadings })
+                body: JSON.stringify({ 
+                    date: dateStr, 
+                    readings: selectedReadings,
+                    serviceDetails: currentServiceDetails
+                })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showSuccess('Readings sent to OBS successfully!');
+                    showSuccess('Readings and service details sent to OBS successfully!');
                 } else {
-                    showError('Failed to send readings to OBS');
+                    showError('Failed to send to OBS: ' + (data.message || 'Unknown error'));
                 }
             })
             .catch(error => {
@@ -612,6 +830,96 @@
             }
             
             showSuccess('Export functionality coming soon!');
+        }
+
+        // Service Details Modal Functions
+        function showServiceDetails() {
+            const modal = document.getElementById('serviceDetailsModal');
+            modal.style.display = 'block';
+            
+            // Load existing service details for the selected date
+            loadServiceDetailsFromStorage();
+        }
+
+        function closeServiceDetails() {
+            const modal = document.getElementById('serviceDetailsModal');
+            modal.style.display = 'none';
+        }
+
+        function saveServiceDetails() {
+            const form = document.getElementById('serviceDetailsForm');
+            const formData = new FormData(form);
+            
+            // Convert FormData to object
+            const details = {};
+            for (let [key, value] of formData.entries()) {
+                details[key] = value.trim();
+            }
+            
+            // Store service details with date key
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            serviceDetails[dateStr] = details;
+            
+            // Save to localStorage for persistence
+            localStorage.setItem('serviceDetails', JSON.stringify(serviceDetails));
+            
+            // Save to server
+            fetch('/api/service_details', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    date: dateStr,
+                    details: details
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess('Service details saved successfully!');
+                    closeServiceDetails();
+                } else {
+                    showError('Failed to save service details to server (saved locally)');
+                    closeServiceDetails();
+                }
+            })
+            .catch(error => {
+                console.error('Error saving service details:', error);
+                showSuccess('Service details saved locally');
+                closeServiceDetails();
+            });
+        }
+
+        function loadServiceDetailsFromStorage() {
+            try {
+                const stored = localStorage.getItem('serviceDetails');
+                if (stored) {
+                    serviceDetails = JSON.parse(stored);
+                }
+                
+                const dateStr = selectedDate.toISOString().split('T')[0];
+                const details = serviceDetails[dateStr] || {};
+                
+                // Populate form with existing data
+                const form = document.getElementById('serviceDetailsForm');
+                const inputs = form.querySelectorAll('input');
+                inputs.forEach(input => {
+                    if (details[input.name]) {
+                        input.value = details[input.name];
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading service details:', error);
+            }
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('serviceDetailsModal');
+            if (event.target === modal) {
+                closeServiceDetails();
+            }
         }
 
         function showError(message) {

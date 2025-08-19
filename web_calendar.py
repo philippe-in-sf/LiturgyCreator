@@ -280,6 +280,7 @@ def send_to_obs():
     try:
         data = request.get_json()
         date_str = data.get('date')
+        service_details = data.get('serviceDetails', {})
         
         # Check if config.ini exists
         import os
@@ -313,11 +314,24 @@ def send_to_obs():
             
             if readings:
                 # Send readings to OBS
-                if obs.update_scripture_sources(readings):
+                scripture_success = obs.update_scripture_sources(readings)
+                
+                # Send service details to OBS if provided
+                service_success = True
+                if service_details:
+                    service_success = obs.update_service_details(service_details)
+                
+                if scripture_success and service_success:
                     obs.disconnect()
                     return jsonify({
                         'success': True,
-                        'message': f'Successfully sent readings for {date_str} to OBS'
+                        'message': f'Successfully sent readings and service details for {date_str} to OBS'
+                    })
+                elif scripture_success:
+                    obs.disconnect()
+                    return jsonify({
+                        'success': True,
+                        'message': f'Successfully sent readings for {date_str} to OBS (service details failed)'
                     })
                 else:
                     obs.disconnect()
@@ -352,6 +366,90 @@ def send_to_obs():
             'success': False,
             'error': str(e),
             'message': 'Unexpected error occurred'
+        }), 500
+
+@app.route('/api/service_details', methods=['POST'])
+def save_service_details():
+    """API endpoint to save service details for a specific date"""
+    try:
+        data = request.get_json()
+        date_str = data.get('date')
+        details = data.get('details', {})
+        
+        # For now, store in a simple file-based system
+        # In production, this would go to a database
+        import json
+        import os
+        
+        details_file = 'service_details.json'
+        service_data = {}
+        
+        # Load existing service details
+        if os.path.exists(details_file):
+            try:
+                with open(details_file, 'r') as f:
+                    service_data = json.load(f)
+            except:
+                service_data = {}
+        
+        # Save the new details
+        service_data[date_str] = details
+        
+        try:
+            with open(details_file, 'w') as f:
+                json.dump(service_data, f, indent=2)
+            
+            return jsonify({
+                'success': True,
+                'message': f'Service details saved for {date_str}'
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': f'Failed to save service details: {str(e)}'
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to process service details'
+        }), 500
+
+@app.route('/api/service_details/<date_str>', methods=['GET'])
+def get_service_details(date_str):
+    """API endpoint to get service details for a specific date"""
+    try:
+        import json
+        import os
+        
+        details_file = 'service_details.json'
+        
+        if os.path.exists(details_file):
+            try:
+                with open(details_file, 'r') as f:
+                    service_data = json.load(f)
+                    details = service_data.get(date_str, {})
+                    
+                return jsonify({
+                    'success': True,
+                    'details': details
+                })
+            except:
+                return jsonify({
+                    'success': True,
+                    'details': {}
+                })
+        else:
+            return jsonify({
+                'success': True,
+                'details': {}
+            })
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
         }), 500
 
 if __name__ == '__main__':

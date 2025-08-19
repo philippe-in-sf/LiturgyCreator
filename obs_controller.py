@@ -126,6 +126,52 @@ class OBSController:
         self.logger.info(f"Updated {success_count}/{total_updates} OBS text sources")
         return success_count == total_updates
     
+    def update_service_details(self, service_details: Dict[str, str]) -> bool:
+        """
+        Update OBS text sources with service details (hymns, clergy, musicians)
+        
+        Args:
+            service_details: Dictionary containing service detail information
+            
+        Returns:
+            True if all updates successful, False if any failed
+        """
+        if not self.client:
+            self.logger.error("Not connected to OBS")
+            return False
+        
+        success_count = 0
+        total_updates = 0
+        
+        # Service detail mappings for OBS text sources
+        detail_mappings = {
+            'openingHymn': 'opening_hymn',
+            'sequenceHymn': 'sequence_hymn', 
+            'communionMotet': 'communion_motet',
+            'closingHymn': 'closing_hymn',
+            'organistName': 'organist_name',
+            'preludeName': 'prelude_name',
+            'preludeComposer': 'prelude_composer',
+            'postludeName': 'postlude_name',
+            'postludeComposer': 'postlude_composer',
+            'preacherName': 'preacher_name',
+            'presiderName': 'presider_name'
+        }
+        
+        for detail_key, detail_value in service_details.items():
+            if detail_key in detail_mappings and detail_value.strip():
+                mapping_key = detail_mappings[detail_key]
+                if mapping_key in self.scene_mappings:
+                    total_updates += 1
+                    if self._update_text_source(
+                        self.scene_mappings[mapping_key],
+                        detail_value.strip()
+                    ):
+                        success_count += 1
+        
+        self.logger.info(f"Updated {success_count}/{total_updates} service detail OBS sources")
+        return success_count == total_updates or total_updates == 0
+    
     def _update_text_source(self, source_name: str, text: str) -> bool:
         """
         Update a specific text source in OBS
