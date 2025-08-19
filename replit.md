@@ -19,24 +19,24 @@ Preferred communication style: Simple, everyday language.
 - **Coverage**: Added comprehensive Sunday readings for August 2025
 - **User Preference**: Focus on Sunday readings rather than weekdays (per user request)
 
-### Deployment Configuration Fixes (Updated August 18, 2025)
+### Deployment Configuration Fixes (Updated August 19, 2025)
 - **Issue**: Deployment failed due to undefined `$file` variable in run command and missing entry point specification
-- **Root Cause**: `.replit` configuration missing explicit `run` command, causing deployment system to reference undefined variables
-- **Resolution**: Comprehensive deployment configuration update:
+- **Root Cause**: `.replit` configuration missing explicit `run` command in `[deployment]` section for Google Cloud Run
+- **Resolution**: Comprehensive deployment configuration for Cloud Run deployment:
   - **Primary Entry Points**:
-    - `main.py`: Primary deployment entry point with enhanced error handling
-    - `start.py`: Universal fallback entry point for various deployment platforms
-    - `index.py`: Alternative entry point for platforms expecting index.py
-    - `server.py`: Production-optimized entry point specifically for Replit deployment
+    - `app.py`: Minimal, streamlined entry point for Cloud Run deployment
+    - `main.py`: Alternative entry point with port 5000 default
+    - `run`: Executable script with `python3 app.py` command
   - **Configuration Files**:
-    - `pyproject.toml`: Updated with proper project metadata, entry point scripts, and build system configuration
-    - `Procfile`: Updated to use `python main.py` instead of `python app.py`
-    - `run.sh`: Bash script providing shell-based entry point alternative
-  - **Verification**: All entry points tested and confirmed working with successful imports and HTTP 200 responses
+    - `Procfile`: `web: python3 app.py` for Heroku-style deployment
+    - `Dockerfile`: Cloud Run optimized with Python 3.11, non-root user, proper CMD
+    - `.dockerignore`: Excludes cache and development files
+    - `pyproject.toml`: Minimal configuration with essential metadata only
+  - **Verification**: All entry points tested and confirmed working with successful imports
+- **Deployment Target**: Google Cloud Run via Replit deployment system
 - **Entry Point**: Web calendar application (`web_calendar.py`) serves as the main web interface
-- **Host Configuration**: All entry points configured to bind to `0.0.0.0` with PORT environment variable support
-- **Environment Variables**: Support for `PORT`, `FLASK_DEBUG`, `DEBUG`, and `ENVIRONMENT` variables for deployment flexibility
-- **Deployment Target**: Configured for Google Cloud Run via Replit deployment system
+- **Host Configuration**: All entry points bind to `0.0.0.0` with PORT environment variable support
+- **Container Ready**: Dockerfile creates secure, production-ready container for deployment
 
 # System Architecture
 
