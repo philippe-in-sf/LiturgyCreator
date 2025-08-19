@@ -12,7 +12,10 @@ dependencies = [
 ]
 
 [project.scripts]
-liturgical-calendar = "main:main"
+liturgical-calendar = "app:main"
+
+[project.entry-points."console_scripts"]
+liturgical-calendar-web = "app:main"
 
 [build-system]
 requires = ["setuptools>=61.0"]
