@@ -480,7 +480,6 @@
                 <div class="action-buttons">
                     <button class="action-btn btn-primary" onclick="loadReadings()">Load Reading</button>
                     <button class="action-btn btn-secondary" onclick="showServiceDetails()">Service Details</button>
-                    <button class="action-btn btn-success" onclick="sendToOBS()">Send to OBS</button>
                     <button class="action-btn btn-info" onclick="exportReading()">Export</button>
                 </div>
             </div>
@@ -787,41 +786,7 @@
             loadReadingsForDate(dateStr);
         }
 
-        function sendToOBS() {
-            if (!selectedReadings || !selectedReadings.has_readings) {
-                showError('No readings available to send to OBS');
-                return;
-            }
-            
-            const dateStr = selectedDate.toISOString().split('T')[0];
-            
-            // Include service details in OBS send
-            const currentServiceDetails = serviceDetails[dateStr] || {};
-            
-            fetch('/api/send_to_obs', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    date: dateStr, 
-                    readings: selectedReadings,
-                    serviceDetails: currentServiceDetails
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showSuccess('Readings and service details sent to OBS successfully!');
-                } else {
-                    showError('Failed to send to OBS: ' + (data.message || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Error sending to OBS:', error);
-                showError('Error connecting to OBS');
-            });
-        }
+
 
         function exportReading() {
             if (!selectedReadings || !selectedReadings.has_readings) {

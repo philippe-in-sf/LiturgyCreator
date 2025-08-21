@@ -36,8 +36,9 @@ Preferred communication style: Simple, everyday language.
   - Summary file with reading references included
   - All files organized in date-named folder within ZIP
 - **Text Formatting**: All exported text files use 50-character line width with intelligent word wrapping that preserves word boundaries
-- **User Interface**: Export button added to readings panel, triggers automatic download
-- **Usage**: Select date with readings, click Export button, ZIP file downloads automatically
+- **User Interface**: Export button is now the primary action for obtaining readings and service details
+- **Usage**: Select date with readings, optionally fill out service details, click Export button, ZIP file downloads automatically
+- **OBS Integration**: Temporarily removed from UI - export feature is now the preferred workflow for obtaining formatted readings
 
 #### Deployment Configuration Fix
 - **Issue**: Deployment attempted npm commands instead of Python execution
