@@ -21,5 +21,5 @@ ENV PYTHONUNBUFFERED=1
 # Expose port (default to 5000, but will be overridden by Cloud Run)
 EXPOSE 5000
 
-# Default command - try multiple entry points for maximum compatibility
-CMD ["sh", "-c", "python3 app.py || python3 main.py || python3 deploy.py || python3 -m web_calendar"]
+# Default command for Cloud Run deployment
+CMD ["python3", "app.py"]

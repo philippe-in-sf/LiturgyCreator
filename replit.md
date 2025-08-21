@@ -8,6 +8,28 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Service Details Interview System and Deployment Fix (August 21, 2025)
+
+### Service Details Enhancement
+- **Feature**: Added comprehensive interview section for gathering service information
+- **Implementation**: Professional modal form with organized sections for:
+  - **Hymns & Music**: Opening Hymn, Sequence Hymn, Communion Motet, Closing Hymn
+  - **Musicians**: Organist Name, Prelude/Postlude titles and composers
+  - **Clergy**: Preacher's Name, Presider's Name
+- **Storage**: Local browser storage with server backup capability
+- **OBS Integration**: Extended to send both readings and service details to text sources
+- **Configuration**: Updated config.ini with mappings for all service detail fields
+
+### Deployment Configuration Fix
+- **Issue**: Deployment attempted npm commands instead of Python execution
+- **Root Cause**: .replit file configured with `npm run start` instead of Python command
+- **Resolution**: 
+  - Enhanced app.py with robust error handling and production optimization
+  - Created package.json with proper npm scripts that delegate to Python
+  - Updated Dockerfile and Procfile for consistent Python execution
+  - All entry points now properly handle Cloud Run environment variables
+- **Status**: Deployment configuration fixed, ready for successful Cloud Run deployment
+
 ## Calendar Date Fix and OBS Integration Completion (August 19, 2025)
 
 ### Calendar Date Offset Resolution

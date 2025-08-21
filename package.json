@@ -1,0 +1,14 @@
+{
+  "name": "liturgical-calendar-web",
+  "version": "1.0.0",
+  "description": "Episcopal Church liturgical calendar with OBS integration",
+  "scripts": {
+    "start": "python3 app.py",
+    "dev": "python3 web_calendar.py",
+    "build": "echo 'No build step needed for Python app'"
+  },
+  "main": "app.py",
+  "keywords": ["liturgical", "calendar", "episcopal", "obs"],
+  "author": "Replit Agent",
+  "license": "MIT"
+}

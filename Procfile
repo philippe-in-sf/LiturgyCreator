@@ -1,1 +1,1 @@
-web: python3 -m web_calendar
+web: python3 app.py
