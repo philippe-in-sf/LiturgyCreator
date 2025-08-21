@@ -490,12 +490,19 @@ def export_readings():
             # Create individual text files for each reading
             for reading_type, reading_data in readings.items():
                 # Clean reading type name for filename
-                filename = f"{reading_type.replace('_', ' ').title()}.txt"
-                filepath = f"{date_folder_name}/{filename}"
+                base_name = reading_type.replace('_', ' ').title()
                 
-                # Only include the scripture text, nothing else
-                file_content = reading_data.get('text', '')
-                zip_file.writestr(filepath, file_content)
+                # Create text file with only scripture text
+                text_filename = f"{base_name}.txt"
+                text_filepath = f"{date_folder_name}/{text_filename}"
+                text_content = reading_data.get('text', '')
+                zip_file.writestr(text_filepath, text_content)
+                
+                # Create reference file with only scripture reference
+                ref_filename = f"{base_name} Reference.txt"
+                ref_filepath = f"{date_folder_name}/{ref_filename}"
+                ref_content = reading_data.get('reference', '')
+                zip_file.writestr(ref_filepath, ref_content)
             
             # Create service details file if provided
             if service_details:

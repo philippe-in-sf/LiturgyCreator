@@ -26,8 +26,9 @@ Preferred communication style: Simple, everyday language.
 - **Feature**: Added ZIP export functionality for liturgical readings and service details
 - **Implementation**: New API endpoint `/api/export_readings` creates ZIP archives with individual text files
 - **File Structure**: 
-  - Each reading type gets its own .txt file (e.g., "First Reading.txt", "Gospel.txt")
-  - Text files contain only the scripture text with no formatting or metadata
+  - Each reading type gets two .txt files:
+    - Scripture text file (e.g., "First Reading.txt") - contains only the scripture text
+    - Reference file (e.g., "First Reading Reference.txt") - contains only the scripture reference
   - Service details exported to separate "Service Details.txt" file
   - Summary file with reading references included
   - All files organized in date-named folder within ZIP
