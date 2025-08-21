@@ -29,7 +29,10 @@ Preferred communication style: Simple, everyday language.
   - Each reading type gets two .txt files:
     - Scripture text file (e.g., "First Reading.txt") - contains scripture text formatted at 50 characters wide with word wrapping
     - Reference file (e.g., "First Reading Reference.txt") - contains scripture reference formatted at 50 characters wide
-  - Service details exported to separate "Service Details.txt" file
+  - Individual service detail files (only created if data is provided):
+    - **Hymns**: "Opening Hymn.txt", "Sequence Hymn.txt", "Communion Motet.txt", "Closing Hymn.txt"
+    - **Musicians**: "Organist.txt", "Prelude Title.txt", "Prelude Composer.txt", "Postlude Title.txt", "Postlude Composer.txt"
+    - **Clergy**: "Preacher.txt", "Presider.txt"
   - Summary file with reading references included
   - All files organized in date-named folder within ZIP
 - **Text Formatting**: All exported text files use 50-character line width with intelligent word wrapping that preserves word boundaries

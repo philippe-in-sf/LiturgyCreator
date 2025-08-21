@@ -515,55 +515,54 @@ def export_readings():
                     formatted_ref = raw_ref
                 zip_file.writestr(ref_filepath, formatted_ref)
             
-            # Create service details file if provided
+            # Create individual service detail files if provided
             if service_details:
-                service_content = []
-                service_content.append("Service Details")
-                service_content.append("=" * 50)
-                service_content.append("")
+                # Individual hymn files
+                if service_details.get('openingHymn'):
+                    formatted_hymn = textwrap.fill(service_details['openingHymn'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/Opening Hymn.txt", formatted_hymn)
                 
-                # Hymns & Music
-                if any(service_details.get(key) for key in ['openingHymn', 'sequenceHymn', 'communionMotet', 'closingHymn']):
-                    service_content.append("HYMNS & MUSIC")
-                    service_content.append("-" * 20)
-                    if service_details.get('openingHymn'):
-                        service_content.append(f"Opening Hymn: {service_details['openingHymn']}")
-                    if service_details.get('sequenceHymn'):
-                        service_content.append(f"Sequence Hymn: {service_details['sequenceHymn']}")
-                    if service_details.get('communionMotet'):
-                        service_content.append(f"Communion Motet: {service_details['communionMotet']}")
-                    if service_details.get('closingHymn'):
-                        service_content.append(f"Closing Hymn: {service_details['closingHymn']}")
-                    service_content.append("")
+                if service_details.get('sequenceHymn'):
+                    formatted_hymn = textwrap.fill(service_details['sequenceHymn'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/Sequence Hymn.txt", formatted_hymn)
                 
-                # Musicians
-                if any(service_details.get(key) for key in ['organistName', 'preludeTitle', 'preludeComposer', 'postludeTitle', 'postludeComposer']):
-                    service_content.append("MUSICIANS")
-                    service_content.append("-" * 20)
-                    if service_details.get('organistName'):
-                        service_content.append(f"Organist: {service_details['organistName']}")
-                    if service_details.get('preludeTitle') or service_details.get('preludeComposer'):
-                        prelude = f"Prelude: {service_details.get('preludeTitle', '')} by {service_details.get('preludeComposer', '')}".strip(' by')
-                        service_content.append(prelude)
-                    if service_details.get('postludeTitle') or service_details.get('postludeComposer'):
-                        postlude = f"Postlude: {service_details.get('postludeTitle', '')} by {service_details.get('postludeComposer', '')}".strip(' by')
-                        service_content.append(postlude)
-                    service_content.append("")
+                if service_details.get('communionMotet'):
+                    formatted_motet = textwrap.fill(service_details['communionMotet'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/Communion Motet.txt", formatted_motet)
                 
-                # Clergy
-                if any(service_details.get(key) for key in ['preacherName', 'presiderName']):
-                    service_content.append("CLERGY")
-                    service_content.append("-" * 20)
-                    if service_details.get('preacherName'):
-                        service_content.append(f"Preacher: {service_details['preacherName']}")
-                    if service_details.get('presiderName'):
-                        service_content.append(f"Presider: {service_details['presiderName']}")
-                    service_content.append("")
+                if service_details.get('closingHymn'):
+                    formatted_hymn = textwrap.fill(service_details['closingHymn'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/Closing Hymn.txt", formatted_hymn)
                 
-                service_content.append(f"Exported on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                # Individual musician files
+                if service_details.get('organistName'):
+                    formatted_organist = textwrap.fill(service_details['organistName'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/Organist.txt", formatted_organist)
                 
-                service_file_content = "\n".join(service_content)
-                zip_file.writestr(f"{date_folder_name}/Service Details.txt", service_file_content)
+                if service_details.get('preludeTitle'):
+                    formatted_prelude = textwrap.fill(service_details['preludeTitle'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/Prelude Title.txt", formatted_prelude)
+                
+                if service_details.get('preludeComposer'):
+                    formatted_composer = textwrap.fill(service_details['preludeComposer'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/Prelude Composer.txt", formatted_composer)
+                
+                if service_details.get('postludeTitle'):
+                    formatted_postlude = textwrap.fill(service_details['postludeTitle'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/Postlude Title.txt", formatted_postlude)
+                
+                if service_details.get('postludeComposer'):
+                    formatted_composer = textwrap.fill(service_details['postludeComposer'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/Postlude Composer.txt", formatted_composer)
+                
+                # Individual clergy files
+                if service_details.get('preacherName'):
+                    formatted_preacher = textwrap.fill(service_details['preacherName'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/Preacher.txt", formatted_preacher)
+                
+                if service_details.get('presiderName'):
+                    formatted_presider = textwrap.fill(service_details['presiderName'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/Presider.txt", formatted_presider)
             
             # Create summary file
             summary_content = []
