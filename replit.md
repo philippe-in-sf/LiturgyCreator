@@ -27,11 +27,12 @@ Preferred communication style: Simple, everyday language.
 - **Implementation**: New API endpoint `/api/export_readings` creates ZIP archives with individual text files
 - **File Structure**: 
   - Each reading type gets two .txt files:
-    - Scripture text file (e.g., "First Reading.txt") - contains only the scripture text
-    - Reference file (e.g., "First Reading Reference.txt") - contains only the scripture reference
+    - Scripture text file (e.g., "First Reading.txt") - contains scripture text formatted at 50 characters wide with word wrapping
+    - Reference file (e.g., "First Reading Reference.txt") - contains scripture reference formatted at 50 characters wide
   - Service details exported to separate "Service Details.txt" file
   - Summary file with reading references included
   - All files organized in date-named folder within ZIP
+- **Text Formatting**: All exported text files use 50-character line width with intelligent word wrapping that preserves word boundaries
 - **User Interface**: Export button added to readings panel, triggers automatic download
 - **Usage**: Select date with readings, click Export button, ZIP file downloads automatically
 

@@ -12,6 +12,7 @@ import json
 import os
 import zipfile
 import io
+import textwrap
 from liturgy_fetcher import LiturgyFetcher
 from scripture_parser import ScriptureParser
 
@@ -492,17 +493,27 @@ def export_readings():
                 # Clean reading type name for filename
                 base_name = reading_type.replace('_', ' ').title()
                 
-                # Create text file with only scripture text
+                # Create text file with formatted scripture text (50 char width)
                 text_filename = f"{base_name}.txt"
                 text_filepath = f"{date_folder_name}/{text_filename}"
-                text_content = reading_data.get('text', '')
-                zip_file.writestr(text_filepath, text_content)
+                raw_text = reading_data.get('text', '')
+                if raw_text:
+                    # Format text with word wrapping at 50 characters
+                    formatted_text = textwrap.fill(raw_text, width=50, break_long_words=False, break_on_hyphens=False)
+                else:
+                    formatted_text = raw_text
+                zip_file.writestr(text_filepath, formatted_text)
                 
-                # Create reference file with only scripture reference
+                # Create reference file with formatted reference
                 ref_filename = f"{base_name} Reference.txt"
                 ref_filepath = f"{date_folder_name}/{ref_filename}"
-                ref_content = reading_data.get('reference', '')
-                zip_file.writestr(ref_filepath, ref_content)
+                raw_ref = reading_data.get('reference', '')
+                if raw_ref:
+                    # Format reference with word wrapping at 50 characters
+                    formatted_ref = textwrap.fill(raw_ref, width=50, break_long_words=False, break_on_hyphens=False)
+                else:
+                    formatted_ref = raw_ref
+                zip_file.writestr(ref_filepath, formatted_ref)
             
             # Create service details file if provided
             if service_details:
