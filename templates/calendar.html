@@ -829,7 +829,50 @@
                 return;
             }
             
-            showSuccess('Export functionality coming soon!');
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            
+            // Include service details in export
+            const currentServiceDetails = serviceDetails[dateStr] || {};
+            
+            // Show loading message
+            showSuccess('Preparing export...');
+            
+            fetch('/api/export_readings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    date: dateStr,
+                    serviceDetails: currentServiceDetails
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Export failed');
+                    });
+                }
+            })
+            .then(blob => {
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `liturgical_readings_${dateStr}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showSuccess('Readings exported successfully! Check your downloads folder.');
+            })
+            .catch(error => {
+                console.error('Export error:', error);
+                showError('Failed to export readings: ' + error.message);
+            });
         }
 
         // Service Details Modal Functions
