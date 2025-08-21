@@ -493,36 +493,8 @@ def export_readings():
                 filename = f"{reading_type.replace('_', ' ').title()}.txt"
                 filepath = f"{date_folder_name}/{filename}"
                 
-                # Format content
-                content = []
-                content.append(f"{reading_type.replace('_', ' ').title()}")
-                content.append("=" * 50)
-                content.append("")
-                
-                if reading_data.get('reference'):
-                    content.append(f"Scripture Reference: {reading_data['reference']}")
-                    content.append("")
-                
-                if reading_data.get('text'):
-                    content.append("Scripture Text:")
-                    content.append("-" * 20)
-                    content.append(reading_data['text'])
-                    content.append("")
-                
-                # Add additional metadata
-                if reading_data.get('book'):
-                    content.append(f"Book: {reading_data['book']}")
-                if reading_data.get('chapter'):
-                    content.append(f"Chapter: {reading_data['chapter']}")
-                if reading_data.get('verses'):
-                    content.append(f"Verses: {reading_data['verses']}")
-                if reading_data.get('full_citation'):
-                    content.append(f"Full Citation: {reading_data['full_citation']}")
-                
-                content.append("")
-                content.append(f"Exported on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-                
-                file_content = "\n".join(content)
+                # Only include the scripture text, nothing else
+                file_content = reading_data.get('text', '')
                 zip_file.writestr(filepath, file_content)
             
             # Create service details file if provided

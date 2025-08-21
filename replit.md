@@ -20,7 +20,21 @@ Preferred communication style: Simple, everyday language.
 - **OBS Integration**: Extended to send both readings and service details to text sources
 - **Configuration**: Updated config.ini with mappings for all service detail fields
 
-### Deployment Configuration Fix
+### Export Feature and Deployment Fix (August 21, 2025)
+
+#### Text Export Functionality
+- **Feature**: Added ZIP export functionality for liturgical readings and service details
+- **Implementation**: New API endpoint `/api/export_readings` creates ZIP archives with individual text files
+- **File Structure**: 
+  - Each reading type gets its own .txt file (e.g., "First Reading.txt", "Gospel.txt")
+  - Text files contain only the scripture text with no formatting or metadata
+  - Service details exported to separate "Service Details.txt" file
+  - Summary file with reading references included
+  - All files organized in date-named folder within ZIP
+- **User Interface**: Export button added to readings panel, triggers automatic download
+- **Usage**: Select date with readings, click Export button, ZIP file downloads automatically
+
+#### Deployment Configuration Fix
 - **Issue**: Deployment attempted npm commands instead of Python execution
 - **Root Cause**: .replit file configured with `npm run start` instead of Python command
 - **Current Status**: Ready for manual fix - user needs to edit .replit file line 57
