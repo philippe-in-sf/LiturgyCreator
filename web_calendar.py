@@ -4,11 +4,14 @@ Web-based Interactive Liturgical Calendar
 Episcopal Church Calendar with Revised Common Lectionary integration
 """
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_file
 import calendar
 from datetime import datetime, timedelta, date
 from typing import Dict, List, Optional, Tuple, Any
 import json
+import os
+import zipfile
+import io
 from liturgy_fetcher import LiturgyFetcher
 from scripture_parser import ScriptureParser
 
@@ -450,6 +453,158 @@ def get_service_details(date_str):
         return jsonify({
             'success': False,
             'error': str(e)
+        }), 500
+
+@app.route('/api/export_readings', methods=['POST'])
+def export_readings():
+    """Export readings to individual text files in a ZIP archive"""
+    try:
+        data = request.get_json()
+        date_str = data.get('date')
+        service_details = data.get('serviceDetails', {})
+        
+        if not date_str:
+            return jsonify({
+                'success': False,
+                'error': 'No date provided'
+            }), 400
+        
+        # Parse date for folder naming
+        selected_date = datetime.fromisoformat(date_str)
+        date_folder_name = selected_date.strftime("%Y-%m-%d")
+        
+        # Get readings for the date
+        calendar_instance = WebLiturgicalCalendar()
+        readings = calendar_instance.get_readings_for_date(date_str)
+        
+        if not readings:
+            return jsonify({
+                'success': False,
+                'error': 'No readings available for this date'
+            }), 400
+        
+        # Create ZIP file in memory
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            # Create individual text files for each reading
+            for reading_type, reading_data in readings.items():
+                # Clean reading type name for filename
+                filename = f"{reading_type.replace('_', ' ').title()}.txt"
+                filepath = f"{date_folder_name}/{filename}"
+                
+                # Format content
+                content = []
+                content.append(f"{reading_type.replace('_', ' ').title()}")
+                content.append("=" * 50)
+                content.append("")
+                
+                if reading_data.get('reference'):
+                    content.append(f"Scripture Reference: {reading_data['reference']}")
+                    content.append("")
+                
+                if reading_data.get('text'):
+                    content.append("Scripture Text:")
+                    content.append("-" * 20)
+                    content.append(reading_data['text'])
+                    content.append("")
+                
+                # Add additional metadata
+                if reading_data.get('book'):
+                    content.append(f"Book: {reading_data['book']}")
+                if reading_data.get('chapter'):
+                    content.append(f"Chapter: {reading_data['chapter']}")
+                if reading_data.get('verses'):
+                    content.append(f"Verses: {reading_data['verses']}")
+                if reading_data.get('full_citation'):
+                    content.append(f"Full Citation: {reading_data['full_citation']}")
+                
+                content.append("")
+                content.append(f"Exported on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                
+                file_content = "\n".join(content)
+                zip_file.writestr(filepath, file_content)
+            
+            # Create service details file if provided
+            if service_details:
+                service_content = []
+                service_content.append("Service Details")
+                service_content.append("=" * 50)
+                service_content.append("")
+                
+                # Hymns & Music
+                if any(service_details.get(key) for key in ['openingHymn', 'sequenceHymn', 'communionMotet', 'closingHymn']):
+                    service_content.append("HYMNS & MUSIC")
+                    service_content.append("-" * 20)
+                    if service_details.get('openingHymn'):
+                        service_content.append(f"Opening Hymn: {service_details['openingHymn']}")
+                    if service_details.get('sequenceHymn'):
+                        service_content.append(f"Sequence Hymn: {service_details['sequenceHymn']}")
+                    if service_details.get('communionMotet'):
+                        service_content.append(f"Communion Motet: {service_details['communionMotet']}")
+                    if service_details.get('closingHymn'):
+                        service_content.append(f"Closing Hymn: {service_details['closingHymn']}")
+                    service_content.append("")
+                
+                # Musicians
+                if any(service_details.get(key) for key in ['organistName', 'preludeTitle', 'preludeComposer', 'postludeTitle', 'postludeComposer']):
+                    service_content.append("MUSICIANS")
+                    service_content.append("-" * 20)
+                    if service_details.get('organistName'):
+                        service_content.append(f"Organist: {service_details['organistName']}")
+                    if service_details.get('preludeTitle') or service_details.get('preludeComposer'):
+                        prelude = f"Prelude: {service_details.get('preludeTitle', '')} by {service_details.get('preludeComposer', '')}".strip(' by')
+                        service_content.append(prelude)
+                    if service_details.get('postludeTitle') or service_details.get('postludeComposer'):
+                        postlude = f"Postlude: {service_details.get('postludeTitle', '')} by {service_details.get('postludeComposer', '')}".strip(' by')
+                        service_content.append(postlude)
+                    service_content.append("")
+                
+                # Clergy
+                if any(service_details.get(key) for key in ['preacherName', 'presiderName']):
+                    service_content.append("CLERGY")
+                    service_content.append("-" * 20)
+                    if service_details.get('preacherName'):
+                        service_content.append(f"Preacher: {service_details['preacherName']}")
+                    if service_details.get('presiderName'):
+                        service_content.append(f"Presider: {service_details['presiderName']}")
+                    service_content.append("")
+                
+                service_content.append(f"Exported on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                
+                service_file_content = "\n".join(service_content)
+                zip_file.writestr(f"{date_folder_name}/Service Details.txt", service_file_content)
+            
+            # Create summary file
+            summary_content = []
+            summary_content.append(f"Liturgical Readings Summary - {selected_date.strftime('%B %d, %Y')}")
+            summary_content.append("=" * 60)
+            summary_content.append("")
+            
+            for reading_type, reading_data in readings.items():
+                summary_content.append(f"{reading_type.replace('_', ' ').title()}: {reading_data.get('reference', 'No reference')}")
+            
+            summary_content.append("")
+            summary_content.append(f"Total readings exported: {len(readings)}")
+            summary_content.append(f"Exported on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            
+            zip_file.writestr(f"{date_folder_name}/Summary.txt", "\n".join(summary_content))
+        
+        # Prepare the ZIP file for download
+        zip_buffer.seek(0)
+        
+        return send_file(
+            io.BytesIO(zip_buffer.read()),
+            as_attachment=True,
+            download_name=f"liturgical_readings_{date_folder_name}.zip",
+            mimetype='application/zip'
+        )
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to export readings'
         }), 500
 
 if __name__ == '__main__':
