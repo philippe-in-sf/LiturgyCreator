@@ -411,6 +411,31 @@
             margin: 10px 0;
         }
         
+        .instructions {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .instructions p {
+            margin: 0;
+            color: #495057;
+        }
+        
+        .instructions a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .instructions a:hover {
+            color: #5a6fd8;
+            text-decoration: underline;
+        }
+        
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -481,6 +506,10 @@
                     <button class="action-btn btn-primary" onclick="loadReadings()">Load Reading</button>
                     <button class="action-btn btn-secondary" onclick="showServiceDetails()">Service Details</button>
                     <button class="action-btn btn-info" onclick="exportReading()">Export</button>
+                </div>
+                
+                <div class="instructions">
+                    <p>Select the date that's required, then complete the service details, save them, and click Export. You will download a folder with pre-filled variables, that are meant to work with the templates that we use at Trinity Tulsa on OBS. If you would like a copy of our slide templates, please write to us at <a href="mailto:philippe@beaudette.me">philippe@beaudette.me</a> and we will get you a copy.</p>
                 </div>
             </div>
         </div>
