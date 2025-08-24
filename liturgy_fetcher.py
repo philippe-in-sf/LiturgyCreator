@@ -278,6 +278,94 @@ class LiturgyFetcher:
                     'reference': 'The Collect for Proper 17',
                     'text': 'Lord of all power and might, the author and giver of all good things: Graft in our hearts the love of your Name; increase in us true religion; nourish us with all goodness; and bring forth in us the fruit of good works; through Jesus Christ our Lord, who lives and reigns with you and the Holy Spirit, one God for ever and ever. Amen.'
                 }
+            },
+            '2025-09-07': {  # Thirteenth Sunday after Pentecost (Proper 18)
+                'first_reading': {
+                    'reference': 'Jeremiah 18:1-11',
+                    'text': 'The word that came to Jeremiah from the Lord: "Come, go down to the potter\'s house, and there I will let you hear my words." So I went down to the potter\'s house, and there he was working at his wheel. The vessel he was making of clay was spoiled in the potter\'s hand, and he reworked it into another vessel, as seemed good to him.'
+                },
+                'psalm': {
+                    'reference': 'Psalm 139:1-6, 13-18',
+                    'text': 'Lord, you have searched me out and known me; you know my sitting down and my rising up; you discern my thoughts from afar. You trace my journeys and my resting-places and are acquainted with all my ways. Indeed, there is not a word on my lips, but you, O Lord, know it altogether.'
+                },
+                'second_reading': {
+                    'reference': 'Philemon 1-21',
+                    'text': 'Paul, a prisoner of Christ Jesus, and Timothy our brother, To Philemon our dear friend and co-worker, to Apphia our sister, to Archippus our fellow soldier, and to the church in your house: Grace to you and peace from God our Father and the Lord Jesus Christ.'
+                },
+                'gospel': {
+                    'reference': 'Luke 14:25-33',
+                    'text': 'Now large crowds were traveling with him; and he turned and said to them, "Whoever comes to me and does not hate father and mother, wife and children, brothers and sisters, yes, and even life itself, cannot be my disciple. Whoever does not carry the cross and follow me cannot be my disciple."'
+                },
+                'collect': {
+                    'reference': 'The Collect for Proper 18',
+                    'text': 'Grant us, O Lord, to trust in you with all our hearts; for, as you always resist the proud who confide in their own strength, so you never forsake those who make their boast of your mercy; through Jesus Christ our Lord, who lives and reigns with you and the Holy Spirit, one God, now and for ever. Amen.'
+                }
+            },
+            '2025-09-14': {  # Fourteenth Sunday after Pentecost (Proper 19)
+                'first_reading': {
+                    'reference': 'Jeremiah 4:11-12, 22-28',
+                    'text': 'At that time it will be said to this people and to Jerusalem: A hot wind comes from me out of the bare heights in the desert toward my poor people, not to winnow or cleanse— a wind too strong for that. Now it is I who speak in judgment against them. "For my people are foolish, they do not know me; they are stupid children, they have no understanding. They are skilled in doing evil, but do not know how to do good."'
+                },
+                'psalm': {
+                    'reference': 'Psalm 14',
+                    'text': 'The fool has said in his heart, "There is no God." All are corrupt and commit abominable acts; there is none who does any good. The Lord looks down from heaven upon us all, to see if there is any who is wise, if there is one who seeks after God.'
+                },
+                'second_reading': {
+                    'reference': '1 Timothy 1:12-17',
+                    'text': 'I am grateful to Christ Jesus our Lord, who has strengthened me, because he judged me faithful and appointed me to his service, even though I was formerly a blasphemer, a persecutor, and a man of violence. But I received mercy because I had acted ignorantly in unbelief, and the grace of our Lord overflowed for me with the faith and love that are in Christ Jesus.'
+                },
+                'gospel': {
+                    'reference': 'Luke 15:1-10',
+                    'text': 'Now all the tax collectors and sinners were coming near to listen to him. And the Pharisees and the scribes were grumbling and saying, "This fellow welcomes sinners and eats with them." So he told them this parable: "Which one of you, having a hundred sheep and losing one of them, does not leave the ninety-nine in the wilderness and go after the one that is lost until he finds it?"'
+                },
+                'collect': {
+                    'reference': 'The Collect for Proper 19',
+                    'text': 'O God, because without you we are not able to please you, mercifully grant that your Holy Spirit may in all things direct and rule our hearts; through Jesus Christ our Lord, who lives and reigns with you and the Holy Spirit, one God, now and for ever. Amen.'
+                }
+            },
+            '2025-09-21': {  # Fifteenth Sunday after Pentecost (Proper 20)
+                'first_reading': {
+                    'reference': 'Jeremiah 8:18-9:1',
+                    'text': 'My joy is gone, grief is upon me, my heart is sick. Hark, the cry of my poor people from far and wide in the land: "Is the Lord not in Zion? Is her King not in her?" ("Why have they provoked me to anger with their images, with their foreign idols?") "The harvest is past, the summer is ended, and we are not saved." For the hurt of my poor people I am hurt, I mourn, and dismay has taken hold of me.'
+                },
+                'psalm': {
+                    'reference': 'Psalm 79:1-9',
+                    'text': 'O God, the heathen have come into your inheritance; they have profaned your holy temple; they have made Jerusalem a heap of rubble. They have given the bodies of your servants as food for the birds of the air, and the flesh of your faithful ones to the beasts of the field.'
+                },
+                'second_reading': {
+                    'reference': '1 Timothy 2:1-7',
+                    'text': 'First of all, then, I urge that supplications, prayers, intercessions, and thanksgivings be made for everyone, for kings and all who are in high positions, so that we may lead a quiet and peaceable life in all godliness and dignity. This is right and is acceptable in the sight of God our Savior, who desires everyone to be saved and to come to the knowledge of the truth.'
+                },
+                'gospel': {
+                    'reference': 'Luke 16:1-13',
+                    'text': 'Then Jesus said to the disciples, "There was a rich man who had a manager, and charges were brought to him that this man was squandering his property. So he summoned him and said to him, \'What is this that I hear about you? Give me an accounting of your management, because you cannot be my manager any longer.\'"'
+                },
+                'collect': {
+                    'reference': 'The Collect for Proper 20',
+                    'text': 'Grant us, Lord, not to be anxious about earthly things, but to love things heavenly; and even now, while we are placed among things that are passing away, to hold fast to those that shall endure; through Jesus Christ our Lord, who lives and reigns with you and the Holy Spirit, one God, for ever and ever. Amen.'
+                }
+            },
+            '2025-09-28': {  # Sixteenth Sunday after Pentecost (Proper 21)
+                'first_reading': {
+                    'reference': 'Jeremiah 32:1-3a, 6-15',
+                    'text': 'The word that came to Jeremiah from the Lord in the tenth year of King Zedekiah of Judah, which was the eighteenth year of Nebuchadrezzar. At that time the army of the king of Babylon was besieging Jerusalem, and the prophet Jeremiah was confined in the court of the guard that was in the palace of the king of Judah, where King Zedekiah of Judah had confined him.'
+                },
+                'psalm': {
+                    'reference': 'Psalm 91:1-6, 14-16',
+                    'text': 'He who dwells in the shelter of the Most High, abides under the shadow of the Almighty. He shall say to the Lord, "You are my refuge and my stronghold, my God in whom I put my trust." He shall deliver you from the snare of the hunter and from the deadly pestilence.'
+                },
+                'second_reading': {
+                    'reference': '1 Timothy 6:6-19',
+                    'text': 'Of course, there is great gain in godliness combined with contentment; for we brought nothing into the world, so that we can take nothing out of it; but if we have food and clothing, we will be content with these. But those who want to be rich fall into temptation and are trapped by many senseless and harmful desires that plunge people into ruin and destruction.'
+                },
+                'gospel': {
+                    'reference': 'Luke 16:19-31',
+                    'text': 'There was a rich man who was dressed in purple and fine linen and who feasted sumptuously every day. And at his gate lay a poor man named Lazarus, covered with sores, who longed to satisfy his hunger with what fell from the rich man\'s table; even the dogs would come and lick his sores.'
+                },
+                'collect': {
+                    'reference': 'The Collect for Proper 21',
+                    'text': 'O God, you declare your almighty power chiefly in showing mercy and pity: Grant us the fullness of your grace, that we, running to obtain your promises, may become partakers of your heavenly treasure; through Jesus Christ our Lord, who lives and reigns with you and the Holy Spirit, one God, for ever and ever. Amen.'
+                }
             }
         }
         
@@ -388,7 +476,11 @@ class LiturgyFetcher:
         celebration_names = {
             '2025-08-17': "Tenth Sunday after Pentecost (Proper 15)",
             '2025-08-24': "Eleventh Sunday after Pentecost (Proper 16)", 
-            '2025-08-31': "Twelfth Sunday after Pentecost (Proper 17)"
+            '2025-08-31': "Twelfth Sunday after Pentecost (Proper 17)",
+            '2025-09-07': "Thirteenth Sunday after Pentecost (Proper 18)",
+            '2025-09-14': "Fourteenth Sunday after Pentecost (Proper 19)",
+            '2025-09-21': "Fifteenth Sunday after Pentecost (Proper 20)",
+            '2025-09-28': "Sixteenth Sunday after Pentecost (Proper 21)"
         }
         
         return celebration_names.get(date_str, "Sunday in Ordinary Time")
