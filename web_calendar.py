@@ -13,10 +13,61 @@ import os
 import zipfile
 import io
 import textwrap
+import re
 from liturgy_fetcher import LiturgyFetcher
 from scripture_parser import ScriptureParser
 
 app = Flask(__name__)
+
+def format_text_with_paragraphs(text: str, width: int = 50) -> str:
+    """
+    Format text with word wrapping while preserving paragraph structure.
+    Handles scripture passages by maintaining natural breaks.
+    """
+    if not text:
+        return text
+    
+    # Split text into sentences that likely represent paragraph breaks
+    # Look for periods followed by space and capital letter, or double quotes with period
+    sentences = re.split(r'(?<=[.!?])\s+(?=[A-Z"])|(?<=[.!?]")\s+(?=[A-Z])', text.strip())
+    
+    formatted_paragraphs = []
+    current_paragraph = []
+    
+    for sentence in sentences:
+        sentence = sentence.strip()
+        if not sentence:
+            continue
+            
+        # Check if this sentence should start a new paragraph
+        # Common indicators: starts with certain words or follows a quote
+        new_paragraph_indicators = [
+            'But ', 'And ', 'For ', 'Then ', 'Now ', 'When ', 'So ', 'Therefore ',
+            'He said', 'She said', 'Jesus said', 'The Lord', 'Thus says'
+        ]
+        
+        start_new_paragraph = (
+            len(current_paragraph) >= 3 or  # Prevent overly long paragraphs
+            (current_paragraph and any(sentence.startswith(indicator) for indicator in new_paragraph_indicators))
+        )
+        
+        if start_new_paragraph and current_paragraph:
+            # Join current paragraph and wrap it
+            paragraph_text = ' '.join(current_paragraph)
+            wrapped_paragraph = textwrap.fill(paragraph_text, width=width, break_long_words=False, break_on_hyphens=False)
+            formatted_paragraphs.append(wrapped_paragraph)
+            current_paragraph = [sentence]
+        else:
+            current_paragraph.append(sentence)
+    
+    # Handle remaining sentences
+    if current_paragraph:
+        paragraph_text = ' '.join(current_paragraph)
+        wrapped_paragraph = textwrap.fill(paragraph_text, width=width, break_long_words=False, break_on_hyphens=False)
+        formatted_paragraphs.append(wrapped_paragraph)
+    
+    # Join paragraphs with double line breaks for clear separation
+    return '\n\n'.join(formatted_paragraphs)
 
 class WebLiturgicalCalendar:
     """Web-based liturgical calendar"""
@@ -498,8 +549,8 @@ def export_readings():
                 text_filepath = f"{date_folder_name}/{text_filename}"
                 raw_text = reading_data.get('text', '')
                 if raw_text:
-                    # Format text with word wrapping at 50 characters
-                    formatted_text = textwrap.fill(raw_text, width=50, break_long_words=False, break_on_hyphens=False)
+                    # Format text with word wrapping at 50 characters while preserving paragraph structure
+                    formatted_text = format_text_with_paragraphs(raw_text, width=50)
                 else:
                     formatted_text = raw_text
                 zip_file.writestr(text_filepath, formatted_text)
