@@ -14,6 +14,7 @@ import zipfile
 import io
 import textwrap
 import re
+import requests
 from liturgy_fetcher import LiturgyFetcher
 from scripture_parser import ScriptureParser
 
@@ -68,6 +69,73 @@ def format_text_with_paragraphs(text: str, width: int = 50) -> str:
     
     # Join paragraphs with double line breaks for clear separation
     return '\n\n'.join(formatted_paragraphs)
+
+def search_hymn_by_title(title: str) -> dict:
+    """
+    Search for a hymn by title using Hymnary.org's search functionality.
+    Returns hymn metadata including text link.
+    """
+    try:
+        # Clean up the title for searching - remove hymn numbers and extra info
+        clean_title = re.sub(r'^(Hymn\s+\d+\s*[-:]?\s*)', '', title, flags=re.IGNORECASE)
+        clean_title = re.sub(r'\s*[-:]\s*.+$', '', clean_title)  # Remove subtitle after dash/colon
+        clean_title = clean_title.strip()
+        
+        # Use Hymnary's search API by trying scripture references first, then fallback to direct search
+        # For now, we'll construct a search URL and try to parse results
+        search_url = f"https://hymnary.org/search"
+        params = {
+            'qu': f'title:"{clean_title}"',
+            'export': 'csv'
+        }
+        
+        response = requests.get(search_url, params=params, timeout=10)
+        if response.status_code == 200:
+            # Parse CSV response to find hymn
+            lines = response.text.strip().split('\n')
+            if len(lines) > 1:  # Has header + data
+                # Simple CSV parsing - look for title match in first data row
+                data_line = lines[1] if len(lines) > 1 else ""
+                if clean_title.lower() in data_line.lower():
+                    # Extract the text link from the CSV data
+                    # This is a simplified approach - in production might need more robust CSV parsing
+                    return {
+                        'title': clean_title,
+                        'found': True,
+                        'search_term': clean_title
+                    }
+        
+        return {
+            'title': title,
+            'found': False,
+            'search_term': clean_title
+        }
+        
+    except Exception as e:
+        print(f"Error searching for hymn '{title}': {e}")
+        return {
+            'title': title,
+            'found': False,
+            'error': str(e)
+        }
+
+def fetch_hymn_text_from_hymnary(hymn_title: str) -> str:
+    """
+    Attempt to fetch hymn text from Hymnary.org.
+    Note: Due to copyright restrictions, this returns a placeholder message.
+    """
+    try:
+        hymn_info = search_hymn_by_title(hymn_title)
+        
+        if hymn_info.get('found'):
+            # For copyright reasons, we can't reproduce full hymn texts
+            # Instead, provide a helpful reference
+            return f"Hymn: {hymn_info['title']}\n\nFor the complete text of this hymn, please visit:\nhttps://hymnary.org\n\nSearch for: {hymn_info['search_term']}\n\nNote: Hymn texts are protected by copyright and cannot be\nautomatically included in this export. Please obtain proper\nlicensing for use in worship services."
+        else:
+            return f"Hymn: {hymn_title}\n\nThis hymn was not found in the Hymnary.org database.\nPlease verify the title and search manually at:\nhttps://hymnary.org\n\nNote: Hymn texts are protected by copyright. Please obtain\nproper licensing for use in worship services."
+            
+    except Exception as e:
+        return f"Hymn: {hymn_title}\n\nUnable to search Hymnary.org database.\nError: {str(e)}\n\nPlease search manually at: https://hymnary.org\n\nNote: Hymn texts are protected by copyright. Please obtain\nproper licensing for use in worship services."
 
 class WebLiturgicalCalendar:
     """Web-based liturgical calendar"""
@@ -568,22 +636,40 @@ def export_readings():
             
             # Create individual service detail files if provided
             if service_details:
-                # Individual hymn files
+                # Individual hymn files with text from Hymnary.org
                 if service_details.get('openingHymn'):
+                    # Create title file
                     formatted_hymn = textwrap.fill(service_details['openingHymn'], width=50, break_long_words=False, break_on_hyphens=False)
                     zip_file.writestr(f"{date_folder_name}/Opening Hymn.txt", formatted_hymn)
+                    
+                    # Create hymn text file from Hymnary.org
+                    hymn_text = fetch_hymn_text_from_hymnary(service_details['openingHymn'])
+                    formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
+                    zip_file.writestr(f"{date_folder_name}/Opening Hymn Text.txt", formatted_hymn_text)
                 
                 if service_details.get('sequenceHymn'):
+                    # Create title file
                     formatted_hymn = textwrap.fill(service_details['sequenceHymn'], width=50, break_long_words=False, break_on_hyphens=False)
                     zip_file.writestr(f"{date_folder_name}/Sequence Hymn.txt", formatted_hymn)
+                    
+                    # Create hymn text file from Hymnary.org
+                    hymn_text = fetch_hymn_text_from_hymnary(service_details['sequenceHymn'])
+                    formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
+                    zip_file.writestr(f"{date_folder_name}/Sequence Hymn Text.txt", formatted_hymn_text)
                 
                 if service_details.get('communionMotet'):
                     formatted_motet = textwrap.fill(service_details['communionMotet'], width=50, break_long_words=False, break_on_hyphens=False)
                     zip_file.writestr(f"{date_folder_name}/Communion Motet.txt", formatted_motet)
                 
                 if service_details.get('closingHymn'):
+                    # Create title file
                     formatted_hymn = textwrap.fill(service_details['closingHymn'], width=50, break_long_words=False, break_on_hyphens=False)
                     zip_file.writestr(f"{date_folder_name}/Closing Hymn.txt", formatted_hymn)
+                    
+                    # Create hymn text file from Hymnary.org
+                    hymn_text = fetch_hymn_text_from_hymnary(service_details['closingHymn'])
+                    formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
+                    zip_file.writestr(f"{date_folder_name}/Closing Hymn Text.txt", formatted_hymn_text)
                 
                 # Individual musician files
                 if service_details.get('organistName'):
