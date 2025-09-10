@@ -1,10 +1,32 @@
 # Overview
 
-This project is a Daily Liturgical Scripture OBS Automation system that fetches **Episcopal Church liturgical readings** from The Lectionary Page (Revised Common Lectionary) and automatically updates text sources in OBS Studio via WebSocket connections. The system retrieves daily scripture readings based on the Episcopal liturgical calendar, parses them into a formatted structure, and displays them in configured OBS scenes for live streaming or recording purposes.
+This project is a Daily Liturgical Scripture OBS Automation system (v1.1) that fetches **Episcopal Church liturgical readings** from The Lectionary Page (Revised Common Lectionary) and automatically updates text sources in OBS Studio via WebSocket connections. The system retrieves daily scripture readings based on the Episcopal liturgical calendar, parses them into a formatted structure, and displays them in configured OBS scenes for live streaming or recording purposes.
 
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+# Recent Changes
+
+## PDF Upload Feature and Version 1.1 Release (September 10, 2025)
+
+### PDF Upload Feature
+- **Feature**: Added comprehensive PDF upload and text extraction functionality
+- **Implementation**: New upload interface with drag-and-drop support for PDF documents
+- **Processing**: Advanced text extraction using pdfplumber with OCR fallback capability
+- **Analysis**: Smart liturgical content detection that identifies:
+  - Scripture readings (First Reading, Psalm, Second Reading, Gospel)
+  - Hymns and musical selections
+  - Prayers and liturgical elements
+  - Service information and details
+- **User Interface**: Professional upload area with progress indicators and detailed results display
+- **File Handling**: Supports PDF files up to 16MB with automatic cleanup after processing
+- **Integration**: Seamlessly integrated with existing calendar interface as fourth action button
+
+### Version Management
+- **Version**: Updated application to v1.1 across all configuration files
+- **Deployment**: Configured for autoscale deployment on Replit platform
+- **Documentation**: Updated project documentation to reflect new capabilities
 
 # Recent Changes
 

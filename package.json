@@ -1,6 +1,6 @@
 {
   "name": "liturgical-calendar-web",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Episcopal Church liturgical calendar with OBS integration",
   "scripts": {
     "start": "python3 app.py",
