@@ -10,8 +10,8 @@ Preferred communication style: Simple, everyday language.
 
 ## PDF Upload Feature and Version 1.1 Release (September 10, 2025)
 
-### PDF Upload Feature
-- **Feature**: Added comprehensive PDF upload and text extraction functionality
+### PDF Upload Feature (BETA)
+- **Feature**: Added comprehensive PDF upload and text extraction functionality (experimental)
 - **Implementation**: New upload interface with drag-and-drop support for PDF documents
 - **Processing**: Advanced text extraction using pdfplumber with OCR fallback capability
 - **Analysis**: Smart liturgical content detection that identifies:
@@ -22,6 +22,7 @@ Preferred communication style: Simple, everyday language.
 - **User Interface**: Professional upload area with progress indicators and detailed results display
 - **File Handling**: Supports PDF files up to 16MB with automatic cleanup after processing
 - **Integration**: Seamlessly integrated with existing calendar interface as fourth action button
+- **Status**: Beta feature - may provide unexpected results depending on PDF format and quality
 
 ### Version Management
 - **Version**: Updated application to v1.1 across all configuration files
