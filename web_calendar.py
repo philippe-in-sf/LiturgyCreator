@@ -15,10 +15,145 @@ import io
 import textwrap
 import re
 import requests
+import pdfplumber
+import pytesseract
+from PIL import Image
+from werkzeug.utils import secure_filename
 from liturgy_fetcher import LiturgyFetcher
 from scripture_parser import ScriptureParser
 
 app = Flask(__name__)
+
+# Configure upload settings
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'pdf'}
+MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+
+# Create uploads directory if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    """Check if uploaded file has allowed extension"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def extract_text_from_pdf(pdf_path: str) -> Dict[str, Any]:
+    """Extract text from PDF using pdfplumber and fallback to OCR if needed"""
+    try:
+        extracted_text = ""
+        page_count = 0
+        
+        # Try text extraction with pdfplumber first
+        with pdfplumber.open(pdf_path) as pdf:
+            page_count = len(pdf.pages)
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    extracted_text += page_text + "\n\n"
+        
+        # If no text extracted, try OCR as fallback
+        if not extracted_text.strip():
+            try:
+                # Convert PDF to images and use OCR
+                import fitz  # PyMuPDF for PDF to image conversion
+                doc = fitz.open(pdf_path)
+                
+                for page_num in range(len(doc)):
+                    page = doc.load_page(page_num)
+                    pix = page.get_pixmap()
+                    img_data = pix.tobytes("png")
+                    
+                    # Use PIL to open the image
+                    img = Image.open(io.BytesIO(img_data))
+                    
+                    # Use tesseract for OCR
+                    page_text = pytesseract.image_to_string(img)
+                    if page_text:
+                        extracted_text += page_text + "\n\n"
+                
+                doc.close()
+                
+            except ImportError:
+                # PyMuPDF not available, skip OCR fallback
+                pass
+        
+        return {
+            'success': True,
+            'text': extracted_text.strip(),
+            'page_count': page_count,
+            'method': 'pdfplumber' if extracted_text else 'ocr'
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'error': str(e),
+            'text': '',
+            'page_count': 0
+        }
+
+def process_liturgical_pdf(text: str) -> Dict[str, Any]:
+    """Process extracted PDF text to identify liturgical content"""
+    try:
+        # Common liturgical section identifiers
+        section_patterns = {
+            'first_reading': r'(?i)(?:first\s+reading|lesson\s+1|old\s+testament)',
+            'psalm': r'(?i)(?:psalm|responsorial)',
+            'second_reading': r'(?i)(?:second\s+reading|lesson\s+2|epistle|new\s+testament)',
+            'gospel': r'(?i)(?:gospel|holy\s+gospel)',
+            'hymns': r'(?i)(?:hymn|song|anthem)',
+            'prayers': r'(?i)(?:prayer|collect|intercession)',
+            'service_info': r'(?i)(?:service|worship|celebration|date|time)'
+        }
+        
+        # Split text into sections
+        sections = {}
+        lines = text.split('\n')
+        current_section = 'general'
+        current_content = []
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Check if line matches any section pattern
+            section_found = False
+            for section_key, pattern in section_patterns.items():
+                if re.search(pattern, line):
+                    # Save previous section
+                    if current_content:
+                        sections[current_section] = '\n'.join(current_content)
+                    
+                    # Start new section
+                    current_section = section_key
+                    current_content = [line]
+                    section_found = True
+                    break
+            
+            if not section_found:
+                current_content.append(line)
+        
+        # Save final section
+        if current_content:
+            sections[current_section] = '\n'.join(current_content)
+        
+        return {
+            'success': True,
+            'sections': sections,
+            'full_text': text
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'error': str(e),
+            'sections': {},
+            'full_text': text
+        }
 
 def format_text_with_paragraphs(text: str, width: int = 50) -> str:
     """
@@ -731,6 +866,103 @@ def export_readings():
             'success': False,
             'error': str(e),
             'message': 'Failed to export readings'
+        }), 500
+
+@app.route('/api/upload_pdf', methods=['POST'])
+def upload_pdf():
+    """Handle PDF file upload and text extraction"""
+    try:
+        # Check if file was uploaded
+        if 'file' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No file uploaded'
+            }), 400
+        
+        file = request.files['file']
+        
+        # Check if file was selected
+        if file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No file selected'
+            }), 400
+        
+        # Check file type
+        if not allowed_file(file.filename):
+            return jsonify({
+                'success': False,
+                'error': 'Only PDF files are allowed'
+            }), 400
+        
+        # Save uploaded file
+        filename = secure_filename(file.filename)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"{timestamp}_{filename}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        
+        # Extract text from PDF
+        extraction_result = extract_text_from_pdf(filepath)
+        
+        if not extraction_result['success']:
+            # Clean up file on error
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            return jsonify({
+                'success': False,
+                'error': f"Failed to extract text: {extraction_result['error']}"
+            }), 500
+        
+        # Process liturgical content
+        liturgical_result = process_liturgical_pdf(extraction_result['text'])
+        
+        # Clean up uploaded file after processing
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        
+        return jsonify({
+            'success': True,
+            'filename': file.filename,
+            'page_count': extraction_result['page_count'],
+            'extraction_method': extraction_result['method'],
+            'text_length': len(extraction_result['text']),
+            'sections': liturgical_result['sections'] if liturgical_result['success'] else {},
+            'full_text': extraction_result['text'][:1000] + ('...' if len(extraction_result['text']) > 1000 else ''),  # Truncate for response
+            'processing_success': liturgical_result['success']
+        })
+        
+    except Exception as e:
+        # Clean up file on error
+        try:
+            if 'filepath' in locals() and os.path.exists(filepath):
+                os.remove(filepath)
+        except:
+            pass
+            
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to process PDF file'
+        }), 500
+
+@app.route('/api/pdf_uploads', methods=['GET'])
+def list_pdf_uploads():
+    """List recent PDF upload processing results"""
+    try:
+        # This could be expanded to show upload history from a database
+        # For now, just return basic info about the upload capability
+        return jsonify({
+            'success': True,
+            'upload_enabled': True,
+            'max_file_size_mb': MAX_CONTENT_LENGTH // (1024 * 1024),
+            'allowed_extensions': list(ALLOWED_EXTENSIONS),
+            'message': 'PDF upload functionality is ready'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
         }), 500
 
 if __name__ == '__main__':
