@@ -58,7 +58,16 @@ def extract_text_from_pdf(pdf_path: str) -> Dict[str, Any]:
         if not extracted_text.strip():
             try:
                 # Convert PDF to images and use OCR
-                import fitz  # PyMuPDF for PDF to image conversion
+                try:
+                    import fitz  # PyMuPDF for PDF to image conversion
+                except ImportError:
+                    return {
+                        'success': True,
+                        'text': extracted_text.strip(),
+                        'page_count': page_count,
+                        'method': 'pdfplumber'
+                    }
+                
                 doc = fitz.open(pdf_path)
                 
                 for page_num in range(len(doc)):
@@ -896,7 +905,8 @@ def upload_pdf():
             }), 400
         
         # Save uploaded file
-        filename = secure_filename(file.filename)
+        original_filename = file.filename or 'unknown.pdf'
+        filename = secure_filename(original_filename)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = f"{timestamp}_{filename}"
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -935,8 +945,10 @@ def upload_pdf():
     except Exception as e:
         # Clean up file on error
         try:
-            if 'filepath' in locals() and os.path.exists(filepath):
-                os.remove(filepath)
+            if 'filepath' in locals():
+                filepath_var = locals().get('filepath')
+                if filepath_var and os.path.exists(filepath_var):
+                    os.remove(filepath_var)
         except:
             pass
             

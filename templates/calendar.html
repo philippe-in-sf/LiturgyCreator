@@ -449,6 +449,154 @@
             color: #5a6fd8;
             text-decoration: underline;
         }
+
+        /* PDF Upload Styles */
+        .pdf-upload-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .upload-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .upload-header h3 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .upload-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: scale(1.02);
+        }
+
+        .upload-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            opacity: 0.6;
+        }
+
+        .upload-text p {
+            margin: 0;
+            color: #333;
+        }
+
+        .upload-info {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .upload-progress {
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .upload-results {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .result-section {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-section h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .result-section p {
+            margin: 0;
+            color: #555;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .file-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .info-item .label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .info-item .value {
+            font-size: 1.1rem;
+            color: #333;
+            font-weight: bold;
+        }
         
         @media (max-width: 768px) {
             .main-content {
@@ -526,6 +674,37 @@
                     <button class="action-btn btn-secondary" onclick="showServiceDetails()">Service Details</button>
                     <button class="action-btn btn-primary" onclick="loadReadings()">Load Reading</button>
                     <button class="action-btn btn-info" onclick="exportReading()">Export</button>
+                    <button class="action-btn btn-success" onclick="showPdfUpload()">Upload PDF</button>
+                </div>
+
+                <!-- PDF Upload Section -->
+                <div id="pdfUploadSection" class="pdf-upload-section" style="display: none;">
+                    <div class="upload-header">
+                        <h3>Upload PDF Document</h3>
+                        <p>Upload a PDF containing liturgical readings to extract text and analyze content</p>
+                    </div>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-content">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-text">
+                                <p><strong>Click to upload</strong> or drag and drop your PDF here</p>
+                                <p class="upload-info">Maximum file size: 16MB</p>
+                            </div>
+                        </div>
+                        <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;">
+                    </div>
+                    
+                    <div id="uploadProgress" class="upload-progress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-text">Processing PDF...</div>
+                    </div>
+                    
+                    <div id="uploadResults" class="upload-results" style="display: none;">
+                        <!-- Results will be populated by JavaScript -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -984,6 +1163,181 @@
             // Simple success display - could be enhanced with a proper notification system
             alert('Success: ' + message);
         }
+
+        // PDF Upload Functions
+        function showPdfUpload() {
+            const uploadSection = document.getElementById('pdfUploadSection');
+            const isVisible = uploadSection.style.display !== 'none';
+            
+            if (isVisible) {
+                uploadSection.style.display = 'none';
+            } else {
+                uploadSection.style.display = 'block';
+                resetUploadInterface();
+            }
+        }
+
+        function resetUploadInterface() {
+            document.getElementById('uploadProgress').style.display = 'none';
+            document.getElementById('uploadResults').style.display = 'none';
+            document.getElementById('pdfFileInput').value = '';
+            document.getElementById('progressFill').style.width = '0%';
+        }
+
+        // Setup PDF upload event listeners when DOM is ready
+        function setupPdfUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('pdfFileInput');
+
+            if (!uploadArea || !fileInput) return;
+
+            // Click to upload
+            uploadArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            // File selection
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    uploadPdfFile(e.target.files[0]);
+                }
+            });
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type === 'application/pdf') {
+                    uploadPdfFile(files[0]);
+                } else {
+                    showError('Please drop a PDF file');
+                }
+            });
+        }
+
+        function uploadPdfFile(file) {
+            // Validate file
+            if (file.type !== 'application/pdf') {
+                showError('Please select a PDF file');
+                return;
+            }
+
+            if (file.size > 16 * 1024 * 1024) { // 16MB
+                showError('File size too large. Maximum size is 16MB');
+                return;
+            }
+
+            // Show progress
+            document.getElementById('uploadProgress').style.display = 'block';
+            document.getElementById('uploadResults').style.display = 'none';
+            
+            // Animate progress
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = '30%';
+
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Upload file
+            fetch('/api/upload_pdf', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                progressFill.style.width = '100%';
+                setTimeout(() => {
+                    document.getElementById('uploadProgress').style.display = 'none';
+                    displayUploadResults(data);
+                }, 500);
+            })
+            .catch(error => {
+                document.getElementById('uploadProgress').style.display = 'none';
+                showError('Upload failed: ' + error.message);
+            });
+        }
+
+        function displayUploadResults(data) {
+            const resultsDiv = document.getElementById('uploadResults');
+            
+            if (data.success) {
+                let html = `
+                    <div class="file-info">
+                        <div class="info-item">
+                            <div class="label">File Name</div>
+                            <div class="value">${data.filename}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Pages</div>
+                            <div class="value">${data.page_count}</div>
+                        </div>
+                    </div>
+
+                    <div class="file-info">
+                        <div class="info-item">
+                            <div class="label">Text Length</div>
+                            <div class="value">${data.text_length} chars</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Method</div>
+                            <div class="value">${data.extraction_method}</div>
+                        </div>
+                    </div>
+                `;
+
+                // Show sections if found
+                if (data.processing_success && Object.keys(data.sections).length > 0) {
+                    html += '<h4 style="margin-top: 20px;">Detected Sections:</h4>';
+                    for (const [sectionKey, sectionContent] of Object.entries(data.sections)) {
+                        const sectionTitle = sectionKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        html += `
+                            <div class="result-section">
+                                <h4>${sectionTitle}</h4>
+                                <p>${sectionContent.substring(0, 200)}${sectionContent.length > 200 ? '...' : ''}</p>
+                            </div>
+                        `;
+                    }
+                }
+
+                // Show text preview
+                if (data.full_text) {
+                    html += `
+                        <div class="result-section">
+                            <h4>Text Preview</h4>
+                            <p>${data.full_text}</p>
+                        </div>
+                    `;
+                }
+
+                resultsDiv.innerHTML = html;
+            } else {
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <strong>Upload Failed:</strong> ${data.error}
+                    </div>
+                `;
+            }
+
+            resultsDiv.style.display = 'block';
+        }
+
+        // Add to existing DOMContentLoaded event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            setupPdfUpload();
+        });
     </script>
     
     <footer style="background-color: #f8f9fa; border-top: 1px solid #dee2e6; padding: 20px; margin-top: 40px; text-align: center; color: #6c757d; font-size: 14px;">
