@@ -1,12 +1,20 @@
 # Overview
 
-This project is a Daily Liturgical Scripture OBS Automation system (v1.1) that fetches **Episcopal Church liturgical readings** from The Lectionary Page (Revised Common Lectionary) and automatically updates text sources in OBS Studio via WebSocket connections. The system retrieves daily scripture readings based on the Episcopal liturgical calendar, parses them into a formatted structure, and displays them in configured OBS scenes for live streaming or recording purposes.
+This project is a Daily Liturgical Scripture OBS Automation system (v1.2) that fetches **Episcopal Church liturgical readings** from The Lectionary Page (Revised Common Lectionary) and automatically updates text sources in OBS Studio via WebSocket connections. The system retrieves daily scripture readings based on the Episcopal liturgical calendar, parses them into a formatted structure, and displays them in configured OBS scenes for live streaming or recording purposes.
 
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
 
 # Recent Changes
+
+## PDF Upload Feature and Version 1.2 Release (September 10, 2025)
+
+### Version 1.2 Beta Warning Update
+- **Enhancement**: Added clear beta warnings for PDF upload functionality
+- **User Interface**: Added prominent "(BETA)" label and warning message
+- **Documentation**: Updated to reflect experimental nature of PDF processing
+- **User Experience**: Set proper expectations for text extraction results
 
 ## PDF Upload Feature and Version 1.1 Release (September 10, 2025)
 
