@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: liturgical-calendar-web
+Version: 0.1.0
+Summary: Daily Liturgical Scripture Calendar with OBS Integration - Episcopal Church liturgical readings from the Revised Common Lectionary
+Requires-Python: >=3.11
+Requires-Dist: beautifulsoup4>=4.13.4
+Requires-Dist: flask>=3.1.1
+Requires-Dist: obsws-python>=1.8.0
+Requires-Dist: opencv-python>=4.12.0.88
+Requires-Dist: pdfplumber>=0.11.7
+Requires-Dist: pillow>=11.3.0
+Requires-Dist: pypdf2>=3.0.1
+Requires-Dist: pytesseract>=0.3.13
+Requires-Dist: requests>=2.32.4
+Requires-Dist: trafilatura>=2.0.0

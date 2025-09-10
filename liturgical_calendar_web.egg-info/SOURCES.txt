@@ -1,0 +1,6 @@
+pyproject.toml
+liturgical_calendar_web.egg-info/PKG-INFO
+liturgical_calendar_web.egg-info/SOURCES.txt
+liturgical_calendar_web.egg-info/dependency_links.txt
+liturgical_calendar_web.egg-info/requires.txt
+liturgical_calendar_web.egg-info/top_level.txt
