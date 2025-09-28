@@ -366,6 +366,28 @@ class LiturgyFetcher:
                     'reference': 'The Collect for Proper 21',
                     'text': 'O God, you declare your almighty power chiefly in showing mercy and pity: Grant us the fullness of your grace, that we, running to obtain your promises, may become partakers of your heavenly treasure; through Jesus Christ our Lord, who lives and reigns with you and the Holy Spirit, one God, for ever and ever. Amen.'
                 }
+            },
+            '2025-10-05': {  # Seventeenth Sunday after Pentecost (Proper 22)
+                'first_reading': {
+                    'reference': 'Lamentations 1:1-6',
+                    'text': 'How lonely sits the city that once was full of people! How like a widow she has become, she that was great among the nations! She that was a princess among the provinces has become a vassal. She weeps bitterly in the night, with tears on her cheeks; among all her lovers she has no one to comfort her; all her friends have dealt treacherously with her, they have become her enemies.'
+                },
+                'psalm': {
+                    'reference': 'Psalm 37:1-9',
+                    'text': 'Do not fret because of the wicked; do not be envious of wrongdoers, for they will soon fade like the grass, and wither like the green herb. Trust in the Lord, and do good; so you will live in the land, and enjoy security. Take delight in the Lord, and he will give you the desires of your heart. Commit your way to the Lord; trust in him, and he will act.'
+                },
+                'second_reading': {
+                    'reference': '2 Timothy 1:1-14',
+                    'text': 'Paul, an apostle of Christ Jesus by the will of God, for the sake of the promise of life that is in Christ Jesus, To Timothy, my beloved child: Grace, mercy, and peace from God the Father and Christ Jesus our Lord. I am grateful to God—whom I worship with a clear conscience, as my ancestors did—when I remember you constantly in my prayers night and day.'
+                },
+                'gospel': {
+                    'reference': 'Luke 17:5-10',
+                    'text': 'The apostles said to the Lord, "Increase our faith!" The Lord replied, "If you had faith the size of a mustard seed, you could say to this mulberry tree, \'Be uprooted and planted in the sea,\' and it would obey you. Who among you would say to your slave who has just come in from plowing or tending sheep in the field, \'Come here at once and take your place at the table\'?"'
+                },
+                'collect': {
+                    'reference': 'The Collect for Proper 22',
+                    'text': 'Almighty and everlasting God, in Christ you have revealed your glory among the nations: Preserve the works of your mercy, that your Church throughout the world may persevere with steadfast faith in the confession of your Name; through Jesus Christ our Lord, who lives and reigns with you and the Holy Spirit, one God, for ever and ever. Amen.'
+                }
             }
         }
         
