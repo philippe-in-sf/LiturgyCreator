@@ -1,10 +1,15 @@
 # Overview
 
-This project is a Daily Liturgical Scripture OBS Automation system (v1.2) that fetches **Episcopal Church liturgical readings** from The Lectionary Page (Revised Common Lectionary) and automatically updates text sources in OBS Studio via WebSocket connections. The system retrieves daily scripture readings based on the Episcopal liturgical calendar, parses them into a formatted structure, and displays them in configured OBS scenes for live streaming or recording purposes.
+This project is a Daily Liturgical Scripture OBS Automation system (v1.3) that fetches **Episcopal Church liturgical readings** from The Lectionary Page (Revised Common Lectionary) and automatically updates text sources in OBS Studio via WebSocket connections. The system retrieves daily scripture readings based on the Episcopal liturgical calendar, parses them into a formatted structure, and displays them in configured OBS scenes for live streaming or recording purposes.
 
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## Deployment Preferences
+- **Version Updates**: When updating version number and deploying, always update both:
+  1. Version number in `pyproject.toml` 
+  2. Footer version number in `templates/calendar.html`
 
 # Recent Changes
 
