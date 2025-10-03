@@ -257,15 +257,16 @@ class LiturgicalCalendar:
     def get_liturgical_year(self, date_obj: datetime) -> str:
         """Determine the liturgical year (A, B, or C)"""
         # Liturgical year starts with First Sunday of Advent
-        # Year C: 2024-2025 (ends November 2025)
-        # Year A: 2025-2026 (starts Advent 2025)
+        # Year C: 2024-2025 (ends Nov 29, 2025)
+        # Year A: 2025-2026 (starts Nov 30, 2025)
         # Year B: 2026-2027
         
         if date_obj.year == 2025:
-            if date_obj.month < 12:  # Before Advent 2025
-                return "C"
-            else:  # Advent 2025 starts Year A
+            # First Sunday of Advent 2025 is Nov 30 - this begins Year A
+            if (date_obj.month == 11 and date_obj.day >= 30) or date_obj.month == 12:
                 return "A"
+            else:
+                return "C"
         elif date_obj.year == 2024:
             return "C"
         elif date_obj.year == 2026:

@@ -682,10 +682,11 @@ class LiturgyFetcher:
     def _get_liturgical_year(self, date_obj: datetime) -> str:
         """Determine the liturgical year (A, B, or C) for the given date"""
         if date_obj.year == 2025:
-            if date_obj.month < 12:
-                return "C"
-            else:
+            # First Sunday of Advent 2025 is Nov 30 - this begins Year A
+            if (date_obj.month == 11 and date_obj.day >= 30) or date_obj.month == 12:
                 return "A"  # Advent 2025 begins Year A
+            else:
+                return "C"
         elif date_obj.year == 2024:
             return "C"
         elif date_obj.year == 2026:
