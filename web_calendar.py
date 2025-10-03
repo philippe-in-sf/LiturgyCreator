@@ -877,10 +877,10 @@ def export_readings():
             'message': 'Failed to export readings'
         }), 500
 
-def create_lower_third(reading_type: str, reference: str, width: int = 1920, height: int = 200) -> Image.Image:
+def create_lower_third(reading_type: str, reference: str, width: int = 1920, height: int = 1080) -> Image.Image:
     """Create a lower third graphic for broadcast use"""
-    # Create image with dark background
-    img = Image.new('RGB', (width, height), color='#1a1a2e')
+    # Create image with transparent background (RGBA mode)
+    img = Image.new('RGBA', (width, height), color=(0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     
     # Try to load fonts, fallback to default if not available
@@ -892,19 +892,33 @@ def create_lower_third(reading_type: str, reference: str, width: int = 1920, hei
         title_font = ImageFont.load_default()
         ref_font = ImageFont.load_default()
     
-    # Draw accent bar on left side
-    draw.rectangle([0, 0, 20, height], fill='#0f3460')
+    # Calculate lower third position (bottom third of image)
+    # Lower third starts at 2/3 of the height
+    lower_third_start = int(height * 2 / 3)
+    lower_third_height = height - lower_third_start
+    
+    # Draw semi-transparent dark background for lower third area
+    draw.rectangle(
+        [0, lower_third_start, width, height],
+        fill=(26, 26, 46, 230)  # Dark background with 90% opacity
+    )
+    
+    # Draw accent bar on left side (in lower third area)
+    draw.rectangle(
+        [0, lower_third_start, 20, height],
+        fill=(15, 52, 96, 255)  # Blue accent bar
+    )
     
     # Format reading type (remove underscores, title case)
     formatted_type = reading_type.replace('_', ' ').title()
     
-    # Draw reading type (title)
-    title_y = 40
-    draw.text((40, title_y), formatted_type, fill='#e94560', font=title_font)
+    # Draw reading type (title) - positioned in lower third
+    title_y = lower_third_start + 40
+    draw.text((40, title_y), formatted_type, fill=(233, 69, 96, 255), font=title_font)
     
     # Draw reference (below title)
-    ref_y = 120
-    draw.text((40, ref_y), reference, fill='#f1f1f1', font=ref_font)
+    ref_y = lower_third_start + 120
+    draw.text((40, ref_y), reference, fill=(241, 241, 241, 255), font=ref_font)
     
     return img
 
