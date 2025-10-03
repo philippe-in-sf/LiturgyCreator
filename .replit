@@ -49,10 +49,6 @@ waitForPort = 5000
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 46415
-externalPort = 3000
-
 [deployment]
 deploymentTarget = "autoscale"
-run = ["python", "app.py"]
+run = ["gunicorn", "--bind=0.0.0.0:5000", "--reuse-port", "--workers=2", "web_calendar:app"]
