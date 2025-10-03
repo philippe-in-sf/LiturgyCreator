@@ -892,32 +892,47 @@ def create_lower_third(reading_type: str, reference: str, width: int = 1920, hei
         title_font = ImageFont.load_default()
         ref_font = ImageFont.load_default()
     
-    # Calculate lower third position (bottom third of image)
-    # Lower third starts at 2/3 of the height
-    lower_third_start = int(height * 2 / 3)
-    lower_third_height = height - lower_third_start
-    
-    # Draw semi-transparent dark background for lower third area
-    draw.rectangle(
-        [0, lower_third_start, width, height],
-        fill=(26, 26, 46, 230)  # Dark background with 90% opacity
-    )
-    
-    # Draw accent bar on left side (in lower third area)
-    draw.rectangle(
-        [0, lower_third_start, 20, height],
-        fill=(15, 52, 96, 255)  # Blue accent bar
-    )
-    
     # Format reading type (remove underscores, title case)
     formatted_type = reading_type.replace('_', ' ').title()
     
+    # Calculate text dimensions to determine background height
+    title_bbox = draw.textbbox((0, 0), formatted_type, font=title_font)
+    ref_bbox = draw.textbbox((0, 0), reference, font=ref_font)
+    
+    # Calculate heights
+    title_height = title_bbox[3] - title_bbox[1]
+    ref_height = ref_bbox[3] - ref_bbox[1]
+    
+    # Padding values
+    top_padding = 40
+    text_spacing = 20
+    bottom_padding = 40
+    
+    # Calculate total background height needed
+    background_height = top_padding + title_height + text_spacing + ref_height + bottom_padding
+    
+    # Position lower third to start at 2/3 of the image height
+    lower_third_start = int(height * 2 / 3)
+    background_end = lower_third_start + background_height
+    
+    # Draw semi-transparent dark background for lower third area (only as tall as needed)
+    draw.rectangle(
+        [0, lower_third_start, width, background_end],
+        fill=(26, 26, 46, 230)  # Dark background with 90% opacity
+    )
+    
+    # Draw accent bar on left side (same height as background)
+    draw.rectangle(
+        [0, lower_third_start, 20, background_end],
+        fill=(15, 52, 96, 255)  # Blue accent bar
+    )
+    
     # Draw reading type (title) - positioned in lower third
-    title_y = lower_third_start + 40
+    title_y = lower_third_start + top_padding
     draw.text((40, title_y), formatted_type, fill=(233, 69, 96, 255), font=title_font)
     
     # Draw reference (below title)
-    ref_y = lower_third_start + 120
+    ref_y = title_y + title_height + text_spacing
     draw.text((40, ref_y), reference, fill=(241, 241, 241, 255), font=ref_font)
     
     return img
