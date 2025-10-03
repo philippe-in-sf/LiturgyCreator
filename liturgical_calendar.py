@@ -293,7 +293,7 @@ class LiturgicalCalendar:
             return "Lenten Season / Easter Season"
         elif month in [5, 6]:
             return "Easter Season"
-        elif month in [11] and day >= 27:
+        elif (month == 11 and day >= 27) or (month == 12 and day < 25):
             return "Advent Season"
         else:
             return "Season after Pentecost"
