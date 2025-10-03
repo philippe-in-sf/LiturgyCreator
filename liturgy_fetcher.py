@@ -788,10 +788,24 @@ class LiturgyFetcher:
             '2025-09-07': "Thirteenth Sunday after Pentecost (Proper 18)",
             '2025-09-14': "Fourteenth Sunday after Pentecost (Proper 19)",
             '2025-09-21': "Fifteenth Sunday after Pentecost (Proper 20)",
-            '2025-09-28': "Sixteenth Sunday after Pentecost (Proper 21)"
+            '2025-09-28': "Sixteenth Sunday after Pentecost (Proper 21)",
+            '2025-10-05': "Seventeenth Sunday after Pentecost (Proper 22)",
+            '2025-10-12': "Eighteenth Sunday after Pentecost (Proper 23)",
+            '2025-10-19': "Nineteenth Sunday after Pentecost (Proper 24)",
+            '2025-10-26': "Twentieth Sunday after Pentecost (Proper 25)",
+            '2025-11-02': "Twenty-first Sunday after Pentecost (Proper 26)",
+            '2025-11-09': "Twenty-second Sunday after Pentecost (Proper 27)",
+            '2025-11-16': "Twenty-third Sunday after Pentecost (Proper 28)",
+            '2025-11-23': "Last Sunday after Pentecost (Proper 29 / Christ the King)",
+            '2025-11-30': "First Sunday of Advent",
+            '2025-12-07': "Second Sunday of Advent",
+            '2025-12-14': "Third Sunday of Advent",
+            '2025-12-21': "Fourth Sunday of Advent",
+            '2025-12-25': "The Nativity of our Lord: Christmas Day",
+            '2025-12-28': "First Sunday after Christmas"
         }
         
-        return celebration_names.get(date_str, "Sunday in Ordinary Time")
+        return celebration_names.get(date_str, "Sunday Reading (RCL)")
         
         month = date_obj.month
         day = date_obj.day
