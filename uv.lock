@@ -273,6 +273,18 @@ wheels = [
 ]
 
 [[package]]
+name = "gunicorn"
+version = "23.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/34/72/9614c465dc206155d93eff0ca20d42e1e35afc533971379482de953521a4/gunicorn-23.0.0.tar.gz", hash = "sha256:f014447a0101dc57e294f6c18ca6b40227a4c90e9bdb586042628030cba004ec", size = 375031 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cb/7d/6dac2a6e1eba33ee43f318edbed4ff29151a49b5d37f080aad1e6469bca4/gunicorn-23.0.0-py3-none-any.whl", hash = "sha256:ec400d38950de4dfd418cff8328b2c8faed0edb0d517d3394e457c317908ca4d", size = 85029 },
+]
+
+[[package]]
 name = "htmldate"
 version = "1.9.3"
 source = { registry = "https://pypi.org/simple" }
@@ -332,11 +344,12 @@ wheels = [
 
 [[package]]
 name = "liturgical-calendar-web"
-version = "0.1.0"
+version = "1.7.0"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "flask" },
+    { name = "gunicorn" },
     { name = "obsws-python" },
     { name = "opencv-python" },
     { name = "pdfplumber" },
@@ -345,12 +358,14 @@ dependencies = [
     { name = "pytesseract" },
     { name = "requests" },
     { name = "trafilatura" },
+    { name = "werkzeug" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.13.4" },
     { name = "flask", specifier = ">=3.1.1" },
+    { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "obsws-python", specifier = ">=1.8.0" },
     { name = "opencv-python", specifier = ">=4.12.0.88" },
     { name = "pdfplumber", specifier = ">=0.11.7" },
@@ -359,6 +374,7 @@ requires-dist = [
     { name = "pytesseract", specifier = ">=0.3.13" },
     { name = "requests", specifier = ">=2.32.4" },
     { name = "trafilatura", specifier = ">=2.0.0" },
+    { name = "werkzeug", specifier = ">=3.1.3" },
 ]
 
 [[package]]
