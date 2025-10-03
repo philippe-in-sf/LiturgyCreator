@@ -17,7 +17,7 @@ import re
 import requests
 import pdfplumber
 import pytesseract
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from werkzeug.utils import secure_filename
 from liturgy_fetcher import LiturgyFetcher
 from scripture_parser import ScriptureParser
@@ -875,6 +875,102 @@ def export_readings():
             'success': False,
             'error': str(e),
             'message': 'Failed to export readings'
+        }), 500
+
+def create_lower_third(reading_type: str, reference: str, width: int = 1920, height: int = 200) -> Image.Image:
+    """Create a lower third graphic for broadcast use"""
+    # Create image with dark background
+    img = Image.new('RGB', (width, height), color='#1a1a2e')
+    draw = ImageDraw.Draw(img)
+    
+    # Try to load fonts, fallback to default if not available
+    try:
+        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 60)
+        ref_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 45)
+    except:
+        # Fallback to default font
+        title_font = ImageFont.load_default()
+        ref_font = ImageFont.load_default()
+    
+    # Draw accent bar on left side
+    draw.rectangle([0, 0, 20, height], fill='#0f3460')
+    
+    # Format reading type (remove underscores, title case)
+    formatted_type = reading_type.replace('_', ' ').title()
+    
+    # Draw reading type (title)
+    title_y = 40
+    draw.text((40, title_y), formatted_type, fill='#e94560', font=title_font)
+    
+    # Draw reference (below title)
+    ref_y = 120
+    draw.text((40, ref_y), reference, fill='#f1f1f1', font=ref_font)
+    
+    return img
+
+@app.route('/api/generate_lower_thirds', methods=['POST'])
+def generate_lower_thirds():
+    """Generate lower third graphics for broadcast use"""
+    try:
+        data = request.get_json()
+        date_str = data.get('date')
+        
+        if not date_str:
+            return jsonify({
+                'success': False,
+                'error': 'No date provided'
+            }), 400
+        
+        # Parse date for folder naming
+        selected_date = datetime.fromisoformat(date_str)
+        date_folder_name = selected_date.strftime("%Y-%m-%d")
+        
+        # Get readings for the date
+        calendar_instance = WebLiturgicalCalendar()
+        readings = calendar_instance.get_readings_for_date(date_str)
+        
+        if not readings:
+            return jsonify({
+                'success': False,
+                'error': 'No readings available for this date'
+            }), 400
+        
+        # Create ZIP file in memory
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            # Create lower third graphic for each reading
+            for reading_type, reading_data in readings.items():
+                reference = reading_data.get('reference', 'No reference')
+                
+                # Generate lower third image
+                img = create_lower_third(reading_type, reference)
+                
+                # Save image to buffer
+                img_buffer = io.BytesIO()
+                img.save(img_buffer, format='PNG')
+                img_buffer.seek(0)
+                
+                # Add to ZIP with proper filename
+                filename = f"{reading_type.replace('_', ' ').title()}.png"
+                filepath = f"{date_folder_name}_lower_thirds/{filename}"
+                zip_file.writestr(filepath, img_buffer.read())
+        
+        # Prepare the ZIP file for download
+        zip_buffer.seek(0)
+        
+        return send_file(
+            io.BytesIO(zip_buffer.read()),
+            as_attachment=True,
+            download_name=f"lower_thirds_{date_folder_name}.zip",
+            mimetype='application/zip'
+        )
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate lower thirds'
         }), 500
 
 @app.route('/api/upload_pdf', methods=['POST'])

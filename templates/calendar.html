@@ -674,6 +674,7 @@
                     <button class="action-btn btn-secondary" onclick="showServiceDetails()">Service Details</button>
                     <button class="action-btn btn-primary" onclick="loadReadings()">Load Reading</button>
                     <button class="action-btn btn-info" onclick="exportReading()">Export</button>
+                    <button class="action-btn btn-warning" onclick="generateLowerThirds()" style="background-color: #ff6b35;">Lower Thirds</button>
                     <button class="action-btn btn-success" onclick="showPdfUpload()">Upload PDF</button>
                 </div>
 
@@ -1074,6 +1075,54 @@
             .catch(error => {
                 console.error('Export error:', error);
                 showError('Failed to export readings: ' + error.message);
+            });
+        }
+
+        function generateLowerThirds() {
+            if (!selectedReadings || !selectedReadings.has_readings) {
+                showError('No readings available to generate graphics');
+                return;
+            }
+            
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            
+            // Show loading message
+            showSuccess('Generating lower thirds graphics...');
+            
+            fetch('/api/generate_lower_thirds', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    date: dateStr
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Lower thirds generation failed');
+                    });
+                }
+            })
+            .then(blob => {
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `lower_thirds_${dateStr}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showSuccess('Lower thirds generated successfully! Check your downloads folder.');
+            })
+            .catch(error => {
+                console.error('Lower thirds generation error:', error);
+                showError('Failed to generate lower thirds: ' + error.message);
             });
         }
 
