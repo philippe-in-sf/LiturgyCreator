@@ -428,36 +428,6 @@ class LiturgyFetcher:
                     'reference': 'Luke 18:1-8',
                     'text': 'Then Jesus told them a parable about their need to pray always and not to lose heart. He said, "In a certain city there was a judge who neither feared God nor had respect for people. In that city there was a widow who kept coming to him and saying, \'Grant me justice against my opponent.\' For a while he refused; but later he said to himself, \'Though I have no fear of God and no respect for anyone, yet because this widow keeps bothering me, I will grant her justice, so that she may not wear me out by continually coming.\'" And the Lord said, "Listen to what the unjust judge says. And will not God grant justice to his chosen ones who cry to him day and night? Will he delay long in helping them? I tell you, he will quickly grant justice to them. And yet, when the Son of Man comes, will he find faith on earth?"'
                 },
-                'collect': {
-                    'reference': 'The Collect for Proper 24',
-                    'text': 'Almighty and everlasting God, in Christ you have revealed your glory among the nations: Preserve the works of your mercy, that your Church throughout the world may persevere with steadfast faith in the confession of your Name; through Jesus Christ our Lord, who lives and reigns with you and the Holy Spirit, one God, for ever and ever. Amen.'
-                }
-            },
-            '2025-10-26': {  # Twentieth Sunday after Pentecost (Proper 25)
-                'first_reading': {
-                    'reference': 'Joel 2:23-32',
-                    'text': 'O children of Zion, be glad and rejoice in the LORD your God; for he has given the early rain for your vindication, he has poured down for you abundant rain, the early and the later rain, as before. The threshing-floors shall be full of grain, the vats shall overflow with wine and oil. I will repay you for the years that the swarming locust has eaten, the hopper, the destroyer, and the cutter, my great army, which I sent against you. You shall eat in plenty and be satisfied, and praise the name of the LORD your God, who has dealt wondrously with you. And my people shall never again be put to shame. You shall know that I am in the midst of Israel, and that I, the LORD, am your God and there is no other. And my people shall never again be put to shame. Then afterward I will pour out my spirit on all flesh; your sons and your daughters shall prophesy, your old men shall dream dreams, and your young men shall see visions. Even on the male and female slaves, in those days, I will pour out my spirit. I will show portents in the heavens and on the earth, blood and fire and columns of smoke. The sun shall be turned to darkness, and the moon to blood, before the great and terrible day of the LORD comes. Then everyone who calls on the name of the LORD shall be saved; for in Mount Zion and in Jerusalem there shall be those who escape, as the LORD has said, and among the survivors shall be those whom the LORD calls.'
-                },
-                'psalm': {
-                    'reference': 'Psalm 65',
-                    'text': 'Praise is due to you, O God, in Zion, and to you shall vows be performed. O you who hear prayer, to you shall all flesh come. When iniquities prevail against me, you atone for our transgressions. Blessed is the one you choose and bring near, to dwell in your courts! We shall be satisfied with the goodness of your house, the holiness of your temple! By awesome deeds you answer us with righteousness, O God of our salvation, the hope of all the ends of the earth and of the farthest seas; who formed the mountains by your power, having armed yourself with strength; who stilled the roaring of the seas, the roaring of their waves, and the tumult of the nations. The whole earth is filled with awe at your wonders; where morning dawns, where evening fades, you call forth songs of joy. You visit the earth and water it; you greatly enrich it; the river of God is full of water; you provide their grain, for so you have prepared it. You water its furrows abundantly, settling its ridges, softening it with showers, and blessing its growth. You crown the year with your bounty; your wagon tracks overflow with abundance. The pastures of the wilderness overflow, the hills gird themselves with joy, the meadows clothe themselves with flocks, the valleys deck themselves with grain, they shout and sing together for joy.'
-                },
-                'second_reading': {
-                    'reference': '2 Timothy 4:6-8, 16-18',
-                    'text': 'As for me, I am already being poured out as a libation, and the time of my departure has come. I have fought the good fight, I have finished the race, I have kept the faith. From now on there is reserved for me the crown of righteousness, which the Lord, the righteous judge, will give me on that day, and not only to me but also to all who have longed for his appearing. At my first defense no one came to my support, but all deserted me. May it not be counted against them! But the Lord stood by me and gave me strength, so that through me the message might be fully proclaimed and all the Gentiles might hear it. So I was rescued from the lion\'s mouth. The Lord will rescue me from every evil attack and save me for his heavenly kingdom. To him be the glory forever and ever. Amen.'
-                },
-                'gospel': {
-                    'reference': 'Luke 18:9-14',
-                    'text': 'He also told this parable to some who trusted in themselves that they were righteous and regarded others with contempt: "Two men went up to the temple to pray, one a Pharisee and the other a tax collector. The Pharisee, standing by himself, was praying thus, \'God, I thank you that I am not like other people: thieves, rogues, adulterers, or even like this tax collector. I fast twice a week; I give a tenth of all my income.\' But the tax collector, standing far off, would not even look up to heaven, but was beating his breast and saying, \'God, be merciful to me, a sinner!\' I tell you, this man went down to his home justified rather than the other; for all who exalt themselves will be humbled, but all who humble themselves will be exalted."'
-                },
-                'collect': {
-                    'reference': 'The Collect for Proper 25',
-                    'text': 'Almighty and everlasting God, increase in us the gifts of faith, hope, and charity; and, that we may obtain what you promise, make us love what you command; through Jesus Christ our Lord, who lives and reigns with you and the Holy Spirit, one God, for ever and ever. Amen.'
-                }
-            }
-        }
-        
-        return readings_database.get(date_str)
     
     def _get_liturgical_year(self, date_obj: datetime) -> str:
         """Determine the liturgical year (A, B, or C) for the given date"""
