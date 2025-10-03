@@ -47,7 +47,8 @@ def create_custom_config():
         
         # Scripture readings mappings
         mappings = [
-            ("first_reading_text", "First Reading Text", "The main text of the first scripture reading"),
+
+            
             ("first_reading_reference", "First Reading Reference", "The reference (e.g., 'Genesis 1:1-5')"),
             ("psalm_text", "Psalm Text", "The responsorial psalm text"),
             ("psalm_reference", "Psalm Reference", "The psalm reference (e.g., 'Psalm 23:1-4')"),
