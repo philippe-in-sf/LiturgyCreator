@@ -428,6 +428,13 @@ class LiturgyFetcher:
                     'reference': 'Luke 18:1-8',
                     'text': 'Then Jesus told them a parable about their need to pray always and not to lose heart. He said, "In a certain city there was a judge who neither feared God nor had respect for people. In that city there was a widow who kept coming to him and saying, \'Grant me justice against my opponent.\' For a while he refused; but later he said to himself, \'Though I have no fear of God and no respect for anyone, yet because this widow keeps bothering me, I will grant her justice, so that she may not wear me out by continually coming.\'" And the Lord said, "Listen to what the unjust judge says. And will not God grant justice to his chosen ones who cry to him day and night? Will he delay long in helping them? I tell you, he will quickly grant justice to them. And yet, when the Son of Man comes, will he find faith on earth?"'
                 },
+                'collect': {
+                    'reference': 'The Collect for Proper 24',
+                    'text': 'Almighty and everlasting God, in Christ you have revealed your glory among the nations: Preserve the works of your mercy, that your Church throughout the world may persevere with steadfast faith in the confession of your Name; through Jesus Christ our Lord, who lives and reigns with you and the Holy Spirit, one God, for ever and ever. Amen.'
+                }
+            },
+        
+        return readings_database.get(date_str)
     
     def _get_liturgical_year(self, date_obj: datetime) -> str:
         """Determine the liturgical year (A, B, or C) for the given date"""
