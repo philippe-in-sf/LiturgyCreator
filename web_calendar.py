@@ -964,6 +964,17 @@ def generate_lower_thirds():
                 'error': 'No readings available for this date'
             }), 400
         
+        # Get service details for hymns/music
+        details_file = 'service_details.json'
+        service_details = {}
+        if os.path.exists(details_file):
+            try:
+                with open(details_file, 'r') as f:
+                    service_data = json.load(f)
+                    service_details = service_data.get(date_str, {})
+            except:
+                service_details = {}
+        
         # Create ZIP file in memory
         zip_buffer = io.BytesIO()
         
@@ -984,6 +995,32 @@ def generate_lower_thirds():
                 filename = f"{reading_type.replace('_', ' ').title()}.png"
                 filepath = f"{date_folder_name}_lower_thirds/{filename}"
                 zip_file.writestr(filepath, img_buffer.read())
+            
+            # Create lower third graphics for hymns and music
+            hymn_fields = {
+                'openingHymn': 'Opening Hymn',
+                'sequenceHymn': 'Sequence Hymn',
+                'offertory': 'Offertory',
+                'communionMotet': 'Communion Motet',
+                'communionHymn': 'Communion Hymn',
+                'closingHymn': 'Closing Hymn'
+            }
+            
+            for field_key, field_label in hymn_fields.items():
+                hymn_value = service_details.get(field_key, '').strip()
+                if hymn_value:  # Only create graphic if field has content
+                    # Generate lower third image
+                    img = create_lower_third(field_label, hymn_value)
+                    
+                    # Save image to buffer
+                    img_buffer = io.BytesIO()
+                    img.save(img_buffer, format='PNG')
+                    img_buffer.seek(0)
+                    
+                    # Add to ZIP with proper filename
+                    filename = f"{field_label}.png"
+                    filepath = f"{date_folder_name}_lower_thirds/{filename}"
+                    zip_file.writestr(filepath, img_buffer.read())
         
         # Prepare the ZIP file for download
         zip_buffer.seek(0)
