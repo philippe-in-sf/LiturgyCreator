@@ -5,7 +5,7 @@ Episcopal Church Calendar with Revised Common Lectionary integration
 Version: 1.0.1 - Deployment Ready
 """
 
-from flask import Flask, render_template, jsonify, request, send_file
+from flask import Flask, render_template, jsonify, request, send_file, session, redirect, url_for
 import calendar
 from datetime import datetime, timedelta, date
 from typing import Dict, List, Optional, Tuple, Any
@@ -20,10 +20,14 @@ import pdfplumber
 import pytesseract
 from PIL import Image, ImageDraw, ImageFont
 from werkzeug.utils import secure_filename
+from functools import wraps
 from liturgy_fetcher import LiturgyFetcher
 from scripture_parser import ScriptureParser
 
 app = Flask(__name__)
+
+# Configure secret key for sessions
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', os.urandom(24))
 
 # Configure upload settings
 UPLOAD_FOLDER = 'uploads'
@@ -33,8 +37,20 @@ MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
+# Get access code from environment
+ACCESS_CODE = os.environ.get('ACCESS_CODE', '3501')
+
 # Create uploads directory if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Authentication decorator
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('authenticated'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 def allowed_file(filename):
     """Check if uploaded file has allowed extension"""
@@ -486,12 +502,32 @@ class WebLiturgicalCalendar:
 # Initialize the calendar
 web_calendar = WebLiturgicalCalendar()
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Login page"""
+    if request.method == 'POST':
+        code = request.form.get('code', '')
+        if code == ACCESS_CODE:
+            session['authenticated'] = True
+            return redirect(url_for('index'))
+        else:
+            return render_template('login.html', error='Invalid access code')
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    """Logout"""
+    session.pop('authenticated', None)
+    return redirect(url_for('login'))
+
 @app.route('/')
+@login_required
 def index():
     """Main calendar page"""
     return render_template('calendar.html')
 
 @app.route('/api/calendar/<int:year>/<int:month>')
+@login_required
 def get_calendar(year, month):
     """API endpoint to get calendar data"""
     try:
@@ -501,6 +537,7 @@ def get_calendar(year, month):
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/readings/<date_str>')
+@login_required
 def get_readings(date_str):
     """API endpoint to get readings for a specific date"""
     try:
