@@ -95,6 +95,35 @@ python server.py
 - Responsive web interface
 - API endpoints for calendar data and readings
 
+## Version Management
+
+### Incrementing Version Numbers
+When releasing a new version, you must update the version number in **TWO** locations:
+
+1. **Backend Version** (`web_calendar.py`):
+   - Located in the docstring at the top of the file
+   - Format: `Version: X.Y - Description`
+   - Example: `Version: 1.8 - Password Protected`
+
+2. **Frontend Display** (`templates/calendar.html`):
+   - Located in the footer section at the bottom of the file
+   - Format: `<strong>Episcopal Liturgical Calendar Tool vX.Y</strong>`
+   - Example: `<strong>Episcopal Liturgical Calendar Tool v1.8</strong>`
+
+### Version Update Checklist
+Before releasing a new version:
+- [ ] Update version number in `web_calendar.py` docstring
+- [ ] Update version number in `templates/calendar.html` footer
+- [ ] Verify both version numbers match
+- [ ] Document changes in version description
+- [ ] Test application functionality
+- [ ] Restart workflow to apply changes
+
+### Version Numbering Scheme
+- **Major version** (X.0): Significant feature additions or breaking changes
+- **Minor version** (X.Y): New features, improvements, or bug fixes
+- Use descriptive tags: "Password Protected", "Complete Export", etc.
+
 ## Verification
 The deployment has been tested and verified to:
 ✅ Serve the web application correctly on port 5000
