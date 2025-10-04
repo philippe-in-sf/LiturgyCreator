@@ -2,7 +2,7 @@
 """
 Web-based Interactive Liturgical Calendar
 Episcopal Church Calendar with Revised Common Lectionary integration
-Version: 1.0.1 - Deployment Ready
+Version: 1.0.2 - Password Protected
 """
 
 from flask import Flask, render_template, jsonify, request, send_file, session, redirect, url_for
