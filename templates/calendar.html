@@ -32,6 +32,7 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
         
         .header h1 {
@@ -43,6 +44,28 @@
         .header .subtitle {
             font-size: 1.2rem;
             opacity: 0.9;
+        }
+        
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
         }
         
         .nav-controls {
@@ -620,6 +643,7 @@
 <body>
     <div class="container">
         <div class="header">
+            <a href="/logout" class="logout-btn">🔓 Logout</a>
             <h1>Episcopal Liturgical Calendar</h1>
             <div class="subtitle">Revised Common Lectionary - Interactive Visualization</div>
         </div>
