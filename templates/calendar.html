@@ -698,8 +698,7 @@
                     <ol>
                         <li>Click on Service Details and fill out the worksheet</li>
                         <li>Click on the date of the service and then "Load Readings"</li>
-                        <li>Click Export</li>
-                        <li>Click Lower Thirds</li>
+                        <li>Click "Export All" to download readings + lower thirds graphics</li>
                         <li>Refer to in-house documentation for the OBS editing steps</li>
                     </ol>
                 </div>
@@ -716,9 +715,8 @@
                 <div class="action-buttons">
                     <button class="action-btn btn-secondary" onclick="showServiceDetails()">Service Details</button>
                     <button class="action-btn btn-primary" onclick="loadReadings()">Load Reading</button>
-                    <button class="action-btn btn-info" onclick="exportReading()">Export</button>
-                    <button class="action-btn btn-warning" onclick="generateLowerThirds()" style="background-color: #ff6b35;">Lower Thirds</button>
-                    <button class="action-btn btn-success" onclick="showPdfUpload()" style="display: none;">Upload PDF</button>
+                    <button class="action-btn btn-success" onclick="exportAll()" style="background-color: #28a745;">Export All</button>
+                    <button class="action-btn btn-info" onclick="showPdfUpload()" style="display: none;">Upload PDF</button>
                 </div>
 
                 <!-- PDF Upload Section -->
@@ -1069,6 +1067,58 @@
 
 
 
+        function exportAll() {
+            if (!selectedReadings || !selectedReadings.has_readings) {
+                showError('No readings available to export');
+                return;
+            }
+            
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            
+            // Include service details in export
+            const currentServiceDetails = serviceDetails[dateStr] || {};
+            
+            // Show loading message
+            showSuccess('Preparing complete export (readings + graphics)...');
+            
+            fetch('/api/export_all', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    date: dateStr,
+                    serviceDetails: currentServiceDetails
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Export failed');
+                    });
+                }
+            })
+            .then(blob => {
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `liturgical_export_${dateStr}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showSuccess('Export complete! Downloaded readings + lower thirds graphics.');
+            })
+            .catch(error => {
+                console.error('Export error:', error);
+                showError('Failed to export: ' + error.message);
+            });
+        }
+        
         function exportReading() {
             if (!selectedReadings || !selectedReadings.has_readings) {
                 showError('No readings available to export');

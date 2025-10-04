@@ -976,7 +976,189 @@ def create_lower_third(reading_type: str, reference: str, width: int = 1920, hei
     
     return img
 
+@app.route('/api/export_all', methods=['POST'])
+@login_required
+def export_all():
+    """Combined export: readings text files + lower third graphics in one ZIP"""
+    try:
+        data = request.get_json()
+        date_str = data.get('date')
+        service_details = data.get('serviceDetails', {})
+        
+        if not date_str:
+            return jsonify({
+                'success': False,
+                'error': 'No date provided'
+            }), 400
+        
+        # Parse date for folder naming
+        selected_date = datetime.fromisoformat(date_str)
+        date_folder_name = selected_date.strftime("%Y-%m-%d")
+        
+        # Get readings for the date
+        calendar_instance = WebLiturgicalCalendar()
+        readings = calendar_instance.get_readings_for_date(date_str)
+        
+        if not readings:
+            return jsonify({
+                'success': False,
+                'error': 'No readings available for this date'
+            }), 400
+        
+        # Create ZIP file in memory
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            # ===== PART 1: Export text files (from export_readings) =====
+            # Create individual text files for each reading
+            for reading_type, reading_data in readings.items():
+                # Clean reading type name for filename
+                base_name = reading_type.replace('_', ' ').title()
+                
+                # Create text file with formatted scripture text (50 char width)
+                text_filename = f"{base_name}.txt"
+                text_filepath = f"{date_folder_name}/readings/{text_filename}"
+                raw_text = reading_data.get('text', '')
+                if raw_text:
+                    formatted_text = format_text_with_paragraphs(raw_text, width=50)
+                else:
+                    formatted_text = raw_text
+                zip_file.writestr(text_filepath, formatted_text)
+                
+                # Create reference file with formatted reference
+                ref_filename = f"{base_name} Reference.txt"
+                ref_filepath = f"{date_folder_name}/readings/{ref_filename}"
+                raw_ref = reading_data.get('reference', '')
+                if raw_ref:
+                    formatted_ref = textwrap.fill(raw_ref, width=50, break_long_words=False, break_on_hyphens=False)
+                else:
+                    formatted_ref = raw_ref
+                zip_file.writestr(ref_filepath, formatted_ref)
+            
+            # Create individual service detail files if provided
+            if service_details:
+                # Individual hymn files with text from Hymnary.org
+                if service_details.get('openingHymn'):
+                    formatted_hymn = textwrap.fill(service_details['openingHymn'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/service_details/Opening Hymn.txt", formatted_hymn)
+                    
+                    hymn_text = fetch_hymn_text_from_hymnary(service_details['openingHymn'])
+                    formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
+                    zip_file.writestr(f"{date_folder_name}/service_details/Opening Hymn Text.txt", formatted_hymn_text)
+                
+                if service_details.get('sequenceHymn'):
+                    formatted_hymn = textwrap.fill(service_details['sequenceHymn'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/service_details/Sequence Hymn.txt", formatted_hymn)
+                    
+                    hymn_text = fetch_hymn_text_from_hymnary(service_details['sequenceHymn'])
+                    formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
+                    zip_file.writestr(f"{date_folder_name}/service_details/Sequence Hymn Text.txt", formatted_hymn_text)
+                
+                if service_details.get('communionMotet'):
+                    formatted_motet = textwrap.fill(service_details['communionMotet'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/service_details/Communion Motet.txt", formatted_motet)
+                
+                if service_details.get('closingHymn'):
+                    formatted_hymn = textwrap.fill(service_details['closingHymn'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/service_details/Closing Hymn.txt", formatted_hymn)
+                    
+                    hymn_text = fetch_hymn_text_from_hymnary(service_details['closingHymn'])
+                    formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
+                    zip_file.writestr(f"{date_folder_name}/service_details/Closing Hymn Text.txt", formatted_hymn_text)
+                
+                # Individual musician files
+                if service_details.get('organistName'):
+                    formatted_organist = textwrap.fill(service_details['organistName'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/service_details/Organist.txt", formatted_organist)
+                
+                if service_details.get('preludeTitle'):
+                    formatted_prelude = textwrap.fill(service_details['preludeTitle'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/service_details/Prelude Title.txt", formatted_prelude)
+                
+                if service_details.get('preludeComposer'):
+                    formatted_composer = textwrap.fill(service_details['preludeComposer'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/service_details/Prelude Composer.txt", formatted_composer)
+                
+                if service_details.get('postludeTitle'):
+                    formatted_postlude = textwrap.fill(service_details['postludeTitle'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/service_details/Postlude Title.txt", formatted_postlude)
+                
+                if service_details.get('postludeComposer'):
+                    formatted_composer = textwrap.fill(service_details['postludeComposer'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/service_details/Postlude Composer.txt", formatted_composer)
+                
+                # Individual clergy files
+                if service_details.get('preacherName'):
+                    formatted_preacher = textwrap.fill(service_details['preacherName'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/service_details/Preacher.txt", formatted_preacher)
+                
+                if service_details.get('presiderName'):
+                    formatted_presider = textwrap.fill(service_details['presiderName'], width=50, break_long_words=False, break_on_hyphens=False)
+                    zip_file.writestr(f"{date_folder_name}/service_details/Presider.txt", formatted_presider)
+            
+            # ===== PART 2: Generate lower third graphics =====
+            # Create lower third graphic for each reading
+            for reading_type, reading_data in readings.items():
+                reference = reading_data.get('reference', 'No reference')
+                
+                # Generate lower third image
+                img = create_lower_third(reading_type, reference)
+                
+                # Save image to buffer
+                img_buffer = io.BytesIO()
+                img.save(img_buffer, format='PNG')
+                img_buffer.seek(0)
+                
+                # Add to ZIP with proper filename
+                filename = f"{reading_type.replace('_', ' ').title()}.png"
+                filepath = f"{date_folder_name}/lower_thirds/{filename}"
+                zip_file.writestr(filepath, img_buffer.read())
+            
+            # Create lower third graphics for hymns and music
+            hymn_fields = {
+                'openingHymn': 'Opening Hymn',
+                'sequenceHymn': 'Sequence Hymn',
+                'offertory': 'Offertory',
+                'communionMotet': 'Communion Motet',
+                'communionHymn': 'Communion Hymn',
+                'closingHymn': 'Closing Hymn'
+            }
+            
+            for field_key, field_label in hymn_fields.items():
+                hymn_value = service_details.get(field_key, '').strip()
+                if hymn_value:  # Only create graphic if field has content
+                    # Generate lower third image
+                    img = create_lower_third(field_label, hymn_value)
+                    
+                    # Save image to buffer
+                    img_buffer = io.BytesIO()
+                    img.save(img_buffer, format='PNG')
+                    img_buffer.seek(0)
+                    
+                    # Add to ZIP with proper filename
+                    filename = f"{field_label}.png"
+                    filepath = f"{date_folder_name}/lower_thirds/{filename}"
+                    zip_file.writestr(filepath, img_buffer.read())
+        
+        # Prepare the ZIP file for download
+        zip_buffer.seek(0)
+        
+        return send_file(
+            io.BytesIO(zip_buffer.read()),
+            as_attachment=True,
+            download_name=f"liturgical_export_{date_folder_name}.zip",
+            mimetype='application/zip'
+        )
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate combined export'
+        }), 500
+
 @app.route('/api/generate_lower_thirds', methods=['POST'])
+@login_required
 def generate_lower_thirds():
     """Generate lower third graphics for broadcast use"""
     try:
