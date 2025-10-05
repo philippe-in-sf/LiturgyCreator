@@ -1105,13 +1105,13 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `liturgical_export_${dateStr}.zip`;
+                a.download = `Worship.zip`;
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
                 
-                showSuccess('Export complete! Downloaded readings + lower thirds graphics.');
+                showSuccess('Export complete! Downloaded Worship.zip with readings + graphics.');
             })
             .catch(error => {
                 console.error('Export error:', error);

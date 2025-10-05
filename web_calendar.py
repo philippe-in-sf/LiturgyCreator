@@ -993,7 +993,7 @@ def export_all():
         
         # Parse date for folder naming
         selected_date = datetime.fromisoformat(date_str)
-        date_folder_name = selected_date.strftime("%Y-%m-%d")
+        date_folder_name = "Worship"
         
         # Get readings for the date
         calendar_instance = WebLiturgicalCalendar()
@@ -1146,7 +1146,7 @@ def export_all():
         return send_file(
             io.BytesIO(zip_buffer.read()),
             as_attachment=True,
-            download_name=f"liturgical_export_{date_folder_name}.zip",
+            download_name="Worship.zip",
             mimetype='application/zip'
         )
         
