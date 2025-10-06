@@ -21,6 +21,7 @@ import pytesseract
 from PIL import Image, ImageDraw, ImageFont
 from werkzeug.utils import secure_filename
 from functools import wraps
+import uuid
 from liturgy_fetcher import LiturgyFetcher
 from scripture_parser import ScriptureParser
 
@@ -976,6 +977,150 @@ def create_lower_third(reading_type: str, reference: str, width: int = 1920, hei
     
     return img
 
+def generate_obs_scene_collection(readings: dict, service_details: dict, date_str: str) -> dict:
+    """
+    Generate an OBS scene collection JSON structure
+    that references the exported Worship folder assets
+    """
+    scenes = []
+    
+    # Helper function to create a text source
+    def create_text_source(name: str, file_path: str, y_position: int = 100):
+        return {
+            "id": str(uuid.uuid4()),
+            "name": name,
+            "type": "text_gdiplus_v2",
+            "settings": {
+                "file": file_path,
+                "read_from_file": True,
+                "font": {
+                    "face": "Arial",
+                    "size": 48,
+                    "style": "Bold"
+                },
+                "color": 0xFFFFFFFF,
+                "outline": True,
+                "outline_size": 2,
+                "outline_color": 0xFF000000,
+                "valign": "top",
+                "align": "left"
+            },
+            "pos": {"x": 100, "y": y_position},
+            "scale": {"x": 1.0, "y": 1.0},
+            "visible": True,
+            "locked": False
+        }
+    
+    # Helper function to create an image source
+    def create_image_source(name: str, file_path: str):
+        return {
+            "id": str(uuid.uuid4()),
+            "name": name,
+            "type": "image_source",
+            "settings": {
+                "file": file_path,
+                "unload": False
+            },
+            "pos": {"x": 0, "y": 0},
+            "scale": {"x": 1.0, "y": 1.0},
+            "visible": True,
+            "locked": False
+        }
+    
+    # Create scenes for each scripture reading
+    for reading_type, reading_data in readings.items():
+        base_name = reading_type.replace('_', ' ').title()
+        
+        # Scene with lower third graphic
+        scene = {
+            "id": str(uuid.uuid4()),
+            "name": f"{base_name} - Lower Third",
+            "sources": [
+                create_image_source(
+                    f"{base_name} Graphic",
+                    f"Worship/lower_thirds/{base_name}.png"
+                )
+            ]
+        }
+        scenes.append(scene)
+        
+        # Scene with full text reading
+        text_scene = {
+            "id": str(uuid.uuid4()),
+            "name": f"{base_name} - Full Text",
+            "sources": [
+                create_text_source(
+                    f"{base_name} Text",
+                    f"Worship/readings/{base_name}.txt",
+                    y_position=200
+                ),
+                create_text_source(
+                    f"{base_name} Reference",
+                    f"Worship/readings/{base_name} Reference.txt",
+                    y_position=100
+                )
+            ]
+        }
+        scenes.append(text_scene)
+    
+    # Create scenes for hymns and service elements
+    hymn_fields = {
+        'openingHymn': 'Opening Hymn',
+        'sequenceHymn': 'Sequence Hymn',
+        'communionMotet': 'Communion Motet',
+        'closingHymn': 'Closing Hymn'
+    }
+    
+    for field_key, field_label in hymn_fields.items():
+        if service_details.get(field_key):
+            # Lower third for hymn
+            hymn_scene = {
+                "id": str(uuid.uuid4()),
+                "name": f"{field_label} - Lower Third",
+                "sources": [
+                    create_image_source(
+                        f"{field_label} Graphic",
+                        f"Worship/lower_thirds/{field_label}.png"
+                    )
+                ]
+            }
+            scenes.append(hymn_scene)
+            
+            # Full text for hymn
+            hymn_text_scene = {
+                "id": str(uuid.uuid4()),
+                "name": f"{field_label} - Text",
+                "sources": [
+                    create_text_source(
+                        f"{field_label} Title",
+                        f"Worship/service_details/{field_label}.txt",
+                        y_position=100
+                    ),
+                    create_text_source(
+                        f"{field_label} Full Text",
+                        f"Worship/service_details/{field_label} Text.txt",
+                        y_position=200
+                    )
+                ]
+            }
+            scenes.append(hymn_text_scene)
+    
+    # Create the complete scene collection structure
+    scene_collection = {
+        "name": f"Worship Service - {date_str}",
+        "sources": [],
+        "scenes": scenes,
+        "current_scene": scenes[0]["name"] if scenes else "",
+        "scene_order": [scene["name"] for scene in scenes],
+        "canvas": {
+            "width": 1920,
+            "height": 1080
+        },
+        "version": "28.0.0"
+    }
+    
+    return scene_collection
+
 @app.route('/api/export_all', methods=['POST'])
 @login_required
 def export_all():
@@ -1139,6 +1284,11 @@ def export_all():
                     filename = f"{field_label}.png"
                     filepath = f"{date_folder_name}/lower_thirds/{filename}"
                     zip_file.writestr(filepath, img_buffer.read())
+            
+            # ===== PART 3: Generate OBS Scene Collection =====
+            obs_collection = generate_obs_scene_collection(readings, service_details, date_str)
+            obs_json = json.dumps(obs_collection, indent=2)
+            zip_file.writestr(f"{date_folder_name}_OBS_Scenes.json", obs_json)
         
         # Prepare the ZIP file for download
         zip_buffer.seek(0)
