@@ -2,7 +2,7 @@
 """
 Web-based Interactive Liturgical Calendar
 Episcopal Church Calendar with Revised Common Lectionary integration
-Version: 1.8 - Password Protected
+Version: 1.9 - OBS Scene Generation
 """
 
 from flask import Flask, render_template, jsonify, request, send_file, session, redirect, url_for
