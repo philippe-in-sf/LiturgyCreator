@@ -982,14 +982,18 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
     Generate an OBS scene collection JSON structure
     that references the exported Worship folder assets
     """
+    sources = []
     scenes = []
+    source_counter = 1
     
-    # Helper function to create a text source
-    def create_text_source(name: str, file_path: str, y_position: int = 100):
-        return {
-            "id": str(uuid.uuid4()),
+    # Helper function to create a text source definition
+    def create_text_source_def(name: str, file_path: str):
+        source_uuid = str(uuid.uuid4())
+        source = {
+            "id": "text_gdiplus_v2",
             "name": name,
-            "type": "text_gdiplus_v2",
+            "uuid": source_uuid,
+            "versioned_id": "text_gdiplus_v2",
             "settings": {
                 "file": file_path,
                 "read_from_file": True,
@@ -998,72 +1002,102 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
                     "size": 48,
                     "style": "Bold"
                 },
-                "color": 0xFFFFFFFF,
+                "color": 4294967295,
                 "outline": True,
                 "outline_size": 2,
-                "outline_color": 0xFF000000,
+                "outline_color": 4278190080,
                 "valign": "top",
                 "align": "left"
             },
-            "pos": {"x": 100, "y": y_position},
-            "scale": {"x": 1.0, "y": 1.0},
-            "visible": True,
-            "locked": False
+            "flags": 0,
+            "sync": 0,
+            "filters": []
         }
+        return source, source_uuid
     
-    # Helper function to create an image source
-    def create_image_source(name: str, file_path: str):
-        return {
-            "id": str(uuid.uuid4()),
+    # Helper function to create an image source definition
+    def create_image_source_def(name: str, file_path: str):
+        source_uuid = str(uuid.uuid4())
+        source = {
+            "id": "image_source",
             "name": name,
-            "type": "image_source",
+            "uuid": source_uuid,
+            "versioned_id": "image_source",
             "settings": {
                 "file": file_path,
                 "unload": False
             },
-            "pos": {"x": 0, "y": 0},
+            "flags": 0,
+            "sync": 0,
+            "filters": []
+        }
+        return source, source_uuid
+    
+    # Helper function to create a scene item
+    def create_scene_item(source_uuid: str, name: str, x: int, y: int, item_id: int):
+        return {
+            "id": item_id,
+            "name": name,
+            "source_uuid": source_uuid,
+            "pos": {"x": x, "y": y},
             "scale": {"x": 1.0, "y": 1.0},
+            "rot": 0,
+            "bounds": {"x": 0, "y": 0},
+            "bounds_type": 0,
+            "crop_left": 0,
+            "crop_top": 0,
+            "crop_right": 0,
+            "crop_bottom": 0,
             "visible": True,
             "locked": False
         }
     
-    # Create scenes for each scripture reading
+    # Create sources and scenes for each scripture reading
     for reading_type, reading_data in readings.items():
         base_name = reading_type.replace('_', ' ').title()
         
-        # Scene with lower third graphic
+        # Lower third image source and scene
+        img_source, img_uuid = create_image_source_def(
+            f"{base_name} Graphic",
+            f"Worship/lower_thirds/{base_name}.png"
+        )
+        sources.append(img_source)
+        
         scene = {
-            "id": str(uuid.uuid4()),
+            "id": len(scenes) + 1,
             "name": f"{base_name} - Lower Third",
-            "sources": [
-                create_image_source(
-                    f"{base_name} Graphic",
-                    f"Worship/lower_thirds/{base_name}.png"
-                )
+            "items": [
+                create_scene_item(img_uuid, f"{base_name} Graphic", 0, 0, source_counter)
             ]
         }
+        source_counter += 1
         scenes.append(scene)
         
-        # Scene with full text reading
+        # Text sources and scene
+        ref_source, ref_uuid = create_text_source_def(
+            f"{base_name} Reference",
+            f"Worship/readings/{base_name} Reference.txt"
+        )
+        sources.append(ref_source)
+        
+        text_source, text_uuid = create_text_source_def(
+            f"{base_name} Text",
+            f"Worship/readings/{base_name}.txt"
+        )
+        sources.append(text_source)
+        
         text_scene = {
-            "id": str(uuid.uuid4()),
+            "id": len(scenes) + 1,
             "name": f"{base_name} - Full Text",
-            "sources": [
-                create_text_source(
-                    f"{base_name} Text",
-                    f"Worship/readings/{base_name}.txt",
-                    y_position=200
-                ),
-                create_text_source(
-                    f"{base_name} Reference",
-                    f"Worship/readings/{base_name} Reference.txt",
-                    y_position=100
-                )
+            "items": [
+                create_scene_item(ref_uuid, f"{base_name} Reference", 100, 100, source_counter),
+                create_scene_item(text_uuid, f"{base_name} Text", 100, 200, source_counter + 1)
             ]
         }
+        source_counter += 2
         scenes.append(text_scene)
     
-    # Create scenes for hymns and service elements
+    # Create sources and scenes for hymns
     hymn_fields = {
         'openingHymn': 'Opening Hymn',
         'sequenceHymn': 'Sequence Hymn',
@@ -1074,49 +1108,54 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
     for field_key, field_label in hymn_fields.items():
         if service_details.get(field_key):
             # Lower third for hymn
+            hymn_img_source, hymn_img_uuid = create_image_source_def(
+                f"{field_label} Graphic",
+                f"Worship/lower_thirds/{field_label}.png"
+            )
+            sources.append(hymn_img_source)
+            
             hymn_scene = {
-                "id": str(uuid.uuid4()),
+                "id": len(scenes) + 1,
                 "name": f"{field_label} - Lower Third",
-                "sources": [
-                    create_image_source(
-                        f"{field_label} Graphic",
-                        f"Worship/lower_thirds/{field_label}.png"
-                    )
+                "items": [
+                    create_scene_item(hymn_img_uuid, f"{field_label} Graphic", 0, 0, source_counter)
                 ]
             }
+            source_counter += 1
             scenes.append(hymn_scene)
             
-            # Full text for hymn
+            # Text for hymn
+            hymn_title_source, hymn_title_uuid = create_text_source_def(
+                f"{field_label} Title",
+                f"Worship/service_details/{field_label}.txt"
+            )
+            sources.append(hymn_title_source)
+            
+            hymn_text_source, hymn_text_uuid = create_text_source_def(
+                f"{field_label} Full Text",
+                f"Worship/service_details/{field_label} Text.txt"
+            )
+            sources.append(hymn_text_source)
+            
             hymn_text_scene = {
-                "id": str(uuid.uuid4()),
+                "id": len(scenes) + 1,
                 "name": f"{field_label} - Text",
-                "sources": [
-                    create_text_source(
-                        f"{field_label} Title",
-                        f"Worship/service_details/{field_label}.txt",
-                        y_position=100
-                    ),
-                    create_text_source(
-                        f"{field_label} Full Text",
-                        f"Worship/service_details/{field_label} Text.txt",
-                        y_position=200
-                    )
+                "items": [
+                    create_scene_item(hymn_title_uuid, f"{field_label} Title", 100, 100, source_counter),
+                    create_scene_item(hymn_text_uuid, f"{field_label} Full Text", 100, 200, source_counter + 1)
                 ]
             }
+            source_counter += 2
             scenes.append(hymn_text_scene)
     
     # Create the complete scene collection structure
     scene_collection = {
-        "name": f"Worship Service - {date_str}",
-        "sources": [],
-        "scenes": scenes,
+        "name": f"Worship Service {date_str}",
         "current_scene": scenes[0]["name"] if scenes else "",
-        "scene_order": [scene["name"] for scene in scenes],
-        "canvas": {
-            "width": 1920,
-            "height": 1080
-        },
-        "version": "28.0.0"
+        "scenes": scenes,
+        "sources": sources,
+        "transition_duration": 300,
+        "current_transition": "Fade"
     }
     
     return scene_collection
