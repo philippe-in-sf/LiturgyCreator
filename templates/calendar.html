@@ -634,21 +634,259 @@
             font-weight: bold;
         }
         
+        /* Mobile Responsive Styles */
         @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-                gap: 20px;
-                padding: 20px;
+            body {
+                padding: 10px;
             }
             
-            .nav-controls {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
+            /* Header adjustments */
+            .header {
+                padding: 20px 15px;
             }
             
             .header h1 {
+                font-size: 1.5rem;
+                margin-bottom: 8px;
+            }
+            
+            .header .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .logout-btn {
+                top: 10px;
+                right: 10px;
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            
+            /* Navigation controls */
+            .nav-controls {
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .nav-btn {
+                padding: 8px 15px;
+                font-size: 14px;
+                flex: 1;
+                min-width: 100px;
+            }
+            
+            .month-year {
+                font-size: 1.2rem;
+                width: 100%;
+                order: -1;
+            }
+            
+            .liturgical-info {
+                font-size: 0.85rem;
+                width: 100%;
+            }
+            
+            /* Main content layout */
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 15px;
+            }
+            
+            /* Calendar adjustments */
+            .calendar-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .calendar {
+                font-size: 0.75rem;
+            }
+            
+            .calendar th {
+                padding: 8px 4px;
+                font-size: 0.7rem;
+            }
+            
+            .calendar th {
+                white-space: nowrap;
+            }
+            
+            .calendar td {
+                height: 70px;
+                min-width: 50px;
+            }
+            
+            .day-cell {
+                padding: 4px;
+            }
+            
+            .day-number {
+                font-size: 0.9rem;
+            }
+            
+            .day-info {
+                font-size: 0.6rem;
+                margin-top: 2px;
+            }
+            
+            /* Details panel */
+            .details-panel {
+                padding: 15px;
+            }
+            
+            .selected-date {
+                font-size: 1.1rem;
+            }
+            
+            .celebration {
+                font-size: 0.9rem;
+            }
+            
+            .reading-section {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+            
+            .reading-title {
+                font-size: 1rem;
+            }
+            
+            .reading-reference {
+                font-size: 0.85rem;
+            }
+            
+            .reading-text {
+                font-size: 0.9rem;
+            }
+            
+            /* Action buttons - stack vertically on mobile */
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .action-btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 1rem;
+            }
+            
+            /* Modal adjustments for mobile */
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+                padding: 20px;
+                max-height: 85vh;
+            }
+            
+            .modal-title {
+                font-size: 1.2rem;
+            }
+            
+            .form-section {
+                padding: 15px;
+            }
+            
+            .form-section h3 {
+                font-size: 1rem;
+            }
+            
+            .form-group input {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 12px;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn-save,
+            .btn-cancel {
+                width: 100%;
+                padding: 12px;
+            }
+            
+            /* Instructions adjustments */
+            .instructions {
+                padding: 15px;
+            }
+            
+            .instructions h4 {
+                font-size: 0.7rem;
+            }
+            
+            .instructions ol {
+                font-size: 0.8rem;
+                padding-left: 18px;
+            }
+            
+            .instructions li {
+                margin: 6px 0;
+            }
+            
+            /* PDF Upload adjustments */
+            .pdf-upload-section {
+                padding: 15px;
+            }
+            
+            .upload-header h3 {
+                font-size: 1.1rem;
+            }
+            
+            .upload-header p {
+                font-size: 0.85rem;
+            }
+            
+            .upload-area {
+                padding: 30px 15px;
+            }
+            
+            .upload-icon {
                 font-size: 2rem;
+            }
+            
+            .upload-text p {
+                font-size: 0.9rem;
+            }
+            
+            .file-info {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+        
+        /* Extra small devices (phones in portrait, less than 480px) */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .header .subtitle {
+                font-size: 0.8rem;
+            }
+            
+            .calendar th {
+                font-size: 0.65rem;
+                padding: 6px 2px;
+            }
+            
+            .calendar td {
+                height: 60px;
+                min-width: 45px;
+            }
+            
+            .day-number {
+                font-size: 0.8rem;
+            }
+            
+            .day-info {
+                display: none; /* Hide day info on very small screens */
+            }
+            
+            .nav-btn {
+                font-size: 13px;
+                padding: 8px 10px;
             }
         }
     </style>
