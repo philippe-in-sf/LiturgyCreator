@@ -1609,6 +1609,12 @@
         function updatePathPlaceholder() {
             const osSelect = document.getElementById('obsOperatingSystem');
             const pathInput = document.getElementById('obsBasePath');
+            
+            if (!osSelect || !pathInput) {
+                console.error('Settings elements not found');
+                return;
+            }
+            
             const os = osSelect.value;
             
             const placeholders = {
@@ -1617,7 +1623,9 @@
                 'linux': 'e.g., /home/username/Documents/'
             };
             
-            pathInput.placeholder = placeholders[os] || placeholders['windows'];
+            const newPlaceholder = placeholders[os] || placeholders['windows'];
+            pathInput.placeholder = newPlaceholder;
+            console.log('Updated placeholder for OS:', os, 'to:', newPlaceholder);
         }
 
         function showSettings() {
