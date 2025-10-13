@@ -20,7 +20,7 @@ Preferred communication style: Simple, everyday language.
 - **Implementation**: 
   - Added dynamic color scheme based on service date
   - Background, accent bar, title, and text colors change according to liturgical season
-  - Supports all major seasons: Advent (Purple), Christmas (White/Gold), Epiphany (Green), Lent (Deep Purple), Easter (White/Gold), Pentecost (Red), Ordinary Time (Green)
+  - Supports all major seasons: Advent (Purple), Christmas (White/Gold), Season after Epiphany (Green), Lent (Deep Purple), Easter (White/Gold), Pentecost (Red), Season after Pentecost (Green)
 - **Layout Updates**:
   - Lower third position moved down by 50% (now at 5/6 of screen height instead of 2/3)
   - Text indented 260 pixels from left edge (220px logo space + 40px padding)

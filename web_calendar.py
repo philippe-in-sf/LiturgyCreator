@@ -926,15 +926,15 @@ def get_liturgical_season_colors(date_str: Optional[str] = None) -> Dict[str, tu
     month = date_obj.month
     day = date_obj.day
     
-    # Determine liturgical season
-    season = 'ordinary'  # default
+    # Determine liturgical season (Episcopal terminology)
+    season = 'season_after_pentecost'  # default
     
     if month == 12 and day >= 25:
         season = 'christmas'
     elif month == 1 and day <= 6:
         season = 'christmas'
     elif month == 1 and day > 6:
-        season = 'epiphany'
+        season = 'season_after_epiphany'
     elif month in [2, 3] or (month == 4 and day < 15):
         # Rough Lent/Easter season (needs refinement for actual Easter dates)
         season = 'lent'
@@ -943,7 +943,7 @@ def get_liturgical_season_colors(date_str: Optional[str] = None) -> Dict[str, tu
     elif (month == 11 and day >= 27) or (month == 12 and day < 25):
         season = 'advent'
     else:
-        season = 'ordinary'
+        season = 'season_after_pentecost'
     
     # Color mapping with RGBA tuples (R, G, B, A)
     color_schemes = {
@@ -959,7 +959,7 @@ def get_liturgical_season_colors(date_str: Optional[str] = None) -> Dict[str, tu
             'title': (102, 51, 153, 255),        # Purple
             'text': (60, 60, 60, 255)            # Dark gray
         },
-        'epiphany': {
+        'season_after_epiphany': {
             'background': (0, 100, 0, 230),      # Green with opacity
             'accent': (0, 150, 0, 255),          # Bright green
             'title': (255, 255, 255, 255),       # White
@@ -983,7 +983,7 @@ def get_liturgical_season_colors(date_str: Optional[str] = None) -> Dict[str, tu
             'title': (255, 255, 255, 255),       # White
             'text': (241, 241, 241, 255)         # Light gray
         },
-        'ordinary': {
+        'season_after_pentecost': {
             'background': (0, 128, 0, 230),      # Green with opacity
             'accent': (34, 139, 34, 255),        # Forest green
             'title': (255, 255, 255, 255),       # White
@@ -991,7 +991,7 @@ def get_liturgical_season_colors(date_str: Optional[str] = None) -> Dict[str, tu
         }
     }
     
-    return color_schemes.get(season, color_schemes['ordinary'])
+    return color_schemes.get(season, color_schemes['season_after_pentecost'])
 
 def create_lower_third(reading_type: str, reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080) -> Image.Image:
     """Create a lower third graphic for broadcast use with liturgical season colors"""
