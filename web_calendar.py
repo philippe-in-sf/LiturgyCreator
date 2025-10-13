@@ -1062,7 +1062,7 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
 
 def create_title_card(liturgical_reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080) -> Image.Image:
     """Create a full-screen title card with liturgical reference and church name"""
-    # Create image with white background and 50% opacity
+    # Create image with white background and 50% opacity (alpha 128 = 50%)
     img = Image.new('RGBA', (width, height), color=(255, 255, 255, 128))
     draw = ImageDraw.Draw(img)
     
@@ -1071,20 +1071,44 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
     
     # Try to load fonts
     try:
-        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 80)
+        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 70)
         church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 50)
     except:
         title_font = ImageFont.load_default()
         church_font = ImageFont.load_default()
     
-    # Draw liturgical reference at top center
-    title_bbox = draw.textbbox((0, 0), liturgical_reference, font=title_font)
-    title_width = title_bbox[2] - title_bbox[0]
-    title_x = (width - title_width) // 2
-    title_y = 100
+    # Word wrap liturgical reference if too long
+    max_title_width = width - 200  # Leave 100px margin on each side
+    words = liturgical_reference.split()
+    lines = []
+    current_line = []
     
-    # Draw text with liturgical season title color
-    draw.text((title_x, title_y), liturgical_reference, fill=liturgical_colors['title'], font=title_font)
+    for word in words:
+        test_line = ' '.join(current_line + [word])
+        bbox = draw.textbbox((0, 0), test_line, font=title_font)
+        line_width = bbox[2] - bbox[0]
+        
+        if line_width <= max_title_width:
+            current_line.append(word)
+        else:
+            if current_line:
+                lines.append(' '.join(current_line))
+            current_line = [word]
+    
+    if current_line:
+        lines.append(' '.join(current_line))
+    
+    # Draw liturgical reference centered at top (multi-line if needed)
+    line_height = 80
+    total_height = len(lines) * line_height
+    start_y = 150
+    
+    for i, line in enumerate(lines):
+        bbox = draw.textbbox((0, 0), line, font=title_font)
+        line_width = bbox[2] - bbox[0]
+        line_x = (width - line_width) // 2
+        line_y = start_y + (i * line_height)
+        draw.text((line_x, line_y), line, fill=liturgical_colors['title'], font=title_font)
     
     # Draw church name at bottom center
     church_name = "Trinity Episcopal Church, Tulsa, OK"
