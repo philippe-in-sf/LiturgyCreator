@@ -1100,10 +1100,10 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
     def create_text_source_def(name: str, file_path: str):
         source_uuid = str(uuid.uuid4())
         source = {
-            "id": "text_gdiplus_v2",
+            "versioned_id": "text_gdiplus_v2",
             "name": name,
             "uuid": source_uuid,
-            "versioned_id": "text_gdiplus_v2",
+            "id": "text_gdiplus_v2",
             "settings": {
                 "file": file_path,
                 "read_from_file": True,
@@ -1119,9 +1119,13 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
                 "valign": "top",
                 "align": "left"
             },
-            "flags": 0,
+            "mixers": 0,
             "sync": 0,
-            "filters": []
+            "flags": 0,
+            "volume": 1.0,
+            "balance": 0.5,
+            "filters": [],
+            "private_settings": {}
         }
         return source, source_uuid
     
@@ -1129,17 +1133,21 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
     def create_image_source_def(name: str, file_path: str):
         source_uuid = str(uuid.uuid4())
         source = {
-            "id": "image_source",
+            "versioned_id": "image_source",
             "name": name,
             "uuid": source_uuid,
-            "versioned_id": "image_source",
+            "id": "image_source",
             "settings": {
                 "file": file_path,
                 "unload": False
             },
-            "flags": 0,
+            "mixers": 0,
             "sync": 0,
-            "filters": []
+            "flags": 0,
+            "volume": 1.0,
+            "balance": 0.5,
+            "filters": [],
+            "private_settings": {}
         }
         return source, source_uuid
     
@@ -1174,9 +1182,9 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
         sources.append(img_source)
         
         scene = {
-            "id": len(scenes) + 1,
             "name": f"{base_name} - Lower Third",
-            "items": [
+            "id": len(scenes) + 1,
+            "sources": [
                 create_scene_item(img_uuid, f"{base_name} Graphic", 0, 0, source_counter)
             ]
         }
@@ -1197,9 +1205,9 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
         sources.append(text_source)
         
         text_scene = {
-            "id": len(scenes) + 1,
             "name": f"{base_name} - Full Text",
-            "items": [
+            "id": len(scenes) + 1,
+            "sources": [
                 create_scene_item(ref_uuid, f"{base_name} Reference", 100, 100, source_counter),
                 create_scene_item(text_uuid, f"{base_name} Text", 100, 200, source_counter + 1)
             ]
@@ -1225,9 +1233,9 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
             sources.append(hymn_img_source)
             
             hymn_scene = {
-                "id": len(scenes) + 1,
                 "name": f"{field_label} - Lower Third",
-                "items": [
+                "id": len(scenes) + 1,
+                "sources": [
                     create_scene_item(hymn_img_uuid, f"{field_label} Graphic", 0, 0, source_counter)
                 ]
             }
@@ -1248,9 +1256,9 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
             sources.append(hymn_text_source)
             
             hymn_text_scene = {
-                "id": len(scenes) + 1,
                 "name": f"{field_label} - Text",
-                "items": [
+                "id": len(scenes) + 1,
+                "sources": [
                     create_scene_item(hymn_title_uuid, f"{field_label} Title", 100, 100, source_counter),
                     create_scene_item(hymn_text_uuid, f"{field_label} Full Text", 100, 200, source_counter + 1)
                 ]
@@ -1258,14 +1266,27 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
             source_counter += 2
             scenes.append(hymn_text_scene)
     
-    # Create the complete scene collection structure
+    # Create scene order array
+    scene_order = [{"name": scene["name"]} for scene in scenes]
+    
+    # Create the complete scene collection structure (OBS format)
     scene_collection = {
-        "name": f"Worship Service {date_str}",
         "current_scene": scenes[0]["name"] if scenes else "",
-        "scenes": scenes,
+        "current_program_scene": scenes[0]["name"] if scenes else "",
+        "scene_order": scene_order,
+        "name": f"Worship Service {date_str}",
         "sources": sources,
+        "scenes": scenes,
+        "transitions": [
+            {"name": "Fade", "id": "fade_transition"},
+            {"name": "Cut", "id": "cut_transition"}
+        ],
+        "current_transition": "Fade",
         "transition_duration": 300,
-        "current_transition": "Fade"
+        "scaling_enabled": False,
+        "scaling_level": 0,
+        "scaling_off_x": 0.0,
+        "scaling_off_y": 0.0
     }
     
     return scene_collection

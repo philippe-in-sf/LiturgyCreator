@@ -21,6 +21,20 @@
     "closingHymn": "Hymn 432 - O praise ye the Lord!"
   },
   "2025-10-13": {
+    "organistName": "Casey Cantwelll",
+    "preludeName": "Jesu, Joy",
+    "preludeComposer": "Bach",
+    "openingHymn": "Holy Holy Holy",
+    "sequenceHymn": "O Christ",
+    "preacherName": "Canon Betsy",
+    "offertory": "Come, thou font",
+    "communionMotet": "Ave Verum",
+    "communionHymn": "I come with joy",
+    "closingHymn": "O praise ye the Lord",
+    "postludeName": "Improvisation",
+    "postludeComposer": "Cantwell"
+  },
+  "2025-10-19": {
     "organistName": "Casey Cantwell",
     "preludeName": "Some piece",
     "preludeComposer": "Cantwell",
@@ -30,23 +44,8 @@
     "offertory": "Come thou font",
     "communionMotet": "Ave Verum",
     "communionHymn": "I come with joy",
-    "closingHymn": "O praise ye the lord",
-    "postludeName": "Some other piece",
-    "postludeComposer": "Haugen"
-  },
-  "2025-10-19": {
-    "openingHymn": "Holy",
-    "sequenceHymn": "O Christ",
-    "offertory": "Come thou font",
-    "communionMotet": "Ave Verum",
-    "communionHymn": "I come with joy",
     "closingHymn": "O praise ye",
-    "organistName": "Casey Cantwell",
-    "preludeName": "Some piece",
-    "preludeComposer": "Cantwell",
     "postludeName": "Some other piece",
-    "postludeComposer": "Bach",
-    "preacherName": "",
-    "presiderName": ""
+    "postludeComposer": "Bach"
   }
 }
