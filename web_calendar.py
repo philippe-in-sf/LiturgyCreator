@@ -1500,7 +1500,10 @@ def export_all():
             liturgy_fetcher = LiturgyFetcher()
             liturgical_reference = liturgy_fetcher._get_episcopal_celebration_name(selected_date)
             
-            title_card_img = create_title_card(liturgical_reference, date_str)
+            # Remove Proper number designation for title card (e.g., remove "(Proper 25)")
+            title_reference = re.sub(r'\s*\(Proper \d+\)', '', liturgical_reference)
+            
+            title_card_img = create_title_card(title_reference, date_str)
             title_card_buffer = io.BytesIO()
             title_card_img.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
