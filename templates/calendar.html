@@ -1099,7 +1099,7 @@
                     
                     <div class="form-group">
                         <label for="obsOperatingSystem">Operating System</label>
-                        <select id="obsOperatingSystem" name="obsOperatingSystem" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                        <select id="obsOperatingSystem" name="obsOperatingSystem" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;" onchange="updatePathPlaceholder()">
                             <option value="windows">Windows</option>
                             <option value="mac">Mac</option>
                             <option value="linux">Linux</option>
@@ -1108,7 +1108,7 @@
                     
                     <div class="form-group">
                         <label for="obsBasePath">Base Path for Worship Folder</label>
-                        <input type="text" id="obsBasePath" name="obsBasePath" placeholder="e.g., C:\Users\YourName\Documents\ or /Users/YourName/Documents/">
+                        <input type="text" id="obsBasePath" name="obsBasePath" placeholder="e.g., C:\Users\YourName\Documents\">
                         <small style="color: #6c757d; display: block; margin-top: 5px;">
                             Enter the full path to where you extract the Worship folder (include trailing slash/backslash)
                         </small>
@@ -1605,10 +1605,25 @@
             }
         }
 
+        function updatePathPlaceholder() {
+            const osSelect = document.getElementById('obsOperatingSystem');
+            const pathInput = document.getElementById('obsBasePath');
+            const os = osSelect.value;
+            
+            const placeholders = {
+                'windows': 'e.g., C:\\Users\\YourName\\Documents\\',
+                'mac': 'e.g., /Users/YourName/Documents/',
+                'linux': 'e.g., /home/username/Documents/'
+            };
+            
+            pathInput.placeholder = placeholders[os] || placeholders['windows'];
+        }
+
         function showSettings() {
             const modal = document.getElementById('settingsModal');
             modal.style.display = 'block';
             loadOBSSettings();
+            updatePathPlaceholder();
         }
 
         function closeSettings() {
