@@ -13,6 +13,20 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## OBS Settings Feature (October 13, 2025)
+
+### OBS Path Configuration
+- **Feature**: Added Settings interface for OBS file path configuration
+- **Implementation**:
+  - Settings modal with operating system selection (Windows/Mac/Linux)
+  - Base path configuration for Worship folder location
+  - Settings saved in localStorage for persistence
+- **OBS Scene Generation**: 
+  - Automatic path separator conversion based on OS (backslash for Windows, forward slash for Mac/Linux)
+  - Absolute paths generated using user-configured base path
+  - Scene collection JSON now includes correct paths for OBS Studio import
+- **User Experience**: One-time setup, paths automatically configured for all future exports
+
 ## Liturgical Season Colors and Mobile Enhancement (October 13, 2025)
 
 ### Lower Thirds Enhancement
