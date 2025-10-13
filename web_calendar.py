@@ -951,8 +951,8 @@ def create_lower_third(reading_type: str, reference: str, width: int = 1920, hei
     # Calculate total background height needed
     background_height = top_padding + title_height + text_spacing + ref_height + bottom_padding
     
-    # Position lower third to start at 2/3 of the image height
-    lower_third_start = int(height * 2 / 3)
+    # Position lower third lower on screen (at 5/6 of the image height, lowered by 50% from original 2/3)
+    lower_third_start = int(height * 5 / 6)
     background_end = lower_third_start + background_height
     
     # Draw semi-transparent dark background for lower third area (only as tall as needed)
@@ -967,13 +967,17 @@ def create_lower_third(reading_type: str, reference: str, width: int = 1920, hei
         fill=(15, 52, 96, 255)  # Blue accent bar
     )
     
-    # Draw reading type (title) - positioned in lower third
+    # Logo space (reserved for logo to be added later)
+    logo_space = 220  # Space reserved on left for logo
+    text_indent = logo_space + 40  # Text starts after logo space plus padding
+    
+    # Draw reading type (title) - indented to leave room for logo
     title_y = lower_third_start + top_padding
-    draw.text((40, title_y), formatted_type, fill=(233, 69, 96, 255), font=title_font)
+    draw.text((text_indent, title_y), formatted_type, fill=(233, 69, 96, 255), font=title_font)
     
     # Draw reference (below title)
     ref_y = title_y + title_height + text_spacing
-    draw.text((40, ref_y), reference, fill=(241, 241, 241, 255), font=ref_font)
+    draw.text((text_indent, ref_y), reference, fill=(241, 241, 241, 255), font=ref_font)
     
     return img
 
