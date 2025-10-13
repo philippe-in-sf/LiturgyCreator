@@ -1138,10 +1138,15 @@
         let calendarData = null;
         let selectedReadings = null;
         let serviceDetails = {};
+        let obsSettings = {
+            operatingSystem: 'windows',
+            basePath: 'C:\\Users\\YourName\\Documents\\'
+        };
 
-        // Initialize calendar
+        // Initialize calendar and settings
         document.addEventListener('DOMContentLoaded', function() {
             loadCalendar();
+            loadOBSSettings();
         });
 
         function loadCalendar() {
@@ -1584,11 +1589,60 @@
             }
         }
 
+        // OBS Settings Functions
+        function loadOBSSettings() {
+            try {
+                const stored = localStorage.getItem('obsSettings');
+                if (stored) {
+                    obsSettings = JSON.parse(stored);
+                }
+                
+                document.getElementById('obsOperatingSystem').value = obsSettings.operatingSystem || 'windows';
+                document.getElementById('obsBasePath').value = obsSettings.basePath || '';
+            } catch (error) {
+                console.error('Error loading OBS settings:', error);
+            }
+        }
+
+        function showSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.style.display = 'block';
+            loadOBSSettings();
+        }
+
+        function closeSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.style.display = 'none';
+        }
+
+        function saveSettings() {
+            const operatingSystem = document.getElementById('obsOperatingSystem').value;
+            const basePath = document.getElementById('obsBasePath').value.trim();
+            
+            if (!basePath) {
+                showError('Please enter a base path for the Worship folder');
+                return;
+            }
+            
+            obsSettings = {
+                operatingSystem: operatingSystem,
+                basePath: basePath
+            };
+            
+            localStorage.setItem('obsSettings', JSON.stringify(obsSettings));
+            showSuccess('OBS settings saved successfully!');
+            closeSettings();
+        }
+
         // Close modal when clicking outside of it
         window.onclick = function(event) {
-            const modal = document.getElementById('serviceDetailsModal');
-            if (event.target === modal) {
+            const serviceModal = document.getElementById('serviceDetailsModal');
+            const settingsModal = document.getElementById('settingsModal');
+            
+            if (event.target === serviceModal) {
                 closeServiceDetails();
+            } else if (event.target === settingsModal) {
+                closeSettings();
             }
         }
 
