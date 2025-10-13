@@ -1109,8 +1109,8 @@
                     <div class="form-group">
                         <label for="obsBasePath">Base Path for Worship Folder</label>
                         <input type="text" id="obsBasePath" name="obsBasePath" placeholder="e.g., C:\Users\YourName\Documents\">
-                        <small style="color: #6c757d; display: block; margin-top: 5px;">
-                            Enter the full path to where you extract the Worship folder (include trailing slash/backslash)
+                        <small id="pathHelperText" style="color: #6c757d; display: block; margin-top: 5px;">
+                            Example: C:\Users\YourName\Documents\
                         </small>
                     </div>
                     
@@ -1609,23 +1609,25 @@
         function updatePathPlaceholder() {
             const osSelect = document.getElementById('obsOperatingSystem');
             const pathInput = document.getElementById('obsBasePath');
+            const helperText = document.getElementById('pathHelperText');
             
-            if (!osSelect || !pathInput) {
+            if (!osSelect || !pathInput || !helperText) {
                 console.error('Settings elements not found');
                 return;
             }
             
             const os = osSelect.value;
             
-            const placeholders = {
-                'windows': 'e.g., C:\\Users\\YourName\\Documents\\',
-                'mac': 'e.g., /Users/YourName/Documents/',
-                'linux': 'e.g., /home/username/Documents/'
+            const examples = {
+                'windows': 'C:\\Users\\YourName\\Documents\\',
+                'mac': '/Users/YourName/Documents/',
+                'linux': '/home/username/Documents/'
             };
             
-            const newPlaceholder = placeholders[os] || placeholders['windows'];
-            pathInput.placeholder = newPlaceholder;
-            console.log('Updated placeholder for OS:', os, 'to:', newPlaceholder);
+            const example = examples[os] || examples['windows'];
+            pathInput.placeholder = 'e.g., ' + example;
+            helperText.textContent = 'Example: ' + example;
+            console.log('Updated example for OS:', os, 'to:', example);
         }
 
         function showSettings() {
