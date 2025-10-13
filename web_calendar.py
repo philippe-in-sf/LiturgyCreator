@@ -1060,14 +1060,41 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     
     return img
 
-def generate_obs_scene_collection(readings: dict, service_details: dict, date_str: str) -> dict:
+def generate_obs_scene_collection(readings: dict, service_details: dict, date_str: str, obs_settings: dict = None) -> dict:
     """
     Generate an OBS scene collection JSON structure
-    that references the exported Worship folder assets
+    that references the exported Worship folder assets with absolute paths
     """
     sources = []
     scenes = []
     source_counter = 1
+    
+    # Get path settings with defaults
+    if obs_settings is None:
+        obs_settings = {
+            'operatingSystem': 'windows',
+            'basePath': 'C:\\Users\\YourName\\Documents\\'
+        }
+    
+    os_type = obs_settings.get('operatingSystem', 'windows')
+    base_path = obs_settings.get('basePath', '')
+    
+    # Determine path separator based on OS
+    if os_type == 'windows':
+        separator = '\\'
+    else:
+        separator = '/'
+    
+    # Helper function to construct absolute path
+    def make_absolute_path(relative_path: str) -> str:
+        # Replace forward slashes with OS-appropriate separator
+        path = relative_path.replace('/', separator)
+        # Combine base path with relative path
+        if base_path:
+            # Ensure base_path ends with separator
+            base = base_path if base_path.endswith(separator) else base_path + separator
+            return base + path
+        return path
     
     # Helper function to create a text source definition
     def create_text_source_def(name: str, file_path: str):
@@ -1142,7 +1169,7 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
         # Lower third image source and scene
         img_source, img_uuid = create_image_source_def(
             f"{base_name} Graphic",
-            f"Worship/lower_thirds/{base_name}.png"
+            make_absolute_path(f"Worship/lower_thirds/{base_name}.png")
         )
         sources.append(img_source)
         
@@ -1159,13 +1186,13 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
         # Text sources and scene
         ref_source, ref_uuid = create_text_source_def(
             f"{base_name} Reference",
-            f"Worship/readings/{base_name} Reference.txt"
+            make_absolute_path(f"Worship/readings/{base_name} Reference.txt")
         )
         sources.append(ref_source)
         
         text_source, text_uuid = create_text_source_def(
             f"{base_name} Text",
-            f"Worship/readings/{base_name}.txt"
+            make_absolute_path(f"Worship/readings/{base_name}.txt")
         )
         sources.append(text_source)
         
@@ -1193,7 +1220,7 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
             # Lower third for hymn
             hymn_img_source, hymn_img_uuid = create_image_source_def(
                 f"{field_label} Graphic",
-                f"Worship/lower_thirds/{field_label}.png"
+                make_absolute_path(f"Worship/lower_thirds/{field_label}.png")
             )
             sources.append(hymn_img_source)
             
@@ -1210,13 +1237,13 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
             # Text for hymn
             hymn_title_source, hymn_title_uuid = create_text_source_def(
                 f"{field_label} Title",
-                f"Worship/service_details/{field_label}.txt"
+                make_absolute_path(f"Worship/service_details/{field_label}.txt")
             )
             sources.append(hymn_title_source)
             
             hymn_text_source, hymn_text_uuid = create_text_source_def(
                 f"{field_label} Full Text",
-                f"Worship/service_details/{field_label} Text.txt"
+                make_absolute_path(f"Worship/service_details/{field_label} Text.txt")
             )
             sources.append(hymn_text_source)
             

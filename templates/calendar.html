@@ -1376,7 +1376,8 @@
                 },
                 body: JSON.stringify({ 
                     date: dateStr,
-                    serviceDetails: currentServiceDetails
+                    serviceDetails: currentServiceDetails,
+                    obsSettings: obsSettings
                 })
             })
             .then(response => {
