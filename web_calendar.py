@@ -1069,13 +1069,20 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
     # Determine liturgical season colors
     liturgical_colors = get_liturgical_season_colors(date_str)
     
-    # Try to load fonts
+    # Try to load elegant serif fonts for a classic, timeless look
     try:
-        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 70)
-        church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 50)
+        # Try DejaVu Serif first (elegant and widely available)
+        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 70)
+        church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 50)
     except:
-        title_font = ImageFont.load_default()
-        church_font = ImageFont.load_default()
+        try:
+            # Fallback to Liberation Serif
+            title_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf", 70)
+            church_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf", 50)
+        except:
+            # Final fallback to default
+            title_font = ImageFont.load_default()
+            church_font = ImageFont.load_default()
     
     # Word wrap liturgical reference if too long
     max_title_width = width - 200  # Leave 100px margin on each side
