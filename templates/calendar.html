@@ -954,7 +954,7 @@
                     <button class="action-btn btn-secondary" onclick="showServiceDetails()">Service Details</button>
                     <button class="action-btn btn-primary" onclick="loadReadings()">Load Reading</button>
                     <button class="action-btn btn-success" onclick="exportAll()" style="background-color: #28a745;">Export All</button>
-                    <button class="action-btn btn-info" onclick="showPdfUpload()" style="display: none;">Upload PDF</button>
+                    <button class="action-btn btn-info" onclick="showSettings()" style="background-color: #6c757d;">⚙️ Settings</button>
                 </div>
 
                 <!-- PDF Upload Section -->
@@ -1077,6 +1077,56 @@
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="closeServiceDetails()">Cancel</button>
                     <button type="button" class="btn-save" onclick="saveServiceDetails()">Save Details</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeSettings()">&times;</span>
+                <h2 class="modal-title">OBS Export Settings</h2>
+            </div>
+            
+            <form id="settingsForm">
+                <div class="form-section">
+                    <h3>OBS File Path Configuration</h3>
+                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
+                        Configure where you extract the Worship folder so the OBS scene file uses the correct absolute paths.
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="obsOperatingSystem">Operating System</label>
+                        <select id="obsOperatingSystem" name="obsOperatingSystem" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                            <option value="windows">Windows</option>
+                            <option value="mac">Mac</option>
+                            <option value="linux">Linux</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="obsBasePath">Base Path for Worship Folder</label>
+                        <input type="text" id="obsBasePath" name="obsBasePath" placeholder="e.g., C:\Users\YourName\Documents\ or /Users/YourName/Documents/">
+                        <small style="color: #6c757d; display: block; margin-top: 5px;">
+                            Enter the full path to where you extract the Worship folder (include trailing slash/backslash)
+                        </small>
+                    </div>
+                    
+                    <div style="background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 4px; padding: 12px; margin-top: 15px;">
+                        <strong>💡 Example Paths:</strong><br>
+                        <small>
+                            • Windows: <code>C:\Users\YourName\Documents\</code><br>
+                            • Mac: <code>/Users/YourName/Documents/</code><br>
+                            • Linux: <code>/home/username/Documents/</code>
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeSettings()">Cancel</button>
+                    <button type="button" class="btn-save" onclick="saveSettings()">Save Settings</button>
                 </div>
             </form>
         </div>
