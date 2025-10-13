@@ -38,6 +38,7 @@ The application follows a modular architecture with five main components:
 - **Calendar Date Offset Resolution**: JavaScript date parsing modified to correctly handle timezones and prevent one-day offsets.
 - **Deployment Configuration**: Comprehensive configuration for Google Cloud Run deployment, including `Procfile`, `Dockerfile`, `.dockerignore`, and `pyproject.toml` settings, ensuring Python 3.11 execution and proper port binding.
 - **Readings API Resolution**: Enhanced fallback system for liturgical APIs (local database, external APIs, closest Sunday readings) to ensure readings are always available.
+- **OBS Scene Collection Export (v2.2.0)**: Complete rewrite of OBS scene collection JSON generation to match native OBS Studio format specification, including proper source definitions, scene structure, transitions array, scene order, and all required metadata fields for successful import into OBS Studio.
 
 ## Configuration Management
 

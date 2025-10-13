@@ -1,1 +1,1 @@
-web: python3 app.py
+web: gunicorn --bind=0.0.0.0:5000 --reuse-port web_calendar:app
