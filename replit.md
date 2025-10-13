@@ -13,6 +13,34 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Liturgical Season Colors and Mobile Enhancement (October 13, 2025)
+
+### Lower Thirds Enhancement
+- **Feature**: Lower third graphics now automatically adapt to liturgical season colors
+- **Implementation**: 
+  - Added dynamic color scheme based on service date
+  - Background, accent bar, title, and text colors change according to liturgical season
+  - Supports all major seasons: Advent (Purple), Christmas (White/Gold), Epiphany (Green), Lent (Deep Purple), Easter (White/Gold), Pentecost (Red), Ordinary Time (Green)
+- **Layout Updates**:
+  - Lower third position moved down by 50% (now at 5/6 of screen height instead of 2/3)
+  - Text indented 260 pixels from left edge (220px logo space + 40px padding)
+  - Reserved space for church logo to be added on the left side
+- **Color Schemes**: Each season has carefully selected colors that are liturgically appropriate and visually distinct
+
+### Mobile Responsive Design
+- **Feature**: Comprehensive mobile-responsive interface for all screen sizes
+- **Implementation**:
+  - **Tablet (≤768px)**: Single-column layout, stacked action buttons, responsive navigation
+  - **Mobile (≤480px)**: Compact layout, optimized touch targets, streamlined display
+- **Enhancements**:
+  - Touch-friendly button sizes and spacing
+  - Horizontally scrollable calendar on small screens
+  - Responsive modals and forms (95% width on mobile)
+  - Font sizes automatically adjust for readability
+  - Service details modal optimized for mobile input (16px inputs prevent iOS zoom)
+  - Calendar day info hidden on very small screens to save space
+- **User Experience**: Seamless experience across desktop, tablet, and mobile devices
+
 ## PDF Upload Feature and Version 1.2 Release (September 10, 2025)
 
 ### Version 1.2 Beta Warning Update

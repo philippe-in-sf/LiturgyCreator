@@ -917,11 +917,90 @@ def export_readings():
             'message': 'Failed to export readings'
         }), 500
 
-def create_lower_third(reading_type: str, reference: str, width: int = 1920, height: int = 1080) -> Image.Image:
-    """Create a lower third graphic for broadcast use"""
+def get_liturgical_season_colors(date_str: Optional[str] = None) -> Dict[str, tuple]:
+    """Get liturgical season colors for lower third graphics"""
+    if not date_str:
+        date_str = datetime.now().strftime('%Y-%m-%d')
+    
+    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+    month = date_obj.month
+    day = date_obj.day
+    
+    # Determine liturgical season
+    season = 'ordinary'  # default
+    
+    if month == 12 and day >= 25:
+        season = 'christmas'
+    elif month == 1 and day <= 6:
+        season = 'christmas'
+    elif month == 1 and day > 6:
+        season = 'epiphany'
+    elif month in [2, 3] or (month == 4 and day < 15):
+        # Rough Lent/Easter season (needs refinement for actual Easter dates)
+        season = 'lent'
+    elif month in [4, 5, 6] and (month > 4 or day >= 15):
+        season = 'easter'
+    elif (month == 11 and day >= 27) or (month == 12 and day < 25):
+        season = 'advent'
+    else:
+        season = 'ordinary'
+    
+    # Color mapping with RGBA tuples (R, G, B, A)
+    color_schemes = {
+        'advent': {
+            'background': (102, 51, 153, 230),   # Purple with opacity
+            'accent': (102, 51, 153, 255),       # Purple solid
+            'title': (255, 255, 255, 255),       # White
+            'text': (241, 241, 241, 255)         # Light gray
+        },
+        'christmas': {
+            'background': (255, 255, 255, 230),  # White with opacity
+            'accent': (212, 175, 55, 255),       # Gold
+            'title': (102, 51, 153, 255),        # Purple
+            'text': (60, 60, 60, 255)            # Dark gray
+        },
+        'epiphany': {
+            'background': (0, 100, 0, 230),      # Green with opacity
+            'accent': (0, 150, 0, 255),          # Bright green
+            'title': (255, 255, 255, 255),       # White
+            'text': (241, 241, 241, 255)         # Light gray
+        },
+        'lent': {
+            'background': (75, 0, 130, 230),     # Deep purple with opacity
+            'accent': (102, 51, 153, 255),       # Purple
+            'title': (255, 255, 255, 255),       # White
+            'text': (241, 241, 241, 255)         # Light gray
+        },
+        'easter': {
+            'background': (255, 255, 255, 230),  # White with opacity
+            'accent': (212, 175, 55, 255),       # Gold
+            'title': (184, 134, 11, 255),        # Dark gold
+            'text': (60, 60, 60, 255)            # Dark gray
+        },
+        'pentecost': {
+            'background': (170, 0, 0, 230),      # Red with opacity
+            'accent': (220, 20, 60, 255),        # Crimson
+            'title': (255, 255, 255, 255),       # White
+            'text': (241, 241, 241, 255)         # Light gray
+        },
+        'ordinary': {
+            'background': (0, 128, 0, 230),      # Green with opacity
+            'accent': (34, 139, 34, 255),        # Forest green
+            'title': (255, 255, 255, 255),       # White
+            'text': (241, 241, 241, 255)         # Light gray
+        }
+    }
+    
+    return color_schemes.get(season, color_schemes['ordinary'])
+
+def create_lower_third(reading_type: str, reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080) -> Image.Image:
+    """Create a lower third graphic for broadcast use with liturgical season colors"""
     # Create image with transparent background (RGBA mode)
     img = Image.new('RGBA', (width, height), color=(0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
+    
+    # Determine liturgical season colors
+    liturgical_colors = get_liturgical_season_colors(date_str)
     
     # Try to load fonts, fallback to default if not available
     try:
@@ -955,16 +1034,16 @@ def create_lower_third(reading_type: str, reference: str, width: int = 1920, hei
     lower_third_start = int(height * 5 / 6)
     background_end = lower_third_start + background_height
     
-    # Draw semi-transparent dark background for lower third area (only as tall as needed)
+    # Draw semi-transparent background with liturgical season color
     draw.rectangle(
         [0, lower_third_start, width, background_end],
-        fill=(26, 26, 46, 230)  # Dark background with 90% opacity
+        fill=liturgical_colors['background']
     )
     
-    # Draw accent bar on left side (same height as background)
+    # Draw accent bar on left side with liturgical season accent color
     draw.rectangle(
         [0, lower_third_start, 20, background_end],
-        fill=(15, 52, 96, 255)  # Blue accent bar
+        fill=liturgical_colors['accent']
     )
     
     # Logo space (reserved for logo to be added later)
@@ -973,11 +1052,11 @@ def create_lower_third(reading_type: str, reference: str, width: int = 1920, hei
     
     # Draw reading type (title) - indented to leave room for logo
     title_y = lower_third_start + top_padding
-    draw.text((text_indent, title_y), formatted_type, fill=(233, 69, 96, 255), font=title_font)
+    draw.text((text_indent, title_y), formatted_type, fill=liturgical_colors['title'], font=title_font)
     
     # Draw reference (below title)
     ref_y = title_y + title_height + text_spacing
-    draw.text((text_indent, ref_y), reference, fill=(241, 241, 241, 255), font=ref_font)
+    draw.text((text_indent, ref_y), reference, fill=liturgical_colors['text'], font=ref_font)
     
     return img
 
@@ -1289,8 +1368,8 @@ def export_all():
             for reading_type, reading_data in readings.items():
                 reference = reading_data.get('reference', 'No reference')
                 
-                # Generate lower third image
-                img = create_lower_third(reading_type, reference)
+                # Generate lower third image with liturgical season colors
+                img = create_lower_third(reading_type, reference, date_str)
                 
                 # Save image to buffer
                 img_buffer = io.BytesIO()
@@ -1315,8 +1394,8 @@ def export_all():
             for field_key, field_label in hymn_fields.items():
                 hymn_value = service_details.get(field_key, '').strip()
                 if hymn_value:  # Only create graphic if field has content
-                    # Generate lower third image
-                    img = create_lower_third(field_label, hymn_value)
+                    # Generate lower third image with liturgical season colors
+                    img = create_lower_third(field_label, hymn_value, date_str)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -1397,8 +1476,8 @@ def generate_lower_thirds():
             for reading_type, reading_data in readings.items():
                 reference = reading_data.get('reference', 'No reference')
                 
-                # Generate lower third image
-                img = create_lower_third(reading_type, reference)
+                # Generate lower third image with liturgical season colors
+                img = create_lower_third(reading_type, reference, date_str)
                 
                 # Save image to buffer
                 img_buffer = io.BytesIO()
@@ -1423,8 +1502,8 @@ def generate_lower_thirds():
             for field_key, field_label in hymn_fields.items():
                 hymn_value = service_details.get(field_key, '').strip()
                 if hymn_value:  # Only create graphic if field has content
-                    # Generate lower third image
-                    img = create_lower_third(field_label, hymn_value)
+                    # Generate lower third image with liturgical season colors
+                    img = create_lower_third(field_label, hymn_value, date_str)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
