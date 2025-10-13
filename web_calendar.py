@@ -1278,6 +1278,7 @@ def export_all():
         data = request.get_json()
         date_str = data.get('date')
         service_details = data.get('serviceDetails', {})
+        obs_settings = data.get('obsSettings', {})
         
         if not date_str:
             return jsonify({
@@ -1435,7 +1436,7 @@ def export_all():
                     zip_file.writestr(filepath, img_buffer.read())
             
             # ===== PART 3: Generate OBS Scene Collection =====
-            obs_collection = generate_obs_scene_collection(readings, service_details, date_str)
+            obs_collection = generate_obs_scene_collection(readings, service_details, date_str, obs_settings)
             obs_json = json.dumps(obs_collection, indent=2)
             zip_file.writestr(f"{date_folder_name}_OBS_Scenes.json", obs_json)
         
