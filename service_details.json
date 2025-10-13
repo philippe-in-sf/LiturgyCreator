@@ -19,5 +19,35 @@
     "communionMotet": "Ave Verum Corpus - Mozart",
     "communionHymn": "Hymn 304 - I come with joy to meet my Lord",
     "closingHymn": "Hymn 432 - O praise ye the Lord!"
+  },
+  "2025-10-13": {
+    "openingHymn": "Holy",
+    "sequenceHymn": "O Christ",
+    "offertory": "Come thou font",
+    "communionMotet": "Ave Verum",
+    "communionHymn": "I come with joy",
+    "closingHymn": "O praise ye the lord",
+    "organistName": "Casey Cantwell",
+    "preludeName": "Some piece",
+    "preludeComposer": "Cantwell",
+    "postludeName": "Some other piece",
+    "postludeComposer": "Haugen",
+    "preacherName": "",
+    "presiderName": ""
+  },
+  "2025-10-19": {
+    "openingHymn": "Holy",
+    "sequenceHymn": "O Christ",
+    "offertory": "Come thou font",
+    "communionMotet": "Ave Verum",
+    "communionHymn": "I come with joy",
+    "closingHymn": "O praise ye",
+    "organistName": "Casey Cantwell",
+    "preludeName": "Some piece",
+    "preludeComposer": "Cantwell",
+    "postludeName": "Some other piece",
+    "postludeComposer": "Bach",
+    "preacherName": "",
+    "presiderName": ""
   }
 }
