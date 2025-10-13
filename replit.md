@@ -39,6 +39,7 @@ The application follows a modular architecture with five main components:
 - **Deployment Configuration**: Comprehensive configuration for Google Cloud Run deployment, including `Procfile`, `Dockerfile`, `.dockerignore`, and `pyproject.toml` settings, ensuring Python 3.11 execution and proper port binding.
 - **Readings API Resolution**: Enhanced fallback system for liturgical APIs (local database, external APIs, closest Sunday readings) to ensure readings are always available.
 - **OBS Scene Collection Export (v2.2.0)**: Complete rewrite of OBS scene collection JSON generation to match native OBS Studio format specification, including proper source definitions, scene structure, transitions array, scene order, and all required metadata fields for successful import into OBS Studio.
+- **Full-Screen Title Card (v2.2.1)**: Automatic generation of a 1920x1080 title card image with 50% white opacity, displaying the liturgical reference (e.g., "First Sunday of Advent") centered at the top and "Trinity Episcopal Church, Tulsa, OK" at the bottom, styled with liturgical season colors matching the lower thirds.
 
 ## Configuration Management
 

@@ -1060,6 +1060,48 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     
     return img
 
+def create_title_card(liturgical_reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080) -> Image.Image:
+    """Create a full-screen title card with liturgical reference and church name"""
+    # Create image with white background and 50% opacity
+    img = Image.new('RGBA', (width, height), color=(255, 255, 255, 128))
+    draw = ImageDraw.Draw(img)
+    
+    # Determine liturgical season colors
+    liturgical_colors = get_liturgical_season_colors(date_str)
+    
+    # Try to load fonts
+    try:
+        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 80)
+        church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 50)
+    except:
+        title_font = ImageFont.load_default()
+        church_font = ImageFont.load_default()
+    
+    # Draw liturgical reference at top center
+    title_bbox = draw.textbbox((0, 0), liturgical_reference, font=title_font)
+    title_width = title_bbox[2] - title_bbox[0]
+    title_x = (width - title_width) // 2
+    title_y = 100
+    
+    # Draw text with liturgical season title color
+    draw.text((title_x, title_y), liturgical_reference, fill=liturgical_colors['title'], font=title_font)
+    
+    # Draw church name at bottom center
+    church_name = "Trinity Episcopal Church, Tulsa, OK"
+    church_bbox = draw.textbbox((0, 0), church_name, font=church_font)
+    church_width = church_bbox[2] - church_bbox[0]
+    church_x = (width - church_width) // 2
+    church_y = height - 150
+    
+    # Draw church name with liturgical season text color
+    draw.text((church_x, church_y), church_name, fill=liturgical_colors['text'], font=church_font)
+    
+    # Draw thin accent bars at top and bottom using liturgical accent color
+    draw.rectangle([0, 80, width, 85], fill=liturgical_colors['accent'])
+    draw.rectangle([0, height - 180, width, height - 175], fill=liturgical_colors['accent'])
+    
+    return img
+
 def generate_obs_scene_collection(readings: dict, service_details: dict, date_str: str, obs_settings: dict = None) -> dict:
     """
     Generate an OBS scene collection JSON structure
@@ -1169,6 +1211,23 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
             "visible": True,
             "locked": False
         }
+    
+    # Create title card scene (full-screen)
+    title_card_source, title_card_uuid = create_image_source_def(
+        "Title Card",
+        make_absolute_path("Worship/Title_Card.png")
+    )
+    sources.append(title_card_source)
+    
+    title_card_scene = {
+        "name": "Title Card",
+        "id": 1,
+        "sources": [
+            create_scene_item(title_card_uuid, "Title Card", 0, 0, source_counter)
+        ]
+    }
+    source_counter += 1
+    scenes.append(title_card_scene)
     
     # Create sources and scenes for each scripture reading
     for reading_type, reading_data in readings.items():
@@ -1413,6 +1472,16 @@ def export_all():
                     zip_file.writestr(f"{date_folder_name}/service_details/Presider.txt", formatted_presider)
             
             # ===== PART 2: Generate lower third graphics =====
+            # Generate full-screen title card with liturgical reference
+            liturgy_fetcher = LiturgyFetcher()
+            liturgical_reference = liturgy_fetcher._get_episcopal_celebration_name(selected_date)
+            
+            title_card_img = create_title_card(liturgical_reference, date_str)
+            title_card_buffer = io.BytesIO()
+            title_card_img.save(title_card_buffer, format='PNG')
+            title_card_buffer.seek(0)
+            zip_file.writestr(f"{date_folder_name}/Title_Card.png", title_card_buffer.read())
+            
             # Create lower third graphic for each reading
             for reading_type, reading_data in readings.items():
                 reference = reading_data.get('reference', 'No reference')
