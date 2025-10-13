@@ -1600,6 +1600,7 @@
                 
                 document.getElementById('obsOperatingSystem').value = obsSettings.operatingSystem || 'windows';
                 document.getElementById('obsBasePath').value = obsSettings.basePath || '';
+                updatePathPlaceholder();
             } catch (error) {
                 console.error('Error loading OBS settings:', error);
             }
