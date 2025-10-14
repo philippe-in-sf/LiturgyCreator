@@ -26,7 +26,7 @@ The application follows a modular architecture with five main components:
 ## UI/UX Decisions
 
 - **Liturgical Season Colors**: Lower third graphics dynamically adapt to liturgical season colors (Advent, Christmas, Epiphany, Lent, Easter, Pentecost) for appropriate visual themes.
-- **Lower Thirds Layout**: Positioned at 5/6 of screen height with a 260-pixel text indent, reserving space for a church logo.
+- **Lower Thirds Layout**: Positioned at 5/6 of screen height with church logo (Trinity Episcopal Church building illustration) positioned at left edge, followed by text content indented at 260 pixels.
 - **Mobile Responsive Design**: Comprehensive mobile-responsive interface for all screen sizes, including tablet (single-column, stacked buttons) and mobile (compact layout, optimized touch targets, responsive modals, adjustable font sizes).
 - **OBS Path Configuration**: Settings interface for OBS file path configuration with OS selection, base path configuration, and localStorage persistence for scene generation.
 
@@ -40,7 +40,8 @@ The application follows a modular architecture with five main components:
 - **Readings API Resolution**: Enhanced fallback system for liturgical APIs (local database, external APIs, closest Sunday readings) to ensure readings are always available.
 - **OBS Scene Collection Export (v2.2.0)**: Complete rewrite of OBS scene collection JSON generation to match native OBS Studio format specification, including proper source definitions, scene structure, transitions array, scene order, and all required metadata fields for successful import into OBS Studio.
 - **Full-Screen Title Card (v2.2.1)**: Automatic generation of a 1920x1080 title card image with 50% white opacity, displaying the liturgical reference (e.g., "First Sunday of Advent") centered at the top and "Trinity Episcopal Church, Tulsa, OK" at the bottom, styled with liturgical season colors matching the lower thirds.
-- **Enhanced Title Card Design (v2.2.2)**: Eye-catching title card design with decorative borders, corner flourishes, horizontal dividers with diamond ornaments, text shadows for depth, and elegant serif typography—all using dynamic liturgical season accent colors for visual impact while maintaining reverent aesthetics.
+- **Enhanced Title Card Design (v2.2.2)**: Eye-catching title card design with decorative borders, corner flourishes, horizontal dividers with diamond ornaments, text shadows for depth, and elegant serif typography (90pt for liturgical reference, 60pt for church name)—all using dynamic liturgical season accent colors for visual impact while maintaining reverent aesthetics.
+- **Church Logo Integration (v2.2.3)**: Integrated Trinity Episcopal Church logo into Lower Thirds graphics, positioned at the left edge (30px from edge) with automatic scaling to fit within the reserved 200px width space, maintaining aspect ratio and vertical centering within the lower third bar.
 
 ## Configuration Management
 
