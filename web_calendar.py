@@ -1052,7 +1052,7 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     
     try:
         # Load the church logo
-        logo_path = "attached_assets/Trin High Qual_1760427474512.jpg"
+        logo_path = "attached_assets/Trin High Qual - trans_1760427955140.png"
         logo = Image.open(logo_path)
         
         # Resize logo to fit in the reserved space (max 200px wide, maintaining aspect ratio)
