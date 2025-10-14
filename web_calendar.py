@@ -1071,21 +1071,83 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
     
     # Try to load elegant serif fonts for a classic, timeless look
     try:
-        # Try DejaVu Serif first (elegant and widely available)
-        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 70)
-        church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 50)
+        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 75)
+        church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 45)
+        decorative_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf", 35)
     except:
         try:
-            # Fallback to Liberation Serif
-            title_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf", 70)
-            church_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf", 50)
+            title_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf", 75)
+            church_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf", 45)
+            decorative_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf", 35)
         except:
-            # Final fallback to default
             title_font = ImageFont.load_default()
             church_font = ImageFont.load_default()
+            decorative_font = ImageFont.load_default()
+    
+    # Draw decorative border with liturgical accent color
+    border_width = 30
+    draw.rectangle([border_width, border_width, width - border_width, height - border_width], 
+                   outline=liturgical_colors['accent'], width=8)
+    
+    # Draw decorative corner flourishes
+    corner_size = 120
+    corner_color = liturgical_colors['accent']
+    
+    # Top-left corner
+    draw.arc([border_width + 20, border_width + 20, border_width + corner_size, border_width + corner_size], 
+             start=180, end=270, fill=corner_color, width=6)
+    
+    # Top-right corner
+    draw.arc([width - border_width - corner_size, border_width + 20, width - border_width - 20, border_width + corner_size], 
+             start=270, end=0, fill=corner_color, width=6)
+    
+    # Bottom-left corner
+    draw.arc([border_width + 20, height - border_width - corner_size, border_width + corner_size, height - border_width - 20], 
+             start=90, end=180, fill=corner_color, width=6)
+    
+    # Bottom-right corner
+    draw.arc([width - border_width - corner_size, height - border_width - corner_size, width - border_width - 20, height - border_width - 20], 
+             start=0, end=90, fill=corner_color, width=6)
+    
+    # Draw decorative horizontal dividers with gradient effect
+    divider_y_top = 220
+    divider_y_bottom = height - 220
+    center_x = width // 2
+    
+    # Top divider - decorative lines emanating from center
+    for i in range(3):
+        offset = i * 15
+        draw.line([(center_x - 400 - offset, divider_y_top + i * 3), (center_x - 50, divider_y_top + i * 3)], 
+                  fill=liturgical_colors['accent'], width=2)
+        draw.line([(center_x + 50, divider_y_top + i * 3), (center_x + 400 + offset, divider_y_top + i * 3)], 
+                  fill=liturgical_colors['accent'], width=2)
+    
+    # Bottom divider
+    for i in range(3):
+        offset = i * 15
+        draw.line([(center_x - 400 - offset, divider_y_bottom + i * 3), (center_x - 50, divider_y_bottom + i * 3)], 
+                  fill=liturgical_colors['accent'], width=2)
+        draw.line([(center_x + 50, divider_y_bottom + i * 3), (center_x + 400 + offset, divider_y_bottom + i * 3)], 
+                  fill=liturgical_colors['accent'], width=2)
+    
+    # Draw decorative center ornament (diamond shape)
+    diamond_size = 25
+    draw.polygon([
+        (center_x, divider_y_top - diamond_size),
+        (center_x + diamond_size, divider_y_top),
+        (center_x, divider_y_top + diamond_size),
+        (center_x - diamond_size, divider_y_top)
+    ], fill=liturgical_colors['accent'])
+    
+    draw.polygon([
+        (center_x, divider_y_bottom - diamond_size),
+        (center_x + diamond_size, divider_y_bottom),
+        (center_x, divider_y_bottom + diamond_size),
+        (center_x - diamond_size, divider_y_bottom)
+    ], fill=liturgical_colors['accent'])
     
     # Word wrap liturgical reference if too long
-    max_title_width = width - 200  # Leave 100px margin on each side
+    max_title_width = width - 300
     words = liturgical_reference.split()
     lines = []
     current_line = []
@@ -1106,30 +1168,34 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
         lines.append(' '.join(current_line))
     
     # Draw liturgical reference centered at top (multi-line if needed)
-    line_height = 80
-    total_height = len(lines) * line_height
-    start_y = 150
+    line_height = 85
+    start_y = 280
     
     for i, line in enumerate(lines):
+        # Draw text shadow for depth
         bbox = draw.textbbox((0, 0), line, font=title_font)
         line_width = bbox[2] - bbox[0]
         line_x = (width - line_width) // 2
         line_y = start_y + (i * line_height)
+        
+        # Shadow
+        shadow_color = (0, 0, 0, 80)
+        draw.text((line_x + 3, line_y + 3), line, fill=shadow_color, font=title_font)
+        
+        # Main text
         draw.text((line_x, line_y), line, fill=liturgical_colors['title'], font=title_font)
     
-    # Draw church name at bottom center
+    # Draw church name at bottom center with shadow
     church_name = "Trinity Episcopal Church, Tulsa, OK"
     church_bbox = draw.textbbox((0, 0), church_name, font=church_font)
     church_width = church_bbox[2] - church_bbox[0]
     church_x = (width - church_width) // 2
-    church_y = height - 150
+    church_y = height - 280
     
-    # Draw church name with liturgical season text color
+    # Shadow for church name
+    draw.text((church_x + 2, church_y + 2), church_name, fill=(0, 0, 0, 80), font=church_font)
+    # Main text
     draw.text((church_x, church_y), church_name, fill=liturgical_colors['text'], font=church_font)
-    
-    # Draw thin accent bars at top and bottom using liturgical accent color
-    draw.rectangle([0, 80, width, 85], fill=liturgical_colors['accent'])
-    draw.rectangle([0, height - 180, width, height - 175], fill=liturgical_colors['accent'])
     
     return img
 
