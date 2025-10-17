@@ -1073,15 +1073,20 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
         title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 200)
         church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 140)
         decorative_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf", 35)
-    except:
+        print(f"✅ Successfully loaded DejaVu fonts: title=200pt, church=140pt")
+    except Exception as e:
+        print(f"❌ Failed to load DejaVu fonts: {e}")
         try:
             title_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf", 200)
             church_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf", 140)
             decorative_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf", 35)
-        except:
+            print(f"✅ Successfully loaded Liberation fonts: title=200pt, church=140pt")
+        except Exception as e2:
+            print(f"❌ Failed to load Liberation fonts: {e2}")
             title_font = ImageFont.load_default()
             church_font = ImageFont.load_default()
             decorative_font = ImageFont.load_default()
+            print(f"⚠️ Using default fonts (this will be very small!)")
     
     # Draw decorative border with liturgical accent color
     border_width = 30
