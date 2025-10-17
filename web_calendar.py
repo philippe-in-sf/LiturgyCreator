@@ -1070,17 +1070,17 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
     
     # Try to load elegant serif fonts for a classic, timeless look
     try:
-        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 200)
-        church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 140)
+        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 150)
+        church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 100)
         decorative_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf", 35)
-        print(f"✅ Successfully loaded DejaVu fonts: title=200pt, church=140pt")
+        print(f"✅ Successfully loaded DejaVu fonts: title=150pt, church=100pt")
     except Exception as e:
         print(f"❌ Failed to load DejaVu fonts: {e}")
         try:
-            title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 200)
-            church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 140)
+            title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 150)
+            church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 100)
             decorative_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 35)
-            print(f"✅ Successfully loaded DejaVuSans fonts: title=200pt, church=140pt")
+            print(f"✅ Successfully loaded DejaVuSans fonts: title=150pt, church=100pt")
         except Exception as e2:
             print(f"❌ Failed to load all fonts: {e2}")
             title_font = ImageFont.load_default()
@@ -1204,8 +1204,8 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
         lines.append(' '.join(current_line))
     
     # Draw liturgical reference centered at top (multi-line if needed)
-    line_height = 220
-    start_y = 200
+    line_height = 170
+    start_y = 220
     
     for i, line in enumerate(lines):
         # Draw text shadow for depth
