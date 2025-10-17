@@ -1069,13 +1069,13 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
     
     # Try to load elegant serif fonts for a classic, timeless look
     try:
-        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 90)
-        church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 60)
+        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 120)
+        church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 80)
         decorative_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf", 35)
     except:
         try:
-            title_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf", 90)
-            church_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf", 60)
+            title_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf", 120)
+            church_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf", 80)
             decorative_font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf", 35)
         except:
             title_font = ImageFont.load_default()
@@ -1166,7 +1166,7 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
         lines.append(' '.join(current_line))
     
     # Draw liturgical reference centered at top (multi-line if needed)
-    line_height = 100
+    line_height = 140
     start_y = 280
     
     for i, line in enumerate(lines):
