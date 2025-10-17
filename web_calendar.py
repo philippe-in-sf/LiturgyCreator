@@ -1144,6 +1144,38 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
         (center_x - diamond_size, divider_y_bottom)
     ], fill=liturgical_colors['accent'])
     
+    # Add church logo in the center
+    try:
+        logo_path = "attached_assets/Trin High Qual - trans_1760427955140.png"
+        logo = Image.open(logo_path)
+        
+        # Scale logo to fit nicely in the center area (max 500px width)
+        max_logo_width = 500
+        max_logo_height = 400
+        
+        # Calculate scaling to fit within both constraints
+        width_ratio = max_logo_width / logo.width
+        height_ratio = max_logo_height / logo.height
+        scale_ratio = min(width_ratio, height_ratio)
+        
+        new_logo_width = int(logo.width * scale_ratio)
+        new_logo_height = int(logo.height * scale_ratio)
+        
+        logo_resized = logo.resize((new_logo_width, new_logo_height), Image.Resampling.LANCZOS)
+        
+        # Convert to RGBA if needed
+        if logo_resized.mode != 'RGBA':
+            logo_resized = logo_resized.convert('RGBA')
+        
+        # Position logo in the center of the card
+        logo_x = (width - new_logo_width) // 2
+        logo_y = (height - new_logo_height) // 2
+        
+        # Paste logo onto the card
+        img.paste(logo_resized, (logo_x, logo_y), logo_resized)
+    except Exception as e:
+        print(f"Could not load church logo for title card: {e}")
+    
     # Word wrap liturgical reference if too long
     max_title_width = width - 300
     words = liturgical_reference.split()
