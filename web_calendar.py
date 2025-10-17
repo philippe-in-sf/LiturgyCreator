@@ -1193,9 +1193,13 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
     service_x = (width - service_width) // 2
     service_y = 100  # Above the first divider at y=220
     
-    # Shadow
-    shadow_color = (0, 0, 0, 80)
-    draw.text((service_x + 3, service_y + 3), service_type, fill=shadow_color, font=title_font)
+    # Black outline (draw text in 8 directions)
+    outline_width = 4
+    for offset_x in range(-outline_width, outline_width + 1):
+        for offset_y in range(-outline_width, outline_width + 1):
+            if offset_x != 0 or offset_y != 0:
+                draw.text((service_x + offset_x, service_y + offset_y), service_type, fill=(0, 0, 0, 255), font=title_font)
+    
     # Main text
     draw.text((service_x, service_y), service_type, fill=liturgical_colors['title'], font=title_font)
     
@@ -1206,8 +1210,13 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
         date_x = (width - date_width) // 2
         date_y = 250  # Just below the first divider at y=220
         
-        # Shadow
-        draw.text((date_x + 2, date_y + 2), service_date, fill=shadow_color, font=church_font)
+        # Black outline (draw text in 8 directions)
+        outline_width = 3
+        for offset_x in range(-outline_width, outline_width + 1):
+            for offset_y in range(-outline_width, outline_width + 1):
+                if offset_x != 0 or offset_y != 0:
+                    draw.text((date_x + offset_x, date_y + offset_y), service_date, fill=(0, 0, 0, 255), font=church_font)
+        
         # Main text
         draw.text((date_x, date_y), service_date, fill=liturgical_colors['text'], font=church_font)
     
@@ -1218,8 +1227,13 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
     church_x = (width - church_width) // 2
     church_y = height - 170  # Below the second divider at y=(height-220)=860
     
-    # Shadow for church name
-    draw.text((church_x + 2, church_y + 2), church_name, fill=(0, 0, 0, 80), font=church_font)
+    # Black outline (draw text in 8 directions)
+    outline_width = 3
+    for offset_x in range(-outline_width, outline_width + 1):
+        for offset_y in range(-outline_width, outline_width + 1):
+            if offset_x != 0 or offset_y != 0:
+                draw.text((church_x + offset_x, church_y + offset_y), church_name, fill=(0, 0, 0, 255), font=church_font)
+    
     # Main text
     draw.text((church_x, church_y), church_name, fill=liturgical_colors['text'], font=church_font)
     
