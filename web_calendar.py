@@ -1070,17 +1070,17 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
     
     # Try to load elegant serif fonts for a classic, timeless look
     try:
-        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 150)
-        church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 100)
+        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 100)
+        church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 70)
         decorative_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf", 35)
-        print(f"✅ Successfully loaded DejaVu fonts: title=150pt, church=100pt")
+        print(f"✅ Successfully loaded DejaVu fonts: title=100pt, church=70pt")
     except Exception as e:
         print(f"❌ Failed to load DejaVu fonts: {e}")
         try:
-            title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 150)
-            church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 100)
+            title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 100)
+            church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 70)
             decorative_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 35)
-            print(f"✅ Successfully loaded DejaVuSans fonts: title=150pt, church=100pt")
+            print(f"✅ Successfully loaded DejaVuSans fonts: title=100pt, church=70pt")
         except Exception as e2:
             print(f"❌ Failed to load all fonts: {e2}")
             title_font = ImageFont.load_default()
@@ -1204,8 +1204,8 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
         lines.append(' '.join(current_line))
     
     # Draw liturgical reference centered at top (multi-line if needed)
-    line_height = 170
-    start_y = 220
+    line_height = 120
+    start_y = 300
     
     for i, line in enumerate(lines):
         # Draw text shadow for depth
@@ -1677,12 +1677,10 @@ def export_all():
                     zip_file.writestr(f"{date_folder_name}/service_details/Presider.txt", formatted_presider)
             
             # ===== PART 2: Generate lower third graphics =====
-            # Generate full-screen title card with liturgical reference
-            liturgy_fetcher = LiturgyFetcher()
-            liturgical_reference = liturgy_fetcher._get_episcopal_celebration_name(selected_date)
-            
-            # Remove Proper number designation for title card (e.g., remove "(Proper 25)")
-            title_reference = re.sub(r'\s*\(Proper \d+\)', '', liturgical_reference)
+            # Generate full-screen title card with "Holy Eucharist" and date
+            # Format date nicely (e.g., "October 19, 2025")
+            formatted_date = selected_date.strftime("%B %d, %Y")
+            title_reference = f"Holy Eucharist\n{formatted_date}"
             
             title_card_img = create_title_card(title_reference, date_str)
             title_card_buffer = io.BytesIO()
