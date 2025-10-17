@@ -1952,6 +1952,173 @@ def list_pdf_uploads():
             'error': str(e)
         }), 500
 
+@app.route('/api/special_service', methods=['POST'])
+def special_service():
+    """Generate graphics and text files for special (non-lectionary) services"""
+    try:
+        data = request.get_json()
+        service_title = data.get('title', '')
+        service_date = data.get('date', '')
+        readings = data.get('readings', {})
+        service_details = data.get('service_details', {})
+        
+        if not service_title:
+            return jsonify({
+                'success': False,
+                'error': 'Service title is required'
+            }), 400
+        
+        if not service_date:
+            return jsonify({
+                'success': False,
+                'error': 'Service date is required'
+            }), 400
+        
+        # Parse date
+        selected_date = datetime.fromisoformat(service_date)
+        date_folder_name = "Worship"
+        
+        # Create ZIP file in memory
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            # ===== PART 1: Export text files for readings =====
+            reading_types = {
+                'gospel': 'Gospel',
+                'old_testament': 'Old Testament',
+                'epistle': 'Epistle',
+                'psalm': 'Psalm'
+            }
+            
+            for reading_key, reading_label in reading_types.items():
+                reading_data = readings.get(reading_key, {})
+                reference = reading_data.get('reference', '').strip()
+                text = reading_data.get('text', '').strip()
+                
+                if reference or text:
+                    # Create text file with scripture text
+                    if text:
+                        text_filename = f"{reading_label}.txt"
+                        text_filepath = f"{date_folder_name}/readings/{text_filename}"
+                        formatted_text = format_text_with_paragraphs(text, width=50)
+                        zip_file.writestr(text_filepath, formatted_text)
+                    
+                    # Create reference file
+                    if reference:
+                        ref_filename = f"{reading_label} Reference.txt"
+                        ref_filepath = f"{date_folder_name}/readings/{ref_filename}"
+                        formatted_ref = textwrap.fill(reference, width=50, break_long_words=False, break_on_hyphens=False)
+                        zip_file.writestr(ref_filepath, formatted_ref)
+            
+            # ===== PART 2: Export service details files =====
+            service_detail_fields = {
+                'openingHymn': 'Opening Hymn',
+                'sequenceHymn': 'Sequence Hymn',
+                'communionMotet': 'Communion Motet',
+                'closingHymn': 'Closing Hymn',
+                'organistName': 'Organist',
+                'preludeName': 'Prelude Title',
+                'preludeComposer': 'Prelude Composer',
+                'postludeName': 'Postlude Title',
+                'postludeComposer': 'Postlude Composer',
+                'preacherName': 'Preacher',
+                'offertory': 'Offertory'
+            }
+            
+            for field_key, field_label in service_detail_fields.items():
+                field_value = service_details.get(field_key, '').strip()
+                if field_value:
+                    formatted_value = textwrap.fill(field_value, width=50, break_long_words=False, break_on_hyphens=False)
+                    filename = f"{field_label}.txt"
+                    filepath = f"{date_folder_name}/service_details/{filename}"
+                    zip_file.writestr(filepath, formatted_value)
+            
+            # Fetch hymn texts from Hymnary.org
+            for hymn_key in ['openingHymn', 'sequenceHymn', 'closingHymn']:
+                hymn_value = service_details.get(hymn_key, '').strip()
+                if hymn_value:
+                    hymn_text = fetch_hymn_text_from_hymnary(hymn_value)
+                    if hymn_text:
+                        formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
+                        label = hymn_key.replace('Hymn', ' Hymn').replace('opening', 'Opening').replace('sequence', 'Sequence').replace('closing', 'Closing')
+                        filename = f"{label.strip()} Text.txt"
+                        filepath = f"{date_folder_name}/service_details/{filename}"
+                        zip_file.writestr(filepath, formatted_hymn_text)
+            
+            # ===== PART 3: Generate title card with service title =====
+            title_card = create_title_card(service_title, selected_date)
+            title_card_buffer = io.BytesIO()
+            title_card.save(title_card_buffer, format='PNG')
+            title_card_buffer.seek(0)
+            zip_file.writestr(f"{date_folder_name}/graphics/Title Card.png", title_card_buffer.read())
+            
+            # ===== PART 4: Generate lower third graphics for readings =====
+            for reading_key, reading_label in reading_types.items():
+                reading_data = readings.get(reading_key, {})
+                reference = reading_data.get('reference', '').strip()
+                
+                if reference:
+                    # Generate lower third image (use generic color scheme for special services)
+                    img = create_lower_third(reading_label, reference, service_date)
+                    
+                    # Save image to buffer
+                    img_buffer = io.BytesIO()
+                    img.save(img_buffer, format='PNG')
+                    img_buffer.seek(0)
+                    
+                    # Add to ZIP
+                    filename = f"{reading_label}.png"
+                    filepath = f"{date_folder_name}/graphics/{filename}"
+                    zip_file.writestr(filepath, img_buffer.read())
+            
+            # ===== PART 5: Generate lower third graphics for hymns/music =====
+            hymn_fields = {
+                'openingHymn': 'Opening Hymn',
+                'sequenceHymn': 'Sequence Hymn',
+                'offertory': 'Offertory',
+                'communionMotet': 'Communion Motet',
+                'communionHymn': 'Communion Hymn',
+                'closingHymn': 'Closing Hymn'
+            }
+            
+            for field_key, field_label in hymn_fields.items():
+                hymn_value = service_details.get(field_key, '').strip()
+                if hymn_value:
+                    # Generate lower third image
+                    img = create_lower_third(field_label, hymn_value, service_date)
+                    
+                    # Save image to buffer
+                    img_buffer = io.BytesIO()
+                    img.save(img_buffer, format='PNG')
+                    img_buffer.seek(0)
+                    
+                    # Add to ZIP
+                    filename = f"{field_label}.png"
+                    filepath = f"{date_folder_name}/graphics/{filename}"
+                    zip_file.writestr(filepath, img_buffer.read())
+        
+        # Prepare the ZIP file for download
+        zip_buffer.seek(0)
+        
+        # Generate safe filename from service title
+        safe_title = "".join(c for c in service_title if c.isalnum() or c in (' ', '-', '_')).strip()
+        safe_title = safe_title.replace(' ', '_')[:50]  # Limit length
+        download_name = f"special_service_{safe_title}_{service_date.replace('-', '')}.zip"
+        
+        return send_file(
+            io.BytesIO(zip_buffer.read()),
+            as_attachment=True,
+            download_name=download_name,
+            mimetype='application/zip'
+        )
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate special service materials'
+        }), 500
+
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5000))
