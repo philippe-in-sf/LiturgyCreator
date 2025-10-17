@@ -1182,51 +1182,41 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
     except Exception as e:
         print(f"Could not load church logo for title card: {e}")
     
-    # Word wrap liturgical reference if too long
-    max_title_width = width - 300
-    words = liturgical_reference.split()
-    lines = []
-    current_line = []
+    # Split liturgical reference into service type and date (separated by newline)
+    reference_parts = liturgical_reference.split('\n')
+    service_type = reference_parts[0] if reference_parts else "Holy Eucharist"
+    service_date = reference_parts[1] if len(reference_parts) > 1 else ""
     
-    for word in words:
-        test_line = ' '.join(current_line + [word])
-        bbox = draw.textbbox((0, 0), test_line, font=title_font)
-        line_width = bbox[2] - bbox[0]
-        
-        if line_width <= max_title_width:
-            current_line.append(word)
-        else:
-            if current_line:
-                lines.append(' '.join(current_line))
-            current_line = [word]
+    # Draw "Holy Eucharist" ABOVE the first separator
+    bbox = draw.textbbox((0, 0), service_type, font=title_font)
+    service_width = bbox[2] - bbox[0]
+    service_x = (width - service_width) // 2
+    service_y = 100  # Above the first divider at y=220
     
-    if current_line:
-        lines.append(' '.join(current_line))
+    # Shadow
+    shadow_color = (0, 0, 0, 80)
+    draw.text((service_x + 3, service_y + 3), service_type, fill=shadow_color, font=title_font)
+    # Main text
+    draw.text((service_x, service_y), service_type, fill=liturgical_colors['title'], font=title_font)
     
-    # Draw liturgical reference centered at top (multi-line if needed)
-    line_height = 120
-    start_y = 300
-    
-    for i, line in enumerate(lines):
-        # Draw text shadow for depth
-        bbox = draw.textbbox((0, 0), line, font=title_font)
-        line_width = bbox[2] - bbox[0]
-        line_x = (width - line_width) // 2
-        line_y = start_y + (i * line_height)
+    # Draw date JUST BELOW the first separator
+    if service_date:
+        date_bbox = draw.textbbox((0, 0), service_date, font=church_font)
+        date_width = date_bbox[2] - date_bbox[0]
+        date_x = (width - date_width) // 2
+        date_y = 250  # Just below the first divider at y=220
         
         # Shadow
-        shadow_color = (0, 0, 0, 80)
-        draw.text((line_x + 3, line_y + 3), line, fill=shadow_color, font=title_font)
-        
+        draw.text((date_x + 2, date_y + 2), service_date, fill=shadow_color, font=church_font)
         # Main text
-        draw.text((line_x, line_y), line, fill=liturgical_colors['title'], font=title_font)
+        draw.text((date_x, date_y), service_date, fill=liturgical_colors['text'], font=church_font)
     
-    # Draw church name at bottom center with shadow
+    # Draw church name BELOW the second separator
     church_name = "Trinity Episcopal Church, Tulsa, OK"
     church_bbox = draw.textbbox((0, 0), church_name, font=church_font)
     church_width = church_bbox[2] - church_bbox[0]
     church_x = (width - church_width) // 2
-    church_y = height - 240
+    church_y = height - 170  # Below the second divider at y=(height-220)=860
     
     # Shadow for church name
     draw.text((church_x + 2, church_y + 2), church_name, fill=(0, 0, 0, 80), font=church_font)
@@ -1509,9 +1499,11 @@ def preview_graphics():
         
         previews = []
         
-        # Generate title card preview
-        liturgical_reference = liturgical_info.get('liturgical_reference', 'Sunday Service')
-        title_card = create_title_card(liturgical_reference, date_str)
+        # Generate title card preview with "Holy Eucharist" and date
+        selected_date = datetime.fromisoformat(date_str)
+        formatted_date = selected_date.strftime("%B %d, %Y")
+        title_reference = f"Holy Eucharist\n{formatted_date}"
+        title_card = create_title_card(title_reference, date_str)
         
         # Convert title card to base64
         title_buffer = io.BytesIO()
