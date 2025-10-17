@@ -1908,11 +1908,123 @@
             modal.style.display = 'none';
         }
 
+        // Special Service Functions
+        function showSpecialService() {
+            const modal = document.getElementById('specialServiceModal');
+            modal.style.display = 'block';
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('specialServiceDate').value = today;
+        }
+        
+        function closeSpecialService() {
+            const modal = document.getElementById('specialServiceModal');
+            modal.style.display = 'none';
+            
+            // Reset form
+            document.getElementById('specialServiceForm').reset();
+        }
+        
+        function saveSpecialService() {
+            const serviceTitle = document.getElementById('specialServiceTitle').value.trim();
+            const serviceDate = document.getElementById('specialServiceDate').value;
+            
+            if (!serviceTitle) {
+                showError('Please enter a service title');
+                return;
+            }
+            
+            if (!serviceDate) {
+                showError('Please select a service date');
+                return;
+            }
+            
+            // Collect readings
+            const readings = {
+                gospel: {
+                    reference: document.getElementById('specialGospelRef').value.trim(),
+                    text: document.getElementById('specialGospelText').value.trim()
+                },
+                old_testament: {
+                    reference: document.getElementById('specialOTRef').value.trim(),
+                    text: document.getElementById('specialOTText').value.trim()
+                },
+                epistle: {
+                    reference: document.getElementById('specialEpistleRef').value.trim(),
+                    text: document.getElementById('specialEpistleText').value.trim()
+                },
+                psalm: {
+                    reference: document.getElementById('specialPsalmRef').value.trim(),
+                    text: document.getElementById('specialPsalmText').value.trim()
+                }
+            };
+            
+            // Collect service details
+            const specialServiceDetails = {
+                organistName: document.getElementById('specialOrganistName').value.trim(),
+                preludeName: document.getElementById('specialPreludeName').value.trim(),
+                preludeComposer: document.getElementById('specialPreludeComposer').value.trim(),
+                openingHymn: document.getElementById('specialOpeningHymn').value.trim(),
+                sequenceHymn: document.getElementById('specialSequenceHymn').value.trim(),
+                preacherName: document.getElementById('specialPreacherName').value.trim(),
+                offertory: document.getElementById('specialOffertory').value.trim(),
+                communionMotet: document.getElementById('specialCommunionMotet').value.trim(),
+                communionHymn: document.getElementById('specialCommunionHymn').value.trim(),
+                closingHymn: document.getElementById('specialClosingHymn').value.trim(),
+                postludeName: document.getElementById('specialPostludeName').value.trim(),
+                postludeComposer: document.getElementById('specialPostludeComposer').value.trim()
+            };
+            
+            // Check if at least one reading is provided
+            const hasReadings = readings.gospel.reference || readings.old_testament.reference || 
+                               readings.epistle.reference || readings.psalm.reference;
+            
+            if (!hasReadings) {
+                showError('Please enter at least one scripture reading');
+                return;
+            }
+            
+            // Send to backend
+            fetch('/api/special_service', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: serviceTitle,
+                    date: serviceDate,
+                    readings: readings,
+                    service_details: specialServiceDetails
+                })
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                // Download the ZIP file
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `special_service_${serviceDate.replace(/-/g, '')}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showSuccess('Special service graphics generated successfully!');
+                closeSpecialService();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Failed to generate special service graphics');
+            });
+        }
+
         // Close modal when clicking outside of it
         window.onclick = function(event) {
             const serviceModal = document.getElementById('serviceDetailsModal');
             const settingsModal = document.getElementById('settingsModal');
             const previewModal = document.getElementById('previewModal');
+            const specialServiceModal = document.getElementById('specialServiceModal');
             
             if (event.target === serviceModal) {
                 closeServiceDetails();
@@ -1920,6 +2032,8 @@
                 closeSettings();
             } else if (event.target === previewModal) {
                 closePreview();
+            } else if (event.target === specialServiceModal) {
+                closeSpecialService();
             }
         }
 
