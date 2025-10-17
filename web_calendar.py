@@ -2046,7 +2046,7 @@ def special_service():
                         zip_file.writestr(filepath, formatted_hymn_text)
             
             # ===== PART 3: Generate title card with service title =====
-            title_card = create_title_card(service_title, selected_date)
+            title_card = create_title_card(service_title, service_date)
             title_card_buffer = io.BytesIO()
             title_card.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
