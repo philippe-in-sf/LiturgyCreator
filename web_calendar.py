@@ -20,7 +20,6 @@ import pdfplumber
 import pytesseract
 from PIL import Image, ImageDraw, ImageFont
 from werkzeug.utils import secure_filename
-from functools import wraps
 import uuid
 from liturgy_fetcher import LiturgyFetcher
 from scripture_parser import ScriptureParser
@@ -38,20 +37,8 @@ MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
-# Get access code from environment
-ACCESS_CODE = os.environ.get('ACCESS_CODE', '3501')
-
 # Create uploads directory if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# Authentication decorator
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('authenticated'):
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
 
 def allowed_file(filename):
     """Check if uploaded file has allowed extension"""
@@ -503,32 +490,12 @@ class WebLiturgicalCalendar:
 # Initialize the calendar
 web_calendar = WebLiturgicalCalendar()
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    """Login page"""
-    if request.method == 'POST':
-        code = request.form.get('code', '')
-        if code == ACCESS_CODE:
-            session['authenticated'] = True
-            return redirect(url_for('index'))
-        else:
-            return render_template('login.html', error='Invalid access code')
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    """Logout"""
-    session.pop('authenticated', None)
-    return redirect(url_for('login'))
-
 @app.route('/')
-@login_required
 def index():
     """Main calendar page"""
     return render_template('calendar.html')
 
 @app.route('/api/calendar/<int:year>/<int:month>')
-@login_required
 def get_calendar(year, month):
     """API endpoint to get calendar data"""
     try:
@@ -538,7 +505,6 @@ def get_calendar(year, month):
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/readings/<date_str>')
-@login_required
 def get_readings(date_str):
     """API endpoint to get readings for a specific date"""
     try:
@@ -1480,7 +1446,6 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
     return scene_collection
 
 @app.route('/api/export_all', methods=['POST'])
-@login_required
 def export_all():
     """Combined export: readings text files + lower third graphics in one ZIP"""
     try:
@@ -1680,7 +1645,6 @@ def export_all():
         }), 500
 
 @app.route('/api/generate_lower_thirds', methods=['POST'])
-@login_required
 def generate_lower_thirds():
     """Generate lower third graphics for broadcast use"""
     try:
