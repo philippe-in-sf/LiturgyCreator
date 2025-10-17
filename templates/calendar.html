@@ -953,6 +953,7 @@
                 <div class="action-buttons">
                     <button class="action-btn btn-secondary" onclick="showServiceDetails()">Service Details</button>
                     <button class="action-btn btn-primary" onclick="loadReadings()">Load Reading</button>
+                    <button class="action-btn btn-warning" onclick="showPreview()" style="background-color: #ffc107; color: #000;">👁️ Preview</button>
                     <button class="action-btn btn-success" onclick="exportAll()" style="background-color: #28a745;">Export All</button>
                     <button class="action-btn btn-info" onclick="showSettings()" style="background-color: #6c757d;">⚙️ Settings</button>
                 </div>
@@ -1129,6 +1130,30 @@
                     <button type="button" class="btn-save" onclick="saveSettings()">Save Settings</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px; width: 90%;">
+            <div class="modal-header">
+                <span class="close" onclick="closePreview()">&times;</span>
+                <h2 class="modal-title">Graphics Preview</h2>
+            </div>
+            
+            <div id="previewContent" style="padding: 20px;">
+                <div id="previewLoading" style="text-align: center; padding: 40px;">
+                    <p>Loading preview...</p>
+                </div>
+                <div id="previewImages" style="display: none;">
+                    <!-- Preview images will be populated here -->
+                </div>
+            </div>
+            
+            <div class="form-actions" style="padding: 20px; border-top: 1px solid #ddd;">
+                <button type="button" class="btn-cancel" onclick="closePreview()">Close</button>
+                <button type="button" class="btn-save" onclick="exportAll()" style="background-color: #28a745; color: white;">Download All</button>
+            </div>
         </div>
     </div>
 
@@ -1661,15 +1686,86 @@
             closeSettings();
         }
 
+        // Preview Functions
+        function showPreview() {
+            if (!selectedReadings || !selectedReadings.has_readings) {
+                showError('No readings available to preview');
+                return;
+            }
+            
+            const modal = document.getElementById('previewModal');
+            const loadingDiv = document.getElementById('previewLoading');
+            const imagesDiv = document.getElementById('previewImages');
+            
+            modal.style.display = 'block';
+            loadingDiv.style.display = 'block';
+            imagesDiv.style.display = 'none';
+            
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            
+            fetch('/api/preview_graphics', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ date: dateStr })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayPreviews(data.previews);
+                    loadingDiv.style.display = 'none';
+                    imagesDiv.style.display = 'block';
+                } else {
+                    showError('Failed to load preview: ' + data.error);
+                    closePreview();
+                }
+            })
+            .catch(error => {
+                console.error('Preview error:', error);
+                showError('Failed to load preview');
+                closePreview();
+            });
+        }
+        
+        function displayPreviews(previews) {
+            const imagesDiv = document.getElementById('previewImages');
+            imagesDiv.innerHTML = '';
+            
+            previews.forEach((preview, index) => {
+                const previewItem = document.createElement('div');
+                previewItem.style.cssText = 'margin-bottom: 30px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: #f8f9fa;';
+                
+                previewItem.innerHTML = `
+                    <div style="padding: 15px; background: #fff; border-bottom: 1px solid #ddd;">
+                        <h3 style="margin: 0; color: #333; font-size: 18px;">${preview.name}</h3>
+                    </div>
+                    <div style="padding: 20px; text-align: center; background: #000;">
+                        <img src="${preview.image}" alt="${preview.name}" style="max-width: 100%; height: auto; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+                    </div>
+                `;
+                
+                imagesDiv.appendChild(previewItem);
+            });
+        }
+        
+        function closePreview() {
+            const modal = document.getElementById('previewModal');
+            modal.style.display = 'none';
+        }
+
         // Close modal when clicking outside of it
         window.onclick = function(event) {
             const serviceModal = document.getElementById('serviceDetailsModal');
             const settingsModal = document.getElementById('settingsModal');
+            const previewModal = document.getElementById('previewModal');
             
             if (event.target === serviceModal) {
                 closeServiceDetails();
             } else if (event.target === settingsModal) {
                 closeSettings();
+            } else if (event.target === previewModal) {
+                closePreview();
             }
         }
 

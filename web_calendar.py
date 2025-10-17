@@ -21,6 +21,7 @@ import pytesseract
 from PIL import Image, ImageDraw, ImageFont
 from werkzeug.utils import secure_filename
 import uuid
+import base64
 from liturgy_fetcher import LiturgyFetcher
 from scripture_parser import ScriptureParser
 
@@ -1476,6 +1477,79 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
     }
     
     return scene_collection
+
+@app.route('/api/preview_graphics', methods=['POST'])
+def preview_graphics():
+    """Generate preview images for title card and lower thirds"""
+    try:
+        data = request.get_json()
+        date_str = data.get('date')
+        
+        if not date_str:
+            return jsonify({
+                'success': False,
+                'error': 'No date provided'
+            }), 400
+        
+        # Get readings for the date
+        calendar_instance = WebLiturgicalCalendar()
+        readings = calendar_instance.get_readings_for_date(date_str)
+        liturgical_info = calendar_instance.get_liturgical_info(datetime.fromisoformat(date_str).date())
+        
+        if not readings:
+            return jsonify({
+                'success': False,
+                'error': 'No readings available for this date'
+            }), 400
+        
+        previews = []
+        
+        # Generate title card preview
+        liturgical_reference = liturgical_info.get('liturgical_reference', 'Sunday Service')
+        title_card = create_title_card(liturgical_reference, date_str)
+        
+        # Convert title card to base64
+        title_buffer = io.BytesIO()
+        title_card.save(title_buffer, format='PNG')
+        title_buffer.seek(0)
+        title_b64 = base64.b64encode(title_buffer.read()).decode('utf-8')
+        
+        previews.append({
+            'name': 'Title Card',
+            'image': f'data:image/png;base64,{title_b64}'
+        })
+        
+        # Generate lower thirds previews (limit to first 4 for preview)
+        reading_types = list(readings.keys())[:4]
+        for reading_type in reading_types:
+            reading_data = readings[reading_type]
+            reference = reading_data.get('reference', '')
+            formatted_type = reading_type.replace('_', ' ').title()
+            
+            # Create lower third image
+            lower_third = create_lower_third(reading_type, reference, date_str)
+            
+            # Convert to base64
+            lt_buffer = io.BytesIO()
+            lower_third.save(lt_buffer, format='PNG')
+            lt_buffer.seek(0)
+            lt_b64 = base64.b64encode(lt_buffer.read()).decode('utf-8')
+            
+            previews.append({
+                'name': formatted_type,
+                'image': f'data:image/png;base64,{lt_b64}'
+            })
+        
+        return jsonify({
+            'success': True,
+            'previews': previews
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @app.route('/api/export_all', methods=['POST'])
 def export_all():
