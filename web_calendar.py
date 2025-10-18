@@ -1514,10 +1514,12 @@ def preview_graphics():
         
         previews = []
         
-        # Generate title card preview with "Holy Eucharist" and date
+        # Generate title card preview with "Holy Eucharist for {liturgical reference}" and date
         selected_date = datetime.fromisoformat(date_str)
         formatted_date = selected_date.strftime("%B %d, %Y")
-        title_reference = f"Holy Eucharist\n{formatted_date}"
+        liturgical_reference = liturgical_info.get('liturgical_reference', 'Sunday Service')
+        title_text = f"Holy Eucharist for {liturgical_reference}"
+        title_reference = f"{title_text}\n{formatted_date}"
         title_card = create_title_card(title_reference, date_str)
         
         # Convert title card to base64
@@ -1611,6 +1613,7 @@ def export_all():
         # Get readings for the date
         calendar_instance = WebLiturgicalCalendar()
         readings = calendar_instance.get_readings_for_date(date_str)
+        liturgical_info = calendar_instance.get_liturgical_info(selected_date.date())
         
         if not readings:
             return jsonify({
@@ -1710,10 +1713,12 @@ def export_all():
                     zip_file.writestr(f"{date_folder_name}/service_details/Presider.txt", formatted_presider)
             
             # ===== PART 2: Generate lower third graphics =====
-            # Generate full-screen title card with "Holy Eucharist" and date
+            # Generate full-screen title card with "Holy Eucharist for {liturgical reference}" and date
             # Format date nicely (e.g., "October 19, 2025")
             formatted_date = selected_date.strftime("%B %d, %Y")
-            title_reference = f"Holy Eucharist\n{formatted_date}"
+            liturgical_reference = liturgical_info.get('liturgical_reference', 'Sunday Service')
+            title_text = f"Holy Eucharist for {liturgical_reference}"
+            title_reference = f"{title_text}\n{formatted_date}"
             
             title_card_img = create_title_card(title_reference, date_str)
             title_card_buffer = io.BytesIO()
@@ -2081,8 +2086,10 @@ def special_service():
                         filepath = f"{date_folder_name}/service_details/{filename}"
                         zip_file.writestr(filepath, formatted_hymn_text)
             
-            # ===== PART 3: Generate title card with service title =====
-            title_card = create_title_card(service_title, service_date)
+            # ===== PART 3: Generate title card with service title and date =====
+            formatted_date = selected_date.strftime("%B %d, %Y")
+            title_reference = f"{service_title}\n{formatted_date}"
+            title_card = create_title_card(title_reference, service_date)
             title_card_buffer = io.BytesIO()
             title_card.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
