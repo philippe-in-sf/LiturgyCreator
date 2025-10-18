@@ -1517,8 +1517,12 @@ def preview_graphics():
         # Generate title card preview with "Holy Eucharist for {liturgical reference}" and date
         selected_date = datetime.fromisoformat(date_str)
         formatted_date = selected_date.strftime("%B %d, %Y")
-        liturgical_reference = liturgical_info.get('liturgical_reference', 'Sunday Service')
-        title_text = f"Holy Eucharist for {liturgical_reference}"
+        
+        # Get the liturgical name from the readings data
+        readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
+        liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
+        
+        title_text = f"Holy Eucharist for {liturgical_name}"
         title_reference = f"{title_text}\n{formatted_date}"
         title_card = create_title_card(title_reference, date_str)
         
@@ -1716,8 +1720,12 @@ def export_all():
             # Generate full-screen title card with "Holy Eucharist for {liturgical reference}" and date
             # Format date nicely (e.g., "October 19, 2025")
             formatted_date = selected_date.strftime("%B %d, %Y")
-            liturgical_reference = liturgical_info.get('liturgical_reference', 'Sunday Service')
-            title_text = f"Holy Eucharist for {liturgical_reference}"
+            
+            # Get the liturgical name from the readings data
+            readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
+            liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
+            
+            title_text = f"Holy Eucharist for {liturgical_name}"
             title_reference = f"{title_text}\n{formatted_date}"
             
             title_card_img = create_title_card(title_reference, date_str)
