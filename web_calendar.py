@@ -1493,6 +1493,7 @@ def preview_graphics():
     try:
         data = request.get_json()
         date_str = data.get('date')
+        service_details = data.get('serviceDetails', {})
         
         if not date_str:
             return jsonify({
@@ -1530,9 +1531,8 @@ def preview_graphics():
             'image': f'data:image/png;base64,{title_b64}'
         })
         
-        # Generate lower thirds previews (limit to first 4 for preview)
-        reading_types = list(readings.keys())[:4]
-        for reading_type in reading_types:
+        # Generate lower thirds previews for ALL readings (not limited)
+        for reading_type in readings.keys():
             reading_data = readings[reading_type]
             reference = reading_data.get('reference', '')
             formatted_type = reading_type.replace('_', ' ').title()
@@ -1550,6 +1550,33 @@ def preview_graphics():
                 'name': formatted_type,
                 'image': f'data:image/png;base64,{lt_b64}'
             })
+        
+        # Generate lower thirds for service details (hymns, musicians, clergy)
+        hymn_fields = {
+            'openingHymn': 'Opening Hymn',
+            'sequenceHymn': 'Sequence Hymn',
+            'offertory': 'Offertory',
+            'communionMotet': 'Communion Motet',
+            'communionHymn': 'Communion Hymn',
+            'closingHymn': 'Closing Hymn'
+        }
+        
+        for field_key, field_label in hymn_fields.items():
+            hymn_value = service_details.get(field_key, '').strip()
+            if hymn_value:  # Only create graphic if field has content
+                # Create lower third image
+                lower_third = create_lower_third(field_label, hymn_value, date_str)
+                
+                # Convert to base64
+                lt_buffer = io.BytesIO()
+                lower_third.save(lt_buffer, format='PNG')
+                lt_buffer.seek(0)
+                lt_b64 = base64.b64encode(lt_buffer.read()).decode('utf-8')
+                
+                previews.append({
+                    'name': field_label,
+                    'image': f'data:image/png;base64,{lt_b64}'
+                })
         
         return jsonify({
             'success': True,
