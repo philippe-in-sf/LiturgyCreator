@@ -1505,6 +1505,10 @@ def preview_graphics():
         readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
         liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
         
+        # Remove "Proper X" pattern from the liturgical name (e.g., "Proper 24 (Sunday after Pentecost)" -> "Sunday after Pentecost")
+        import re
+        liturgical_name = re.sub(r'^Proper \d+\s*\((.+)\)$', r'\1', liturgical_name)
+        
         # Just use the liturgical name without "Holy Eucharist for" prefix
         title_reference = f"{liturgical_name}\n{formatted_date}"
         title_card = create_title_card(title_reference, date_str)
@@ -1707,6 +1711,10 @@ def export_all():
             # Get the liturgical name from the readings data
             readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
             liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
+            
+            # Remove "Proper X" pattern from the liturgical name (e.g., "Proper 24 (Sunday after Pentecost)" -> "Sunday after Pentecost")
+            import re
+            liturgical_name = re.sub(r'^Proper \d+\s*\((.+)\)$', r'\1', liturgical_name)
             
             # Just use the liturgical name without "Holy Eucharist for" prefix
             title_reference = f"{liturgical_name}\n{formatted_date}"
