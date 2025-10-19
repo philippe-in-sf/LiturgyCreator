@@ -1053,17 +1053,17 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
     
     # Try to load elegant serif fonts for a classic, timeless look
     try:
-        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 100)
+        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 65)
         church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 70)
         decorative_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf", 35)
-        print(f"✅ Successfully loaded DejaVu fonts: title=100pt, church=70pt")
+        print(f"✅ Successfully loaded DejaVu fonts: title=65pt, church=70pt")
     except Exception as e:
         print(f"❌ Failed to load DejaVu fonts: {e}")
         try:
-            title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 100)
+            title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 65)
             church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 70)
             decorative_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 35)
-            print(f"✅ Successfully loaded DejaVuSans fonts: title=100pt, church=70pt")
+            print(f"✅ Successfully loaded DejaVuSans fonts: title=65pt, church=70pt")
         except Exception as e2:
             print(f"❌ Failed to load all fonts: {e2}")
             title_font = ImageFont.load_default()
