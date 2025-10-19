@@ -1774,32 +1774,24 @@
                 });
                 
                 // Pre-populate reading references from lectionary if not already saved
-                const dayData = document.querySelector(`.day[data-date="${dateStr}"]`);
-                if (dayData) {
-                    const readingsAttr = dayData.getAttribute('data-readings');
-                    if (readingsAttr && readingsAttr !== 'null') {
-                        try {
-                            const readings = JSON.parse(readingsAttr);
-                            
-                            // Pre-fill reading references only if they haven't been manually set
-                            if (!details.firstReadingRef && readings.first_reading) {
-                                document.getElementById('firstReadingRef').value = readings.first_reading.reference || '';
-                            }
-                            
-                            if (!details.psalmRef && readings.psalm) {
-                                document.getElementById('psalmRef').value = readings.psalm.reference || '';
-                            }
-                            
-                            if (!details.secondReadingRef && readings.second_reading) {
-                                document.getElementById('secondReadingRef').value = readings.second_reading.reference || '';
-                            }
-                            
-                            if (!details.gospelRef && readings.gospel) {
-                                document.getElementById('gospelRef').value = readings.gospel.reference || '';
-                            }
-                        } catch (e) {
-                            console.error('Error parsing readings data:', e);
-                        }
+                if (selectedReadings && selectedReadings.has_readings && selectedReadings.readings) {
+                    const readings = selectedReadings.readings;
+                    
+                    // Pre-fill reading references only if they haven't been manually set
+                    if (!details.firstReadingRef && readings.first_reading && readings.first_reading.reference) {
+                        document.getElementById('firstReadingRef').value = readings.first_reading.reference;
+                    }
+                    
+                    if (!details.psalmRef && readings.psalm && readings.psalm.reference) {
+                        document.getElementById('psalmRef').value = readings.psalm.reference;
+                    }
+                    
+                    if (!details.secondReadingRef && readings.second_reading && readings.second_reading.reference) {
+                        document.getElementById('secondReadingRef').value = readings.second_reading.reference;
+                    }
+                    
+                    if (!details.gospelRef && readings.gospel && readings.gospel.reference) {
+                        document.getElementById('gospelRef').value = readings.gospel.reference;
                     }
                 }
             } catch (error) {
