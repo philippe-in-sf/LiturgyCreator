@@ -34,7 +34,7 @@ The application follows a modular architecture with five main components:
 ## Technical Implementations
 
 - **PDF Upload (BETA)**: Drag-and-drop PDF upload with text extraction using `pdfplumber` (with OCR fallback), smart liturgical content detection, and integration into the calendar interface.
-- **Service Details Interview**: A modal form for gathering service information (hymns, musicians, clergy) with local browser storage and server backup, extending OBS integration to include these details.
+- **Service Details Interview**: A modal form for gathering service information (hymns, musicians, clergy, and scripture reading references) with local browser storage and server backup, extending OBS integration to include these details. The form is organized in liturgical order and pre-populates scripture reading references from the day's lectionary, which users can override with custom references if needed.
 - **Text Export Functionality**: ZIP export for liturgical readings and service details via a new API endpoint, creating individual text files (scripture text, references, service details) formatted with 50-character line width and word wrapping.
 - **Calendar Date Offset Resolution**: JavaScript date parsing modified to correctly handle timezones and prevent one-day offsets.
 - **Deployment Configuration**: Comprehensive configuration for Google Cloud Run deployment, including `Procfile`, `Dockerfile`, `.dockerignore`, and `pyproject.toml` settings, ensuring Python 3.11 execution and proper port binding.

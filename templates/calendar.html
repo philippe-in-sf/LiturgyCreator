@@ -975,7 +975,7 @@
             
             <form id="serviceDetailsForm">
                 <div class="form-section">
-                    <h3>Musicians</h3>
+                    <h3>Prelude</h3>
                     
                     <div class="form-group">
                         <label for="organistName">Organist Name</label>
@@ -1000,11 +1000,42 @@
                         <label for="openingHymn">Opening Hymn</label>
                         <input type="text" id="openingHymn" name="openingHymn" placeholder="e.g., Hymn 362 - Holy, Holy, Holy">
                     </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Scripture Readings</h3>
+                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
+                        Pre-filled with lectionary readings. You can override these with different references if needed.
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="firstReadingRef">First Reading Reference</label>
+                        <input type="text" id="firstReadingRef" name="firstReadingRef" placeholder="e.g., Genesis 1:1-5">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="psalmRef">Psalm Reference</label>
+                        <input type="text" id="psalmRef" name="psalmRef" placeholder="e.g., Psalm 23">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="secondReadingRef">Second Reading Reference</label>
+                        <input type="text" id="secondReadingRef" name="secondReadingRef" placeholder="e.g., Romans 8:1-11">
+                    </div>
                     
                     <div class="form-group">
                         <label for="sequenceHymn">Sequence Hymn</label>
                         <input type="text" id="sequenceHymn" name="sequenceHymn" placeholder="e.g., Hymn 632 - O Christ, the Word Incarnate">
                     </div>
+                    
+                    <div class="form-group">
+                        <label for="gospelRef">Gospel Reference</label>
+                        <input type="text" id="gospelRef" name="gospelRef" placeholder="e.g., John 1:1-14">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Sermon & Offertory</h3>
                     
                     <div class="form-group">
                         <label for="preacherName">Preacher's Name</label>
@@ -1015,6 +1046,10 @@
                         <label for="offertory">Offertory</label>
                         <input type="text" id="offertory" name="offertory" placeholder="e.g., Offertory Anthem - Come, Thou Fount of Every Blessing">
                     </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Communion</h3>
                     
                     <div class="form-group">
                         <label for="communionMotet">Communion Motet</label>
@@ -1025,15 +1060,15 @@
                         <label for="communionHymn">Communion Hymn</label>
                         <input type="text" id="communionHymn" name="communionHymn" placeholder="e.g., Hymn 304 - I come with joy to meet my Lord">
                     </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Closing</h3>
                     
                     <div class="form-group">
                         <label for="closingHymn">Closing Hymn</label>
                         <input type="text" id="closingHymn" name="closingHymn" placeholder="e.g., Hymn 432 - O praise ye the Lord!">
                     </div>
-                </div>
-                
-                <div class="form-section">
-                    <h3>Postlude</h3>
                     
                     <div class="form-group">
                         <label for="postludeName">Postlude Title</label>
@@ -1732,8 +1767,41 @@
                 inputs.forEach(input => {
                     if (details[input.name]) {
                         input.value = details[input.name];
+                    } else {
+                        // Clear the field if no saved data
+                        input.value = '';
                     }
                 });
+                
+                // Pre-populate reading references from lectionary if not already saved
+                const dayData = document.querySelector(`.day[data-date="${dateStr}"]`);
+                if (dayData) {
+                    const readingsAttr = dayData.getAttribute('data-readings');
+                    if (readingsAttr && readingsAttr !== 'null') {
+                        try {
+                            const readings = JSON.parse(readingsAttr);
+                            
+                            // Pre-fill reading references only if they haven't been manually set
+                            if (!details.firstReadingRef && readings.first_reading) {
+                                document.getElementById('firstReadingRef').value = readings.first_reading.reference || '';
+                            }
+                            
+                            if (!details.psalmRef && readings.psalm) {
+                                document.getElementById('psalmRef').value = readings.psalm.reference || '';
+                            }
+                            
+                            if (!details.secondReadingRef && readings.second_reading) {
+                                document.getElementById('secondReadingRef').value = readings.second_reading.reference || '';
+                            }
+                            
+                            if (!details.gospelRef && readings.gospel) {
+                                document.getElementById('gospelRef').value = readings.gospel.reference || '';
+                            }
+                        } catch (e) {
+                            console.error('Error parsing readings data:', e);
+                        }
+                    }
+                }
             } catch (error) {
                 console.error('Error loading service details:', error);
             }
