@@ -1013,43 +1013,10 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
         fill=liturgical_colors['accent']
     )
     
-    # Load and place church logo on the left
-    logo_space = 220  # Space reserved on left for logo
-    text_indent = logo_space + 40  # Text starts after logo space plus padding
+    # Text starts at approximately 1/5 of the page from the left (about 384px on 1920px width)
+    text_indent = int(width / 5)
     
-    try:
-        # Load the church logo
-        logo_path = "attached_assets/Trin High Qual - trans_1760427955140.png"
-        logo = Image.open(logo_path)
-        
-        # Resize logo to fit in the reserved space (max 200px wide, maintaining aspect ratio)
-        max_logo_width = 200
-        max_logo_height = background_height - 20  # Leave 10px padding top and bottom
-        
-        # Calculate scaling to fit within both width and height constraints
-        width_ratio = max_logo_width / logo.width
-        height_ratio = max_logo_height / logo.height
-        scale_ratio = min(width_ratio, height_ratio)
-        
-        new_logo_width = int(logo.width * scale_ratio)
-        new_logo_height = int(logo.height * scale_ratio)
-        
-        logo_resized = logo.resize((new_logo_width, new_logo_height), Image.Resampling.LANCZOS)
-        
-        # Convert to RGBA if needed
-        if logo_resized.mode != 'RGBA':
-            logo_resized = logo_resized.convert('RGBA')
-        
-        # Calculate position to center logo vertically in the lower third
-        logo_x = 30  # 30px from left edge (after the accent bar)
-        logo_y = int(lower_third_start + (background_height - new_logo_height) // 2)
-        
-        # Paste logo onto the lower third
-        img.paste(logo_resized, (logo_x, logo_y), logo_resized)
-    except Exception as e:
-        print(f"Could not load church logo: {e}")
-    
-    # Draw reading type (title) - indented to leave room for logo
+    # Draw reading type (title) - indented to start at 1/5 from left
     title_y = lower_third_start + top_padding
     draw.text((text_indent, title_y), formatted_type, fill=liturgical_colors['title'], font=title_font)
     
