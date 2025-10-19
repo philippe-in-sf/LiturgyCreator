@@ -1017,59 +1017,100 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     lower_third_start = int(height * 5 / 6)
     background_end = height  # Go all the way to the bottom of the image
     
-    # === BROADCAST-STYLE BANNER WITH ANGLED EDGES AND LAYERS ===
+    # === ABSTRACT BROADCAST-STYLE BANNER WITH VARIED SHADES AND GRADIENTS ===
     
     # Extract base color components from liturgical colors
     bg_r, bg_g, bg_b, bg_a = liturgical_colors['background']
     accent_r, accent_g, accent_b, accent_a = liturgical_colors['accent']
     
-    # Create darker and lighter shades for layering
-    dark_r = int(bg_r * 0.7)
-    dark_g = int(bg_g * 0.7)
-    dark_b = int(bg_b * 0.7)
+    # Create multiple shades for abstract layering (darkest to lightest)
+    very_dark_r = int(bg_r * 0.4)
+    very_dark_g = int(bg_g * 0.4)
+    very_dark_b = int(bg_b * 0.4)
     
-    light_r = min(255, int(bg_r * 1.15))
-    light_g = min(255, int(bg_g * 1.15))
-    light_b = min(255, int(bg_b * 1.15))
+    dark_r = int(bg_r * 0.65)
+    dark_g = int(bg_g * 0.65)
+    dark_b = int(bg_b * 0.65)
     
-    # LAYER 1: Main background - FULL edge-to-edge, solid color
-    draw.rectangle(
-        [0, lower_third_start, width, background_end],
-        fill=(bg_r, bg_g, bg_b, 255)  # Fully opaque base
-    )
+    mid_r = int(bg_r * 0.85)
+    mid_g = int(bg_g * 0.85)
+    mid_b = int(bg_b * 0.85)
     
-    # LAYER 2: Angled left panel with lighter shade
-    left_panel_width = 350
-    angle_cut = 40
+    light_r = min(255, int(bg_r * 1.1))
+    light_g = min(255, int(bg_g * 1.1))
+    light_b = min(255, int(bg_b * 1.1))
+    
+    very_light_r = min(255, int(bg_r * 1.25))
+    very_light_g = min(255, int(bg_g * 1.25))
+    very_light_b = min(255, int(bg_b * 1.25))
+    
+    # LAYER 1: Gradient background (left to right, dark to light)
+    gradient_steps = 120
+    for i in range(gradient_steps):
+        x_pos = int((width * i) / gradient_steps)
+        next_x = int((width * (i + 1)) / gradient_steps)
+        
+        # Interpolate from dark on left to mid-tone on right
+        factor = i / gradient_steps
+        r = int(dark_r + (mid_r - dark_r) * factor)
+        g = int(dark_g + (mid_g - dark_g) * factor)
+        b = int(dark_b + (mid_b - dark_b) * factor)
+        
+        draw.rectangle(
+            [x_pos, lower_third_start, next_x, background_end],
+            fill=(r, g, b, 255)
+        )
+    
+    # LAYER 2: Abstract angled panel on left (lighter shade)
+    left_panel_width = 380
+    angle_cut = 45
     draw.polygon([
         (0, lower_third_start),
         (left_panel_width, lower_third_start),
         (left_panel_width - angle_cut, background_end),
         (0, background_end)
-    ], fill=(light_r, light_g, light_b, 255))
+    ], fill=(light_r, light_g, light_b, 220))
     
-    # LAYER 3: Bold accent stripe on far left (angled)
-    accent_width = 140
+    # LAYER 3: Narrow angled accent stripe (very light shade)
+    accent_width_1 = 180
     draw.polygon([
         (0, lower_third_start),
-        (accent_width, lower_third_start),
-        (accent_width - 30, background_end),
+        (accent_width_1, lower_third_start),
+        (accent_width_1 - 35, background_end),
+        (0, background_end)
+    ], fill=(very_light_r, very_light_g, very_light_b, 180))
+    
+    # LAYER 4: Bold accent stripe on far left (bright accent color)
+    accent_width_2 = 120
+    draw.polygon([
+        (0, lower_third_start),
+        (accent_width_2, lower_third_start),
+        (accent_width_2 - 28, background_end),
         (0, background_end)
     ], fill=(accent_r, accent_g, accent_b, 255))
     
-    # LAYER 4: Angled right panel with darker shade for depth
-    right_panel_start = width - 250
-    right_angle_cut = 35
+    # LAYER 5: Abstract angled panel on right (very dark for contrast)
+    right_panel_start = width - 280
+    right_angle_cut = 38
     draw.polygon([
         (right_panel_start, lower_third_start),
         (width, lower_third_start),
         (width, background_end),
         (right_panel_start + right_angle_cut, background_end)
-    ], fill=(dark_r, dark_g, dark_b, 200))
+    ], fill=(very_dark_r, very_dark_g, very_dark_b, 200))
     
-    # LAYER 5: Top accent stripe (angled slightly, full width)
-    stripe_width = 8
-    top_slope = 6
+    # LAYER 6: Secondary right panel (mid-dark for layering)
+    right_panel_2 = width - 160
+    draw.polygon([
+        (right_panel_2, lower_third_start + 8),
+        (width, lower_third_start),
+        (width, background_end),
+        (right_panel_2 + 20, background_end - 8)
+    ], fill=(dark_r, dark_g, dark_b, 160))
+    
+    # LAYER 7: Top accent stripe (angled, full width, bright)
+    stripe_width = 7
+    top_slope = 5
     draw.polygon([
         (0, lower_third_start),
         (width, lower_third_start + top_slope),
@@ -1077,14 +1118,33 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
         (0, lower_third_start + stripe_width)
     ], fill=(accent_r, accent_g, accent_b, 255))
     
-    # LAYER 6: Bottom accent stripe (angled slightly, full width)
-    bottom_slope = 6
+    # LAYER 8: Bottom accent stripe (angled, full width)
+    bottom_slope = 5
     draw.polygon([
         (0, background_end - stripe_width),
         (width, background_end - bottom_slope - stripe_width),
         (width, background_end - bottom_slope),
         (0, background_end)
-    ], fill=(accent_r, accent_g, accent_b, 230))
+    ], fill=(accent_r, accent_g, accent_b, 240))
+    
+    # LAYER 9: Abstract diagonal stripes for visual interest (semi-transparent)
+    diagonal_1_start = 500
+    diagonal_1_width = 80
+    draw.polygon([
+        (diagonal_1_start, lower_third_start),
+        (diagonal_1_start + diagonal_1_width, lower_third_start),
+        (diagonal_1_start + diagonal_1_width - 50, background_end),
+        (diagonal_1_start - 50, background_end)
+    ], fill=(very_light_r, very_light_g, very_light_b, 100))
+    
+    diagonal_2_start = 900
+    diagonal_2_width = 100
+    draw.polygon([
+        (diagonal_2_start, lower_third_start),
+        (diagonal_2_start + diagonal_2_width, lower_third_start),
+        (diagonal_2_start + diagonal_2_width - 60, background_end),
+        (diagonal_2_start - 60, background_end)
+    ], fill=(light_r, light_g, light_b, 90))
     
     # Text starts at approximately 1/5 of the page from the left (about 384px on 1920px width)
     text_indent = int(width / 5)
