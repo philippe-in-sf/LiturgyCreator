@@ -27,7 +27,7 @@ The application follows a modular architecture with five main components:
 
 - **Liturgical Season Colors**: Lower third graphics dynamically adapt to liturgical season colors (Advent, Christmas, Epiphany, Lent, Easter, Pentecost) for appropriate visual themes.
 - **Lower Thirds Layout**: Positioned at 5/6 of screen height with text content starting at approximately 1/5 from the left edge (384px on 1920px width), creating clean blank space on the left side.
-- **Banner-Style Lower Thirds**: Full edge-to-edge design with gradient shading for visual depth, accent stripes at top and bottom, angled left panel for dimension, and subtle shadow effects. The banner style creates a professional broadcast look with layered colors and dynamic shading.
+- **Broadcast-Style Lower Thirds**: Professional broadcast design with dramatic angled edges on both sides (left angled down, right angled up), multiple layered colors for depth (dark base layer, main color, lighter highlights, accent stripes), thin accent stripes following the angled top and bottom edges, and gradient overlay. The multi-layer design creates a dynamic, modern broadcast look inspired by professional television graphics.
 - **Mobile Responsive Design**: Comprehensive mobile-responsive interface for all screen sizes, including tablet (single-column, stacked buttons) and mobile (compact layout, optimized touch targets, responsive modals, adjustable font sizes).
 - **OBS Path Configuration**: Settings interface for OBS file path configuration with OS selection, base path configuration, and localStorage persistence for scene generation.
 

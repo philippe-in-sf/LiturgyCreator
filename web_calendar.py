@@ -1017,73 +1017,93 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     lower_third_start = int(height * 5 / 6)
     background_end = min(lower_third_start + background_height, height)  # Ensure it doesn't exceed image bounds
     
-    # === BANNER-STYLE DESIGN WITH GRADIENT SHADING ===
+    # === BROADCAST-STYLE BANNER WITH ANGLED EDGES AND LAYERS ===
     
     # Extract base color components from liturgical colors
     bg_r, bg_g, bg_b, bg_a = liturgical_colors['background']
     accent_r, accent_g, accent_b, accent_a = liturgical_colors['accent']
     
-    # Create a darker shade for depth (70% of original brightness)
-    dark_r = int(bg_r * 0.7)
-    dark_g = int(bg_g * 0.7)
-    dark_b = int(bg_b * 0.7)
+    # Create darker and lighter shades for layering
+    dark_r = int(bg_r * 0.5)
+    dark_g = int(bg_g * 0.5)
+    dark_b = int(bg_b * 0.5)
     
-    # Draw gradient background from left to right for depth
-    gradient_steps = 200
+    light_r = min(255, int(bg_r * 1.3))
+    light_g = min(255, int(bg_g * 1.3))
+    light_b = min(255, int(bg_b * 1.3))
+    
+    # Define angle parameters for dynamic look
+    left_angle = 60  # How much the left side angles in
+    right_angle = 80  # How much the right side angles out
+    
+    # LAYER 1: Base dark layer (full width with angled edges)
+    draw.polygon([
+        (0, lower_third_start + left_angle),  # Top left (angled down)
+        (width, lower_third_start),  # Top right
+        (width, background_end - right_angle),  # Bottom right (angled up)
+        (0, background_end)  # Bottom left
+    ], fill=(dark_r, dark_g, dark_b, bg_a))
+    
+    # LAYER 2: Main background layer (slightly offset for depth)
+    offset = 8
+    draw.polygon([
+        (0, lower_third_start + left_angle - offset),
+        (width, lower_third_start + offset),
+        (width, background_end - right_angle - offset),
+        (0, background_end - offset)
+    ], fill=(bg_r, bg_g, bg_b, bg_a))
+    
+    # LAYER 3: Lighter accent layer (creates highlight effect)
+    highlight_width = 250
+    draw.polygon([
+        (0, lower_third_start + left_angle - offset * 2),
+        (highlight_width, lower_third_start),
+        (highlight_width - 40, background_end - 20),
+        (0, background_end - offset * 2)
+    ], fill=(light_r, light_g, light_b, int(bg_a * 0.6)))
+    
+    # LAYER 4: Accent color stripe on left (angled)
+    accent_width = 120
+    draw.polygon([
+        (0, lower_third_start + left_angle - offset * 2),
+        (accent_width, lower_third_start + 10),
+        (accent_width - 30, background_end - 30),
+        (0, background_end - offset * 2)
+    ], fill=(accent_r, accent_g, accent_b, int(accent_a * 0.7)))
+    
+    # Add thin accent stripes at top and bottom edges for polish
+    stripe_height = 4
+    # Top stripe (angled to follow the banner)
+    draw.polygon([
+        (0, lower_third_start + left_angle - offset * 2),
+        (width, lower_third_start + offset),
+        (width, lower_third_start + offset + stripe_height),
+        (0, lower_third_start + left_angle - offset * 2 + stripe_height)
+    ], fill=liturgical_colors['accent'])
+    
+    # Bottom stripe (angled to follow the banner)
+    draw.polygon([
+        (0, background_end - offset * 2 - stripe_height),
+        (width, background_end - right_angle - offset - stripe_height),
+        (width, background_end - right_angle - offset),
+        (0, background_end - offset * 2)
+    ], fill=liturgical_colors['accent'])
+    
+    # Add subtle gradient overlay for depth (left to right fade)
+    gradient_steps = 150
     for i in range(gradient_steps):
-        # Calculate position and color interpolation
         x_pos = int((width * i) / gradient_steps)
         next_x = int((width * (i + 1)) / gradient_steps)
         
-        # Create a wave pattern: darker on edges, lighter in middle
-        wave_factor = abs(i - gradient_steps / 2) / (gradient_steps / 2)  # 0 at center, 1 at edges
+        # Fade from darker on left to lighter on right
+        fade_factor = i / gradient_steps
+        alpha = int(40 * (1 - fade_factor))  # 40 on left, 0 on right
         
-        r = int(bg_r - (bg_r - dark_r) * wave_factor * 0.3)
-        g = int(bg_g - (bg_g - dark_g) * wave_factor * 0.3)
-        b = int(bg_b - (bg_b - dark_b) * wave_factor * 0.3)
-        
-        draw.rectangle(
-            [x_pos, lower_third_start, next_x, background_end],
-            fill=(r, g, b, bg_a)
-        )
-    
-    # Draw accent stripe at top of banner (full width, edge-to-edge)
-    accent_height = 8
-    draw.rectangle(
-        [0, lower_third_start, width, lower_third_start + accent_height],
-        fill=liturgical_colors['accent']
-    )
-    
-    # Draw accent stripe at bottom of banner (full width, edge-to-edge)
-    draw.rectangle(
-        [0, background_end - accent_height, width, background_end],
-        fill=liturgical_colors['accent']
-    )
-    
-    # Draw decorative left accent panel with angled edge
-    left_panel_width = 300
-    # Create a polygon for angled edge effect
-    draw.polygon([
-        (0, lower_third_start),
-        (left_panel_width, lower_third_start),
-        (left_panel_width - 30, background_end),
-        (0, background_end)
-    ], fill=(accent_r, accent_g, accent_b, int(accent_a * 0.3)))
-    
-    # Draw vertical accent bar on far left (full height)
-    draw.rectangle(
-        [0, lower_third_start, 15, background_end],
-        fill=liturgical_colors['accent']
-    )
-    
-    # Add subtle shadow effect at the top for depth
-    shadow_height = 20
-    for i in range(shadow_height):
-        alpha = int(50 * (1 - i / shadow_height))  # Fade from 50 to 0
-        draw.rectangle(
-            [0, lower_third_start + accent_height + i, width, lower_third_start + accent_height + i + 1],
-            fill=(0, 0, 0, alpha)
-        )
+        if alpha > 0:
+            draw.rectangle(
+                [x_pos, lower_third_start, next_x, background_end],
+                fill=(0, 0, 0, alpha)
+            )
     
     # Text starts at approximately 1/5 of the page from the left (about 384px on 1920px width)
     text_indent = int(width / 5)
