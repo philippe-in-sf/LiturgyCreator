@@ -1023,83 +1023,87 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     bg_r, bg_g, bg_b, bg_a = liturgical_colors['background']
     accent_r, accent_g, accent_b, accent_a = liturgical_colors['accent']
     
-    # Create darker and lighter shades for layering
-    dark_r = int(bg_r * 0.5)
-    dark_g = int(bg_g * 0.5)
-    dark_b = int(bg_b * 0.5)
+    # Create darker and lighter shades for depth
+    dark_r = int(bg_r * 0.6)
+    dark_g = int(bg_g * 0.6)
+    dark_b = int(bg_b * 0.6)
     
-    light_r = min(255, int(bg_r * 1.3))
-    light_g = min(255, int(bg_g * 1.3))
-    light_b = min(255, int(bg_b * 1.3))
+    light_r = min(255, int(bg_r * 1.2))
+    light_g = min(255, int(bg_g * 1.2))
+    light_b = min(255, int(bg_b * 1.2))
     
-    # Define angle parameters for dynamic look
-    left_angle = 60  # How much the left side angles in
-    right_angle = 80  # How much the right side angles out
+    # LAYER 1: Main background - full edge-to-edge rectangle
+    draw.rectangle(
+        [0, lower_third_start, width, background_end],
+        fill=(bg_r, bg_g, bg_b, bg_a)
+    )
     
-    # LAYER 1: Base dark layer (full width with angled edges)
+    # LAYER 2: Dark shadow layer on the bottom for depth
+    shadow_height = int(background_height * 0.15)
+    draw.rectangle(
+        [0, background_end - shadow_height, width, background_end],
+        fill=(dark_r, dark_g, dark_b, int(bg_a * 0.8))
+    )
+    
+    # LAYER 3: Angled accent panel on the left (diagonal cut)
+    left_panel_width = 280
+    angle_offset = 35
     draw.polygon([
-        (0, lower_third_start + left_angle),  # Top left (angled down)
-        (width, lower_third_start),  # Top right
-        (width, background_end - right_angle),  # Bottom right (angled up)
-        (0, background_end)  # Bottom left
-    ], fill=(dark_r, dark_g, dark_b, bg_a))
+        (0, lower_third_start),
+        (left_panel_width, lower_third_start),
+        (left_panel_width - angle_offset, background_end),
+        (0, background_end)
+    ], fill=(light_r, light_g, light_b, int(bg_a * 0.7)))
     
-    # LAYER 2: Main background layer (slightly offset for depth)
-    offset = 8
+    # LAYER 4: Bright accent stripe on far left (angled)
+    accent_stripe_width = 100
     draw.polygon([
-        (0, lower_third_start + left_angle - offset),
-        (width, lower_third_start + offset),
-        (width, background_end - right_angle - offset),
-        (0, background_end - offset)
-    ], fill=(bg_r, bg_g, bg_b, bg_a))
+        (0, lower_third_start),
+        (accent_stripe_width, lower_third_start),
+        (accent_stripe_width - 25, background_end),
+        (0, background_end)
+    ], fill=(accent_r, accent_g, accent_b, accent_a))
     
-    # LAYER 3: Lighter accent layer (creates highlight effect)
-    highlight_width = 250
+    # LAYER 5: Angled top stripe (left to right, slopes down slightly)
+    stripe_height = 6
+    top_angle = 8
     draw.polygon([
-        (0, lower_third_start + left_angle - offset * 2),
-        (highlight_width, lower_third_start),
-        (highlight_width - 40, background_end - 20),
-        (0, background_end - offset * 2)
-    ], fill=(light_r, light_g, light_b, int(bg_a * 0.6)))
+        (0, lower_third_start),
+        (width, lower_third_start + top_angle),
+        (width, lower_third_start + top_angle + stripe_height),
+        (0, lower_third_start + stripe_height)
+    ], fill=(accent_r, accent_g, accent_b, accent_a))
     
-    # LAYER 4: Accent color stripe on left (angled)
-    accent_width = 120
+    # LAYER 6: Angled bottom stripe (left to right, slopes up slightly)
+    bottom_angle = 8
     draw.polygon([
-        (0, lower_third_start + left_angle - offset * 2),
-        (accent_width, lower_third_start + 10),
-        (accent_width - 30, background_end - 30),
-        (0, background_end - offset * 2)
-    ], fill=(accent_r, accent_g, accent_b, int(accent_a * 0.7)))
+        (0, background_end - stripe_height),
+        (width, background_end - bottom_angle - stripe_height),
+        (width, background_end - bottom_angle),
+        (0, background_end)
+    ], fill=(accent_r, accent_g, accent_b, int(accent_a * 0.8)))
     
-    # Add thin accent stripes at top and bottom edges for polish
-    stripe_height = 4
-    # Top stripe (angled to follow the banner)
+    # LAYER 7: Angled accent panel on the right (diagonal cut going opposite direction)
+    right_panel_start = width - 200
+    right_angle = 30
     draw.polygon([
-        (0, lower_third_start + left_angle - offset * 2),
-        (width, lower_third_start + offset),
-        (width, lower_third_start + offset + stripe_height),
-        (0, lower_third_start + left_angle - offset * 2 + stripe_height)
-    ], fill=liturgical_colors['accent'])
+        (right_panel_start, lower_third_start + 10),
+        (width, lower_third_start),
+        (width, background_end),
+        (right_panel_start + right_angle, background_end - 10)
+    ], fill=(dark_r, dark_g, dark_b, int(bg_a * 0.4)))
     
-    # Bottom stripe (angled to follow the banner)
-    draw.polygon([
-        (0, background_end - offset * 2 - stripe_height),
-        (width, background_end - right_angle - offset - stripe_height),
-        (width, background_end - right_angle - offset),
-        (0, background_end - offset * 2)
-    ], fill=liturgical_colors['accent'])
-    
-    # Add subtle gradient overlay for depth (left to right fade)
-    gradient_steps = 150
+    # Add subtle gradient for depth (darker on left, lighter on right)
+    gradient_steps = 100
     for i in range(gradient_steps):
         x_pos = int((width * i) / gradient_steps)
         next_x = int((width * (i + 1)) / gradient_steps)
         
-        # Fade from darker on left to lighter on right
+        # Fade from darker to lighter
         fade_factor = i / gradient_steps
-        alpha = int(40 * (1 - fade_factor))  # 40 on left, 0 on right
+        alpha = int(30 * (1 - fade_factor))  # 30 on left, 0 on right
         
-        if alpha > 0:
+        if alpha > 5:
             draw.rectangle(
                 [x_pos, lower_third_start, next_x, background_end],
                 fill=(0, 0, 0, alpha)
