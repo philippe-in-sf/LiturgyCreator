@@ -1015,7 +1015,7 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     
     # Position lower third lower on screen (at 5/6 of the image height)
     lower_third_start = int(height * 5 / 6)
-    background_end = min(lower_third_start + background_height, height)  # Ensure it doesn't exceed image bounds
+    background_end = height  # Go all the way to the bottom of the image
     
     # === BROADCAST-STYLE BANNER WITH ANGLED EDGES AND LAYERS ===
     
@@ -1023,102 +1023,79 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     bg_r, bg_g, bg_b, bg_a = liturgical_colors['background']
     accent_r, accent_g, accent_b, accent_a = liturgical_colors['accent']
     
-    # Create darker and lighter shades for depth
-    dark_r = int(bg_r * 0.6)
-    dark_g = int(bg_g * 0.6)
-    dark_b = int(bg_b * 0.6)
+    # Create darker and lighter shades for layering
+    dark_r = int(bg_r * 0.7)
+    dark_g = int(bg_g * 0.7)
+    dark_b = int(bg_b * 0.7)
     
-    light_r = min(255, int(bg_r * 1.2))
-    light_g = min(255, int(bg_g * 1.2))
-    light_b = min(255, int(bg_b * 1.2))
+    light_r = min(255, int(bg_r * 1.15))
+    light_g = min(255, int(bg_g * 1.15))
+    light_b = min(255, int(bg_b * 1.15))
     
-    # LAYER 1: Main background - full edge-to-edge rectangle
+    # LAYER 1: Main background - FULL edge-to-edge, solid color
     draw.rectangle(
         [0, lower_third_start, width, background_end],
-        fill=(bg_r, bg_g, bg_b, bg_a)
+        fill=(bg_r, bg_g, bg_b, 255)  # Fully opaque base
     )
     
-    # LAYER 2: Dark shadow layer on the bottom for depth
-    shadow_height = int(background_height * 0.15)
-    draw.rectangle(
-        [0, background_end - shadow_height, width, background_end],
-        fill=(dark_r, dark_g, dark_b, int(bg_a * 0.8))
-    )
-    
-    # LAYER 3: Angled accent panel on the left (diagonal cut)
-    left_panel_width = 280
-    angle_offset = 35
+    # LAYER 2: Angled left panel with lighter shade
+    left_panel_width = 350
+    angle_cut = 40
     draw.polygon([
         (0, lower_third_start),
         (left_panel_width, lower_third_start),
-        (left_panel_width - angle_offset, background_end),
+        (left_panel_width - angle_cut, background_end),
         (0, background_end)
-    ], fill=(light_r, light_g, light_b, int(bg_a * 0.7)))
+    ], fill=(light_r, light_g, light_b, 255))
     
-    # LAYER 4: Bright accent stripe on far left (angled)
-    accent_stripe_width = 100
+    # LAYER 3: Bold accent stripe on far left (angled)
+    accent_width = 140
     draw.polygon([
         (0, lower_third_start),
-        (accent_stripe_width, lower_third_start),
-        (accent_stripe_width - 25, background_end),
+        (accent_width, lower_third_start),
+        (accent_width - 30, background_end),
         (0, background_end)
-    ], fill=(accent_r, accent_g, accent_b, accent_a))
+    ], fill=(accent_r, accent_g, accent_b, 255))
     
-    # LAYER 5: Angled top stripe (left to right, slopes down slightly)
-    stripe_height = 6
-    top_angle = 8
+    # LAYER 4: Angled right panel with darker shade for depth
+    right_panel_start = width - 250
+    right_angle_cut = 35
     draw.polygon([
-        (0, lower_third_start),
-        (width, lower_third_start + top_angle),
-        (width, lower_third_start + top_angle + stripe_height),
-        (0, lower_third_start + stripe_height)
-    ], fill=(accent_r, accent_g, accent_b, accent_a))
-    
-    # LAYER 6: Angled bottom stripe (left to right, slopes up slightly)
-    bottom_angle = 8
-    draw.polygon([
-        (0, background_end - stripe_height),
-        (width, background_end - bottom_angle - stripe_height),
-        (width, background_end - bottom_angle),
-        (0, background_end)
-    ], fill=(accent_r, accent_g, accent_b, int(accent_a * 0.8)))
-    
-    # LAYER 7: Angled accent panel on the right (diagonal cut going opposite direction)
-    right_panel_start = width - 200
-    right_angle = 30
-    draw.polygon([
-        (right_panel_start, lower_third_start + 10),
+        (right_panel_start, lower_third_start),
         (width, lower_third_start),
         (width, background_end),
-        (right_panel_start + right_angle, background_end - 10)
-    ], fill=(dark_r, dark_g, dark_b, int(bg_a * 0.4)))
+        (right_panel_start + right_angle_cut, background_end)
+    ], fill=(dark_r, dark_g, dark_b, 200))
     
-    # Add subtle gradient for depth (darker on left, lighter on right)
-    gradient_steps = 100
-    for i in range(gradient_steps):
-        x_pos = int((width * i) / gradient_steps)
-        next_x = int((width * (i + 1)) / gradient_steps)
-        
-        # Fade from darker to lighter
-        fade_factor = i / gradient_steps
-        alpha = int(30 * (1 - fade_factor))  # 30 on left, 0 on right
-        
-        if alpha > 5:
-            draw.rectangle(
-                [x_pos, lower_third_start, next_x, background_end],
-                fill=(0, 0, 0, alpha)
-            )
+    # LAYER 5: Top accent stripe (angled slightly, full width)
+    stripe_width = 8
+    top_slope = 6
+    draw.polygon([
+        (0, lower_third_start),
+        (width, lower_third_start + top_slope),
+        (width, lower_third_start + top_slope + stripe_width),
+        (0, lower_third_start + stripe_width)
+    ], fill=(accent_r, accent_g, accent_b, 255))
+    
+    # LAYER 6: Bottom accent stripe (angled slightly, full width)
+    bottom_slope = 6
+    draw.polygon([
+        (0, background_end - stripe_width),
+        (width, background_end - bottom_slope - stripe_width),
+        (width, background_end - bottom_slope),
+        (0, background_end)
+    ], fill=(accent_r, accent_g, accent_b, 230))
     
     # Text starts at approximately 1/5 of the page from the left (about 384px on 1920px width)
     text_indent = int(width / 5)
     
     # Draw top text (large font) - indented to start at 1/5 from left
     top_y = lower_third_start + top_padding
-    draw.text((text_indent, top_y), top_text, fill=liturgical_colors['title'], font=top_font)
+    draw.text((text_indent, top_y), top_text, fill=(255, 255, 255, 255), font=top_font)
     
     # Draw bottom text (small font) below top text
     bottom_y = top_y + top_height + text_spacing
-    draw.text((text_indent, bottom_y), bottom_text, fill=liturgical_colors['text'], font=bottom_font)
+    draw.text((text_indent, bottom_y), bottom_text, fill=(241, 241, 241, 255), font=bottom_font)
     
     return img
 
