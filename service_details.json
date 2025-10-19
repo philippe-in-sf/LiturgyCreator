@@ -36,16 +36,20 @@
   },
   "2025-10-19": {
     "organistName": "Casey Cantwell",
-    "preludeName": "Some piece",
-    "preludeComposer": "Cantwell",
-    "openingHymn": "Holy",
-    "sequenceHymn": "O Christ",
-    "preacherName": "Canon Betsy",
-    "offertory": "Come thou font",
-    "communionMotet": "Ave Verum",
-    "communionHymn": "I come with joy",
-    "closingHymn": "O praise ye",
-    "postludeName": "Some other piece",
-    "postludeComposer": "Bach"
+    "preludeName": "Aria",
+    "preludeComposer": "Peeters",
+    "openingHymn": "Holy holy moley",
+    "firstReadingRef": "Jer 31:27-34",
+    "psalmRef": "Psalm  121",
+    "secondReadingRef": "2 Tim 3:14\u20144:5",
+    "sequenceHymn": "O Christ the world incarnate",
+    "gospelRef": "Lk 18:1-8",
+    "preacherName": "Canon Steve",
+    "offertory": "O how i love Jesus",
+    "communionMotet": "",
+    "communionHymn": "Let us Break Bread Together",
+    "closingHymn": "O praise ye the Lord",
+    "postludeName": "Improvisation",
+    "postludeComposer": "Cantwell"
   }
 }

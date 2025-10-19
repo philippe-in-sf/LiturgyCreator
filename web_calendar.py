@@ -1642,9 +1642,18 @@ def preview_graphics():
         })
         
         # Generate lower thirds previews for ALL readings (not limited)
+        # Check for user overrides in service details
+        reading_ref_overrides = {
+            'first_reading': service_details.get('firstReadingRef', '').strip(),
+            'psalm': service_details.get('psalmRef', '').strip(),
+            'second_reading': service_details.get('secondReadingRef', '').strip(),
+            'gospel': service_details.get('gospelRef', '').strip()
+        }
+        
         for reading_type in readings.keys():
             reading_data = readings[reading_type]
-            reference = reading_data.get('reference', '')
+            # Use override if provided, otherwise use lectionary reference
+            reference = reading_ref_overrides.get(reading_type, '') or reading_data.get('reference', '')
             formatted_type = reading_type.replace('_', ' ').title()
             
             # Create lower third image
@@ -1847,8 +1856,17 @@ def export_all():
             zip_file.writestr(f"{date_folder_name}/Title_Card.png", title_card_buffer.read())
             
             # Create lower third graphic for each reading
+            # Check for user overrides in service details
+            reading_ref_overrides = {
+                'first_reading': service_details.get('firstReadingRef', '').strip(),
+                'psalm': service_details.get('psalmRef', '').strip(),
+                'second_reading': service_details.get('secondReadingRef', '').strip(),
+                'gospel': service_details.get('gospelRef', '').strip()
+            }
+            
             for reading_type, reading_data in readings.items():
-                reference = reading_data.get('reference', 'No reference')
+                # Use override if provided, otherwise use lectionary reference
+                reference = reading_ref_overrides.get(reading_type, '') or reading_data.get('reference', 'No reference')
                 
                 # Generate lower third image with liturgical season colors
                 img = create_lower_third(reading_type, reference, date_str)
