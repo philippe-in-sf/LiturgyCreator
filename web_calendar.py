@@ -1505,9 +1505,9 @@ def preview_graphics():
         readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
         liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
         
-        # Remove "Proper X" pattern from the liturgical name (e.g., "Proper 24 (Sunday after Pentecost)" -> "Sunday after Pentecost")
+        # Remove "(Proper X)" pattern from the liturgical name (e.g., "Twentieth Sunday after Pentecost (Proper 25)" -> "Twentieth Sunday after Pentecost")
         import re
-        liturgical_name = re.sub(r'^Proper \d+\s*\((.+)\)$', r'\1', liturgical_name)
+        liturgical_name = re.sub(r'\s*\(Proper \d+\)$', '', liturgical_name)
         
         # Just use the liturgical name without "Holy Eucharist for" prefix
         title_reference = f"{liturgical_name}\n{formatted_date}"
@@ -1712,9 +1712,9 @@ def export_all():
             readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
             liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
             
-            # Remove "Proper X" pattern from the liturgical name (e.g., "Proper 24 (Sunday after Pentecost)" -> "Sunday after Pentecost")
+            # Remove "(Proper X)" pattern from the liturgical name (e.g., "Twentieth Sunday after Pentecost (Proper 25)" -> "Twentieth Sunday after Pentecost")
             import re
-            liturgical_name = re.sub(r'^Proper \d+\s*\((.+)\)$', r'\1', liturgical_name)
+            liturgical_name = re.sub(r'\s*\(Proper \d+\)$', '', liturgical_name)
             
             # Just use the liturgical name without "Holy Eucharist for" prefix
             title_reference = f"{liturgical_name}\n{formatted_date}"
