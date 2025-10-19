@@ -961,7 +961,7 @@ def get_liturgical_season_colors(date_str: Optional[str] = None) -> Dict[str, tu
     return color_schemes.get(season, color_schemes['season_after_pentecost'])
 
 def create_lower_third(reading_type: str, reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080) -> Image.Image:
-    """Create a lower third graphic for broadcast use with liturgical season colors"""
+    """Create a lower third graphic for broadcast use with liturgical season colors and banner-style design"""
     # Create image with transparent background (RGBA mode)
     img = Image.new('RGBA', (width, height), color=(0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
@@ -1013,21 +1013,77 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     # Calculate total background height needed
     background_height = top_padding + top_height + text_spacing + bottom_height + bottom_padding
     
-    # Position lower third lower on screen (at 5/6 of the image height, lowered by 50% from original 2/3)
+    # Position lower third lower on screen (at 5/6 of the image height)
     lower_third_start = int(height * 5 / 6)
-    background_end = lower_third_start + background_height
+    background_end = min(lower_third_start + background_height, height)  # Ensure it doesn't exceed image bounds
     
-    # Draw semi-transparent background with liturgical season color
-    draw.rectangle(
-        [0, lower_third_start, width, background_end],
-        fill=liturgical_colors['background']
-    )
+    # === BANNER-STYLE DESIGN WITH GRADIENT SHADING ===
     
-    # Draw accent bar on left side with liturgical season accent color
+    # Extract base color components from liturgical colors
+    bg_r, bg_g, bg_b, bg_a = liturgical_colors['background']
+    accent_r, accent_g, accent_b, accent_a = liturgical_colors['accent']
+    
+    # Create a darker shade for depth (70% of original brightness)
+    dark_r = int(bg_r * 0.7)
+    dark_g = int(bg_g * 0.7)
+    dark_b = int(bg_b * 0.7)
+    
+    # Draw gradient background from left to right for depth
+    gradient_steps = 200
+    for i in range(gradient_steps):
+        # Calculate position and color interpolation
+        x_pos = int((width * i) / gradient_steps)
+        next_x = int((width * (i + 1)) / gradient_steps)
+        
+        # Create a wave pattern: darker on edges, lighter in middle
+        wave_factor = abs(i - gradient_steps / 2) / (gradient_steps / 2)  # 0 at center, 1 at edges
+        
+        r = int(bg_r - (bg_r - dark_r) * wave_factor * 0.3)
+        g = int(bg_g - (bg_g - dark_g) * wave_factor * 0.3)
+        b = int(bg_b - (bg_b - dark_b) * wave_factor * 0.3)
+        
+        draw.rectangle(
+            [x_pos, lower_third_start, next_x, background_end],
+            fill=(r, g, b, bg_a)
+        )
+    
+    # Draw accent stripe at top of banner (full width, edge-to-edge)
+    accent_height = 8
     draw.rectangle(
-        [0, lower_third_start, 20, background_end],
+        [0, lower_third_start, width, lower_third_start + accent_height],
         fill=liturgical_colors['accent']
     )
+    
+    # Draw accent stripe at bottom of banner (full width, edge-to-edge)
+    draw.rectangle(
+        [0, background_end - accent_height, width, background_end],
+        fill=liturgical_colors['accent']
+    )
+    
+    # Draw decorative left accent panel with angled edge
+    left_panel_width = 300
+    # Create a polygon for angled edge effect
+    draw.polygon([
+        (0, lower_third_start),
+        (left_panel_width, lower_third_start),
+        (left_panel_width - 30, background_end),
+        (0, background_end)
+    ], fill=(accent_r, accent_g, accent_b, int(accent_a * 0.3)))
+    
+    # Draw vertical accent bar on far left (full height)
+    draw.rectangle(
+        [0, lower_third_start, 15, background_end],
+        fill=liturgical_colors['accent']
+    )
+    
+    # Add subtle shadow effect at the top for depth
+    shadow_height = 20
+    for i in range(shadow_height):
+        alpha = int(50 * (1 - i / shadow_height))  # Fade from 50 to 0
+        draw.rectangle(
+            [0, lower_third_start + accent_height + i, width, lower_third_start + accent_height + i + 1],
+            fill=(0, 0, 0, alpha)
+        )
     
     # Text starts at approximately 1/5 of the page from the left (about 384px on 1920px width)
     text_indent = int(width / 5)
