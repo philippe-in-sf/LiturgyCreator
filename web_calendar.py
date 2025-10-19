@@ -1668,7 +1668,11 @@ def preview_graphics():
             'offertory': 'Offertory',
             'communionMotet': 'Communion Motet',
             'communionHymn': 'Communion Hymn',
-            'closingHymn': 'Closing Hymn'
+            'closingHymn': 'Closing Hymn',
+            'preludeTitle': 'Prelude Title',
+            'preludeComposer': 'Prelude Composer',
+            'postludeTitle': 'Postlude Title',
+            'postludeComposer': 'Postlude Composer'
         }
         
         for field_key, field_label in hymn_fields.items():
@@ -1866,7 +1870,11 @@ def export_all():
                 'offertory': 'Offertory',
                 'communionMotet': 'Communion Motet',
                 'communionHymn': 'Communion Hymn',
-                'closingHymn': 'Closing Hymn'
+                'closingHymn': 'Closing Hymn',
+                'preludeTitle': 'Prelude Title',
+                'preludeComposer': 'Prelude Composer',
+                'postludeTitle': 'Postlude Title',
+                'postludeComposer': 'Postlude Composer'
             }
             
             for field_key, field_label in hymn_fields.items():
@@ -1973,7 +1981,11 @@ def generate_lower_thirds():
                 'offertory': 'Offertory',
                 'communionMotet': 'Communion Motet',
                 'communionHymn': 'Communion Hymn',
-                'closingHymn': 'Closing Hymn'
+                'closingHymn': 'Closing Hymn',
+                'preludeTitle': 'Prelude Title',
+                'preludeComposer': 'Prelude Composer',
+                'postludeTitle': 'Postlude Title',
+                'postludeComposer': 'Postlude Composer'
             }
             
             for field_key, field_label in hymn_fields.items():
