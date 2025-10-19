@@ -1497,7 +1497,7 @@ def preview_graphics():
         
         previews = []
         
-        # Generate title card preview with "Holy Eucharist for {liturgical reference}" and date
+        # Generate title card preview with just the liturgical reference and date
         selected_date = datetime.fromisoformat(date_str)
         formatted_date = selected_date.strftime("%B %d, %Y")
         
@@ -1505,8 +1505,8 @@ def preview_graphics():
         readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
         liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
         
-        title_text = f"Holy Eucharist for {liturgical_name}"
-        title_reference = f"{title_text}\n{formatted_date}"
+        # Just use the liturgical name without "Holy Eucharist for" prefix
+        title_reference = f"{liturgical_name}\n{formatted_date}"
         title_card = create_title_card(title_reference, date_str)
         
         # Convert title card to base64
@@ -1700,7 +1700,7 @@ def export_all():
                     zip_file.writestr(f"{date_folder_name}/service_details/Presider.txt", formatted_presider)
             
             # ===== PART 2: Generate lower third graphics =====
-            # Generate full-screen title card with "Holy Eucharist for {liturgical reference}" and date
+            # Generate full-screen title card with just the liturgical reference and date
             # Format date nicely (e.g., "October 19, 2025")
             formatted_date = selected_date.strftime("%B %d, %Y")
             
@@ -1708,8 +1708,8 @@ def export_all():
             readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
             liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
             
-            title_text = f"Holy Eucharist for {liturgical_name}"
-            title_reference = f"{title_text}\n{formatted_date}"
+            # Just use the liturgical name without "Holy Eucharist for" prefix
+            title_reference = f"{liturgical_name}\n{formatted_date}"
             
             title_card_img = create_title_card(title_reference, date_str)
             title_card_buffer = io.BytesIO()
