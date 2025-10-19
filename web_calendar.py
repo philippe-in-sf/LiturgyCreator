@@ -981,13 +981,29 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     # Format reading type (remove underscores, title case)
     formatted_type = reading_type.replace('_', ' ').title()
     
+    # Check if this is a hymn/music item (swap font sizes to emphasize hymn name)
+    is_hymn = any(keyword in formatted_type for keyword in ['Hymn', 'Motet', 'Offertory', 'Prelude', 'Postlude'])
+    
+    if is_hymn:
+        # For hymns: emphasize the hymn name (in large font) over the label (in small font)
+        top_text = reference  # Hymn name/number (large)
+        bottom_text = formatted_type  # Label like "Sequence Hymn" (small)
+        top_font = title_font  # 60pt
+        bottom_font = ref_font  # 45pt
+    else:
+        # For readings: emphasize the reading type (in large font) over the reference (in small font)
+        top_text = formatted_type  # Reading type like "Gospel" (large)
+        bottom_text = reference  # Scripture reference (small)
+        top_font = title_font  # 60pt
+        bottom_font = ref_font  # 45pt
+    
     # Calculate text dimensions to determine background height
-    title_bbox = draw.textbbox((0, 0), formatted_type, font=title_font)
-    ref_bbox = draw.textbbox((0, 0), reference, font=ref_font)
+    top_bbox = draw.textbbox((0, 0), top_text, font=top_font)
+    bottom_bbox = draw.textbbox((0, 0), bottom_text, font=bottom_font)
     
     # Calculate heights
-    title_height = title_bbox[3] - title_bbox[1]
-    ref_height = ref_bbox[3] - ref_bbox[1]
+    top_height = top_bbox[3] - top_bbox[1]
+    bottom_height = bottom_bbox[3] - bottom_bbox[1]
     
     # Padding values
     top_padding = 40
@@ -995,7 +1011,7 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     bottom_padding = 40
     
     # Calculate total background height needed
-    background_height = top_padding + title_height + text_spacing + ref_height + bottom_padding
+    background_height = top_padding + top_height + text_spacing + bottom_height + bottom_padding
     
     # Position lower third lower on screen (at 5/6 of the image height, lowered by 50% from original 2/3)
     lower_third_start = int(height * 5 / 6)
@@ -1016,13 +1032,13 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     # Text starts at approximately 1/5 of the page from the left (about 384px on 1920px width)
     text_indent = int(width / 5)
     
-    # Draw reading type (title) - indented to start at 1/5 from left
-    title_y = lower_third_start + top_padding
-    draw.text((text_indent, title_y), formatted_type, fill=liturgical_colors['title'], font=title_font)
+    # Draw top text (large font) - indented to start at 1/5 from left
+    top_y = lower_third_start + top_padding
+    draw.text((text_indent, top_y), top_text, fill=liturgical_colors['title'], font=top_font)
     
-    # Draw reference (below title)
-    ref_y = title_y + title_height + text_spacing
-    draw.text((text_indent, ref_y), reference, fill=liturgical_colors['text'], font=ref_font)
+    # Draw bottom text (small font) below top text
+    bottom_y = top_y + top_height + text_spacing
+    draw.text((text_indent, bottom_y), bottom_text, fill=liturgical_colors['text'], font=bottom_font)
     
     return img
 
