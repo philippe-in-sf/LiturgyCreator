@@ -40,18 +40,38 @@ class LiturgyFetcher:
             }
         ]
     
-    def fetch_daily_readings(self, date: datetime) -> Optional[Dict[str, Any]]:
+    def fetch_daily_readings(self, date: datetime, service_type: str = 'eucharist') -> Optional[Dict[str, Any]]:
         """
-        Fetch liturgical readings for the specified date
+        Fetch liturgical readings for the specified date and service type
         
         Args:
             date: Date to fetch readings for
+            service_type: Type of service ('eucharist' or 'evensong')
             
         Returns:
             Dictionary containing liturgical readings or None if failed
         """
         date_str = date.strftime('%Y-%m-%d')
         
+        # If Evensong is requested, return empty structure (manual entry required)
+        # Evensong readings are typically not available from standard lectionary APIs
+        if service_type.lower() == 'evensong':
+            self.logger.info(f"Evensong service requested for {date_str} - returning empty structure for manual entry")
+            return {
+                'date': date_str,
+                'celebration': f'{self._get_episcopal_celebration_name(date)} - Evensong',
+                'source': 'Manual Entry (Evensong)',
+                'liturgical_year': self._get_liturgical_year(date),
+                'readings': {
+                    'first_reading': {'reference': '', 'text': ''},
+                    'psalm': {'reference': '', 'text': ''},
+                    'second_reading': {'reference': '', 'text': ''},
+                    'gospel': {'reference': '', 'text': ''},
+                    'collect': {'reference': '', 'text': ''}
+                }
+            }
+        
+        # For Eucharist service type, fetch readings as normal
         # First, try to get readings from local database
         self.logger.info(f"Checking local readings database for {date_str}")
         date_specific_readings = self._get_date_specific_readings(date)

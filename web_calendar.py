@@ -460,7 +460,7 @@ class WebLiturgicalCalendar:
             
         return calendar_info
         
-    def get_readings_for_date(self, date_str: str) -> Dict[str, Any]:
+    def get_readings_for_date(self, date_str: str, service_type: str = 'eucharist') -> Dict[str, Any]:
         """Get readings for a specific date in OBS-compatible format"""
         try:
             # Parse date
@@ -472,8 +472,8 @@ class WebLiturgicalCalendar:
             if not (liturgical_info['is_sunday'] or liturgical_info['feast_day']):
                 return {}
             
-            # Fetch readings
-            readings_data = self.liturgy_fetcher.fetch_daily_readings(selected_date)
+            # Fetch readings with service type
+            readings_data = self.liturgy_fetcher.fetch_daily_readings(selected_date, service_type=service_type)
             
             if not readings_data:
                 return {}
@@ -512,6 +512,9 @@ def get_readings(date_str):
         # Parse date
         selected_date = datetime.fromisoformat(date_str)
         
+        # Get service_type from query parameter (default to 'eucharist' for backward compatibility)
+        service_type = request.args.get('service_type', 'eucharist').lower()
+        
         # Check if it's a Sunday or feast day
         liturgical_info = web_calendar.get_liturgical_info(selected_date.date())
         
@@ -522,13 +525,13 @@ def get_readings(date_str):
                 'liturgical_info': liturgical_info
             })
         
-        # Fetch readings
-        readings_data = web_calendar.liturgy_fetcher.fetch_daily_readings(selected_date)
+        # Fetch readings based on service type
+        readings_data = web_calendar.liturgy_fetcher.fetch_daily_readings(selected_date, service_type=service_type)
         
         if not readings_data:
             return jsonify({
                 'has_readings': False,
-                'message': 'Unable to load readings for this date.',
+                'message': f'Unable to load {service_type} readings for this date.',
                 'liturgical_info': liturgical_info
             })
         
@@ -538,6 +541,7 @@ def get_readings(date_str):
         return jsonify({
             'has_readings': True,
             'date': date_str,
+            'service_type': service_type,
             'liturgical_info': liturgical_info,
             'celebration': readings_data.get('celebration', 'Unknown'),
             'source': readings_data.get('source', 'Unknown'),
@@ -644,10 +648,11 @@ def send_to_obs():
 
 @app.route('/api/service_details', methods=['POST'])
 def save_service_details():
-    """API endpoint to save service details for a specific date"""
+    """API endpoint to save service details for a specific date and service type"""
     try:
         data = request.get_json()
         date_str = data.get('date')
+        service_type = data.get('service_type', 'eucharist')  # Default to eucharist for backward compatibility
         details = data.get('details', {})
         
         # For now, store in a simple file-based system
@@ -666,8 +671,10 @@ def save_service_details():
             except:
                 service_data = {}
         
-        # Save the new details
-        service_data[date_str] = details
+        # Save the new details with nested structure: service_data[date][service_type]
+        if date_str not in service_data:
+            service_data[date_str] = {}
+        service_data[date_str][service_type] = details
         
         try:
             with open(details_file, 'w') as f:
@@ -675,7 +682,7 @@ def save_service_details():
             
             return jsonify({
                 'success': True,
-                'message': f'Service details saved for {date_str}'
+                'message': f'Service details saved for {date_str} ({service_type})'
             })
         except Exception as e:
             return jsonify({
@@ -692,10 +699,13 @@ def save_service_details():
 
 @app.route('/api/service_details/<date_str>', methods=['GET'])
 def get_service_details(date_str):
-    """API endpoint to get service details for a specific date"""
+    """API endpoint to get service details for a specific date and service type"""
     try:
         import json
         import os
+        
+        # Get service_type from query parameter (default to 'eucharist' for backward compatibility)
+        service_type = request.args.get('service_type', 'eucharist')
         
         details_file = 'service_details.json'
         
@@ -703,7 +713,16 @@ def get_service_details(date_str):
             try:
                 with open(details_file, 'r') as f:
                     service_data = json.load(f)
-                    details = service_data.get(date_str, {})
+                    # Handle both old format (direct date access) and new format (date + service_type)
+                    if date_str in service_data:
+                        if isinstance(service_data[date_str], dict) and service_type in service_data[date_str]:
+                            # New format: service_data[date][service_type]
+                            details = service_data[date_str][service_type]
+                        else:
+                            # Old format: service_data[date] - migrate to new format if needed
+                            details = service_data[date_str]
+                    else:
+                        details = {}
                     
                 return jsonify({
                     'success': True,
@@ -1594,6 +1613,7 @@ def preview_graphics():
         data = request.get_json()
         date_str = data.get('date')
         service_details = data.get('serviceDetails', {})
+        service_type = data.get('serviceType', 'eucharist')  # Get service type
         
         if not date_str:
             return jsonify({
@@ -1601,9 +1621,9 @@ def preview_graphics():
                 'error': 'No date provided'
             }), 400
         
-        # Get readings for the date
+        # Get readings for the date with service type
         calendar_instance = WebLiturgicalCalendar()
-        readings = calendar_instance.get_readings_for_date(date_str)
+        readings = calendar_instance.get_readings_for_date(date_str, service_type=service_type)
         liturgical_info = calendar_instance.get_liturgical_info(datetime.fromisoformat(date_str).date())
         
         if not readings:
@@ -1719,6 +1739,7 @@ def export_all():
         data = request.get_json()
         date_str = data.get('date')
         service_details = data.get('serviceDetails', {})
+        service_type = data.get('serviceType', 'eucharist')  # Get service type
         obs_settings = data.get('obsSettings', {})
         
         if not date_str:
@@ -1731,15 +1752,15 @@ def export_all():
         selected_date = datetime.fromisoformat(date_str)
         date_folder_name = "Worship"
         
-        # Get readings for the date
+        # Get readings for the date with service type
         calendar_instance = WebLiturgicalCalendar()
-        readings = calendar_instance.get_readings_for_date(date_str)
+        readings = calendar_instance.get_readings_for_date(date_str, service_type=service_type)
         liturgical_info = calendar_instance.get_liturgical_info(selected_date.date())
         
         if not readings:
             return jsonify({
                 'success': False,
-                'error': 'No readings available for this date'
+                'error': f'No readings available for this date ({service_type})'
             }), 400
         
         # Create ZIP file in memory

@@ -860,6 +860,59 @@
                 padding: 8px 10px;
             }
         }
+        
+        /* Service Type Selector Styles */
+        .service-type-selector {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .service-type-selector h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .service-type-toggle {
+            display: flex;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 2px solid #dee2e6;
+        }
+        
+        .service-type-option {
+            flex: 1;
+            padding: 10px 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            border: none;
+            background: white;
+            color: #495057;
+        }
+        
+        .service-type-option:hover {
+            background: #f8f9fa;
+        }
+        
+        .service-type-option.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .service-type-option:not(:last-child) {
+            border-right: 1px solid #dee2e6;
+        }
     </style>
 </head>
 <body>
@@ -909,6 +962,18 @@
                         <li>Click "Export All" to download readings + lower thirds graphics</li>
                         <li>Refer to in-house documentation for the OBS editing steps</li>
                     </ol>
+                </div>
+                
+                <div class="service-type-selector">
+                    <h4>Service Type</h4>
+                    <div class="service-type-toggle">
+                        <button class="service-type-option active" id="serviceTypeEucharist" onclick="selectServiceType('eucharist')">
+                            Eucharist
+                        </button>
+                        <button class="service-type-option" id="serviceTypeEvensong" onclick="selectServiceType('evensong')">
+                            Evensong
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="details-header">
@@ -1320,8 +1385,9 @@
         let currentDate = new Date();
         let selectedDate = new Date();
         let calendarData = null;
-        let selectedReadings = null;
+        let selectedReadings = {};
         let serviceDetails = {};
+        let selectedServiceType = 'eucharist';
         let obsSettings = {
             operatingSystem: 'windows',
             basePath: 'C:\\Users\\YourName\\Documents\\'
@@ -1331,6 +1397,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadCalendar();
             loadOBSSettings();
+            setupPdfUpload();
         });
 
         function loadCalendar() {
@@ -1447,17 +1514,42 @@
             // Add selection styling to clicked date
             event.target.classList.add('selected');
             
-            // Load readings for selected date
+            // Load readings for selected date with current service type
             loadReadingsForDate(dateStr);
+        }
+
+        function selectServiceType(serviceType) {
+            // Update global variable
+            selectedServiceType = serviceType;
+            
+            // Update button states
+            document.getElementById('serviceTypeEucharist').classList.remove('active');
+            document.getElementById('serviceTypeEvensong').classList.remove('active');
+            
+            if (serviceType === 'eucharist') {
+                document.getElementById('serviceTypeEucharist').classList.add('active');
+            } else {
+                document.getElementById('serviceTypeEvensong').classList.add('active');
+            }
+            
+            // If a date is selected, reload readings for the new service type
+            if (selectedDate) {
+                const dateStr = selectedDate.toISOString().split('T')[0];
+                loadReadingsForDate(dateStr);
+            }
         }
 
         function loadReadingsForDate(dateStr) {
             document.getElementById('readingsContent').innerHTML = '<div class="loading">Loading readings...</div>';
             
-            fetch(`/api/readings/${dateStr}`)
+            fetch(`/api/readings/${dateStr}?service_type=${selectedServiceType}`)
                 .then(response => response.json())
                 .then(data => {
-                    selectedReadings = data;
+                    // Store readings with date and service type structure
+                    if (!selectedReadings[dateStr]) {
+                        selectedReadings[dateStr] = {};
+                    }
+                    selectedReadings[dateStr][selectedServiceType] = data;
                     displayReadings(data);
                 })
                 .catch(error => {
@@ -1484,12 +1576,14 @@
                 return;
             }
             
-            // Update celebration info
-            document.getElementById('celebration').textContent = data.celebration;
+            // Update celebration info with service type
+            const serviceTypeLabel = selectedServiceType.charAt(0).toUpperCase() + selectedServiceType.slice(1);
+            document.getElementById('celebration').textContent = `${data.celebration} - ${serviceTypeLabel}`;
             
             // Display readings
             let html = `
                 <div style="margin-bottom: 15px; padding: 10px; background: #e9ecef; border-radius: 6px; font-size: 0.9rem;">
+                    <strong>Service Type:</strong> ${serviceTypeLabel}<br>
                     <strong>Source:</strong> ${data.source}<br>
                     <strong>Liturgical Year:</strong> ${data.liturgical_year}<br>
                     <strong>Season:</strong> ${data.liturgical_info.season}
@@ -1540,15 +1634,16 @@
 
 
         function exportAll() {
-            if (!selectedReadings || !selectedReadings.has_readings) {
-                showError('No readings available to export');
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            const currentReadings = (selectedReadings[dateStr] && selectedReadings[dateStr][selectedServiceType]) || null;
+            
+            if (!currentReadings || !currentReadings.has_readings) {
+                showError('No readings available to export for the selected service type');
                 return;
             }
             
-            const dateStr = selectedDate.toISOString().split('T')[0];
-            
-            // Include service details in export
-            const currentServiceDetails = serviceDetails[dateStr] || {};
+            // Include service details in export for current service type
+            const currentServiceDetails = (serviceDetails[dateStr] && serviceDetails[dateStr][selectedServiceType]) || {};
             
             // Show loading message
             showSuccess('Preparing complete export (readings + graphics)...');
@@ -1561,6 +1656,7 @@
                 body: JSON.stringify({ 
                     date: dateStr,
                     serviceDetails: currentServiceDetails,
+                    serviceType: selectedServiceType,
                     obsSettings: obsSettings
                 })
             })
@@ -1716,9 +1812,12 @@
                 details[key] = value.trim();
             }
             
-            // Store service details with date key
+            // Store service details with date and service type key
             const dateStr = selectedDate.toISOString().split('T')[0];
-            serviceDetails[dateStr] = details;
+            if (!serviceDetails[dateStr]) {
+                serviceDetails[dateStr] = {};
+            }
+            serviceDetails[dateStr][selectedServiceType] = details;
             
             // Save to localStorage for persistence
             localStorage.setItem('serviceDetails', JSON.stringify(serviceDetails));
@@ -1731,6 +1830,7 @@
                 },
                 body: JSON.stringify({
                     date: dateStr,
+                    service_type: selectedServiceType,
                     details: details
                 })
             })
@@ -1759,7 +1859,8 @@
                 }
                 
                 const dateStr = selectedDate.toISOString().split('T')[0];
-                const details = serviceDetails[dateStr] || {};
+                // Get details for the current date and service type
+                const details = (serviceDetails[dateStr] && serviceDetails[dateStr][selectedServiceType]) || {};
                 
                 // Populate form with existing data
                 const form = document.getElementById('serviceDetailsForm');
@@ -1773,9 +1874,12 @@
                     }
                 });
                 
+                // Get current readings for this date and service type
+                const currentReadings = (selectedReadings[dateStr] && selectedReadings[dateStr][selectedServiceType]) || null;
+                
                 // Pre-populate reading references from lectionary if not already saved
-                if (selectedReadings && selectedReadings.has_readings && selectedReadings.readings) {
-                    const readings = selectedReadings.readings;
+                if (currentReadings && currentReadings.has_readings && currentReadings.readings) {
+                    const readings = currentReadings.readings;
                     
                     // Pre-fill reading references only if they haven't been manually set
                     if (!details.firstReadingRef && readings.first_reading && readings.first_reading.reference) {
@@ -1872,8 +1976,11 @@
 
         // Preview Functions
         function showPreview() {
-            if (!selectedReadings || !selectedReadings.has_readings) {
-                showError('No readings available to preview');
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            const currentReadings = (selectedReadings[dateStr] && selectedReadings[dateStr][selectedServiceType]) || null;
+            
+            if (!currentReadings || !currentReadings.has_readings) {
+                showError('No readings available to preview for the selected service type');
                 return;
             }
             
@@ -1885,14 +1992,15 @@
             loadingDiv.style.display = 'block';
             imagesDiv.style.display = 'none';
             
-            const dateStr = selectedDate.toISOString().split('T')[0];
-            
             fetch('/api/preview_graphics', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ date: dateStr })
+                body: JSON.stringify({ 
+                    date: dateStr,
+                    serviceType: selectedServiceType
+                })
             })
             .then(response => response.json())
             .then(data => {
