@@ -53,23 +53,29 @@ class LiturgyFetcher:
         """
         date_str = date.strftime('%Y-%m-%d')
         
-        # If Evensong is requested, return empty structure (manual entry required)
-        # Evensong readings are typically not available from standard lectionary APIs
+        # If Evensong is requested, fetch from Daily Office Lectionary
         if service_type.lower() == 'evensong':
-            self.logger.info(f"Evensong service requested for {date_str} - returning empty structure for manual entry")
-            return {
-                'date': date_str,
-                'celebration': f'{self._get_episcopal_celebration_name(date)} - Evensong',
-                'source': 'Manual Entry (Evensong)',
-                'liturgical_year': self._get_liturgical_year(date),
-                'readings': {
-                    'first_reading': {'reference': '', 'text': ''},
-                    'psalm': {'reference': '', 'text': ''},
-                    'second_reading': {'reference': '', 'text': ''},
-                    'gospel': {'reference': '', 'text': ''},
-                    'collect': {'reference': '', 'text': ''}
+            self.logger.info(f"Evensong service requested for {date_str} - fetching from Daily Office Lectionary")
+            evening_readings = self._fetch_evening_prayer_readings(date)
+            
+            if evening_readings:
+                return evening_readings
+            else:
+                # Fallback to empty structure if fetching fails
+                self.logger.warning(f"Could not fetch Evening Prayer readings for {date_str}, returning empty structure")
+                return {
+                    'date': date_str,
+                    'celebration': f'{self._get_episcopal_celebration_name(date)} - Evening Prayer',
+                    'source': 'Manual Entry (Evening Prayer)',
+                    'liturgical_year': self._get_daily_office_year(date),
+                    'readings': {
+                        'first_reading': {'reference': '', 'text': ''},
+                        'psalm': {'reference': '', 'text': ''},
+                        'second_reading': {'reference': '', 'text': ''},
+                        'gospel': {'reference': '', 'text': ''},
+                        'collect': {'reference': '', 'text': ''}
+                    }
                 }
-            }
         
         # For Eucharist service type, fetch readings as normal
         # First, try to get readings from local database
@@ -827,26 +833,6 @@ class LiturgyFetcher:
         }
         
         return celebration_names.get(date_str, "Sunday Reading (RCL)")
-        
-        month = date_obj.month
-        day = date_obj.day
-        
-        # Some basic liturgical season calculations
-        if month == 12 and day >= 25:
-            return "Christmas Season"
-        elif month == 1 and day <= 6:
-            return "Christmas Season"
-        elif month == 1 and day > 6:
-            return "Season after Epiphany"
-        elif month in [3, 4]:  # Rough Lent/Easter season
-            return "Lenten Season"
-        elif month in [5, 6]:  # Easter season
-            return "Easter Season"
-        elif month in [11] and day >= 27:  # Advent
-            return "Advent Season"
-        else:
-            # Season after Pentecost
-            return f"Season after Pentecost"
     
     def _fetch_scripture_text(self, reference: str) -> Optional[str]:
         """
@@ -861,4 +847,420 @@ class LiturgyFetcher:
             
         except Exception as e:
             self.logger.warning(f"Could not fetch scripture text for {reference}: {str(e)}")
+            return None
+    
+    def _calculate_easter(self, year: int) -> datetime:
+        """Calculate Easter Sunday for a given year using the Meeus/Jones/Butcher algorithm
+        
+        Args:
+            year: The year to calculate Easter for
+            
+        Returns:
+            datetime object representing Easter Sunday
+        """
+        a = year % 19
+        b = year // 100
+        c = year % 100
+        d = b // 4
+        e = b % 4
+        f = (b + 8) // 25
+        g = (b - f + 1) // 3
+        h = (19 * a + b - d - g + 15) % 30
+        i = c // 4
+        k = c % 4
+        l = (32 + 2 * e + 2 * i - h - k) % 7
+        m = (a + 11 * h + 22 * l) // 451
+        month = (h + l - 7 * m + 114) // 31
+        day = ((h + l - 7 * m + 114) % 31) + 1
+        
+        return datetime(year, month, day)
+    
+    def _calculate_first_sunday_of_advent(self, year: int) -> datetime:
+        """Calculate the First Sunday of Advent for a given year
+        
+        Advent begins on the 4th Sunday before Christmas (Dec 25)
+        
+        Args:
+            year: The year to calculate Advent for
+            
+        Returns:
+            datetime object representing the First Sunday of Advent
+        """
+        christmas = datetime(year, 12, 25)
+        
+        # Find what day of week Christmas falls on (0=Monday, 6=Sunday)
+        christmas_weekday = christmas.weekday()
+        
+        # Calculate days back to the previous Sunday
+        if christmas_weekday == 6:  # Christmas is Sunday
+            days_to_previous_sunday = 0
+        else:
+            days_to_previous_sunday = (christmas_weekday + 1) % 7
+        
+        # Go back 4 Sundays from the Sunday on or before Christmas
+        # If Christmas is Sunday, we go back 4 weeks (28 days)
+        # If not, we go to the previous Sunday then back 3 more weeks (21 days)
+        if christmas_weekday == 6:
+            first_advent = christmas - timedelta(days=28)
+        else:
+            previous_sunday = christmas - timedelta(days=days_to_previous_sunday)
+            first_advent = previous_sunday - timedelta(days=21)
+        
+        return first_advent
+    
+    def _calculate_ash_wednesday(self, year: int) -> datetime:
+        """Calculate Ash Wednesday for a given year
+        
+        Ash Wednesday is 46 days before Easter Sunday
+        
+        Args:
+            year: The year to calculate Ash Wednesday for
+            
+        Returns:
+            datetime object representing Ash Wednesday
+        """
+        easter = self._calculate_easter(year)
+        ash_wednesday = easter - timedelta(days=46)
+        return ash_wednesday
+    
+    def _calculate_pentecost(self, year: int) -> datetime:
+        """Calculate Pentecost Sunday for a given year
+        
+        Pentecost is 50 days after Easter Sunday (7 weeks)
+        
+        Args:
+            year: The year to calculate Pentecost for
+            
+        Returns:
+            datetime object representing Pentecost Sunday
+        """
+        easter = self._calculate_easter(year)
+        pentecost = easter + timedelta(days=49)  # 49 days after = 50th day
+        return pentecost
+    
+    def _get_daily_office_year(self, date_obj: datetime) -> str:
+        """Determine the Daily Office year (Year One or Year Two)
+        
+        The Daily Office year changes on the First Sunday of Advent, not January 1.
+        - If the date is before Advent of this calendar year, use the calendar year
+        - If the date is after Advent starts, use the next calendar year
+        
+        Odd liturgical years = Year One
+        Even liturgical years = Year Two
+        
+        Args:
+            date_obj: The date to determine the Daily Office year for
+            
+        Returns:
+            "Year One" or "Year Two"
+        """
+        # Calculate First Sunday of Advent for this calendar year
+        first_advent = self._calculate_first_sunday_of_advent(date_obj.year)
+        
+        # If we're at or past Advent, the liturgical year is based on next calendar year
+        # Otherwise, it's based on current calendar year
+        if date_obj >= first_advent:
+            liturgical_year = date_obj.year + 1
+        else:
+            liturgical_year = date_obj.year
+        
+        return "Year One" if liturgical_year % 2 == 1 else "Year Two"
+    
+    def _determine_liturgical_season(self, date_obj: datetime) -> str:
+        """Determine the liturgical season for the Daily Office Lectionary
+        
+        Calculates liturgical seasons based on movable feasts (Easter, etc.)
+        
+        Seasons:
+        - Advent: 4th Sunday before Christmas until Christmas Eve
+        - Christmas: Dec 25 - Jan 5 (12 days)
+        - Epiphany: Jan 6 - day before Ash Wednesday
+        - Lent: Ash Wednesday - Saturday before Easter
+        - Easter: Easter Sunday - day before Pentecost
+        - Pentecost (Season after Pentecost): Pentecost - day before Advent
+        
+        Args:
+            date_obj: The date to determine the season for
+            
+        Returns:
+            Season name for mapping to bcponline.org URLs
+        """
+        year = date_obj.year
+        
+        # Calculate key liturgical dates for this year
+        easter = self._calculate_easter(year)
+        ash_wednesday = self._calculate_ash_wednesday(year)
+        pentecost = self._calculate_pentecost(year)
+        first_advent = self._calculate_first_sunday_of_advent(year)
+        
+        # Define fixed dates
+        christmas_start = datetime(year, 12, 25)
+        christmas_end = datetime(year, 1, 5) if year == date_obj.year else datetime(year + 1, 1, 5)
+        epiphany_start = datetime(year, 1, 6) if year == date_obj.year else datetime(year + 1, 1, 6)
+        
+        # Check which season the date falls in
+        # Order matters - check in chronological order, handling year boundaries
+        
+        # Christmas Season: Dec 25 - Jan 5 (spans year boundary)
+        # Check first to handle early January dates properly
+        if date_obj.month == 12 and date_obj.day >= 25:
+            return "Christmas"
+        if date_obj.month == 1 and date_obj.day <= 5:
+            return "Christmas"
+        
+        # Epiphany Season: Jan 6 - day before Ash Wednesday
+        if date_obj >= datetime(year, 1, 6) and date_obj < ash_wednesday:
+            return "Epiphany"
+        
+        # Lent: Ash Wednesday - Saturday before Easter
+        holy_saturday = easter - timedelta(days=1)
+        if ash_wednesday <= date_obj <= holy_saturday:
+            return "Lent"
+        
+        # Easter Season: Easter Sunday - day before Pentecost
+        pentecost_eve = pentecost - timedelta(days=1)
+        if easter <= date_obj <= pentecost_eve:
+            return "Easter"
+        
+        # Season after Pentecost: Pentecost - day before Advent
+        advent_eve = first_advent - timedelta(days=1)
+        if pentecost <= date_obj <= advent_eve:
+            return "Pentecost"
+        
+        # Advent: First Sunday of Advent - Dec 24
+        christmas_eve = datetime(year, 12, 24)
+        if first_advent <= date_obj <= christmas_eve:
+            return "Advent"
+        
+        # Default fallback (should not reach here with correct logic)
+        # But if we do, return Pentecost as it's the longest season
+        return "Pentecost"
+    
+    def _get_daily_office_url(self, season: str) -> str:
+        """Map liturgical season to bcponline.org Daily Office Lectionary URL"""
+        season_urls = {
+            'Advent': 'https://www.bcponline.org/DOLectionary/Advent.html',
+            'Christmas': 'https://www.bcponline.org/DOLectionary/Christmas.html',
+            'Epiphany': 'https://www.bcponline.org/DOLectionary/Epiphany.html',
+            'Lent': 'https://www.bcponline.org/DOLectionary/Lent.html',
+            'Easter': 'https://www.bcponline.org/DOLectionary/Easter.html',
+            'Pentecost': 'https://www.bcponline.org/DOLectionary/Pentecost.html'
+        }
+        return season_urls.get(season, season_urls['Pentecost'])
+    
+    def _fetch_evening_prayer_readings(self, date: datetime) -> Optional[Dict[str, Any]]:
+        """Fetch Evening Prayer readings from the Daily Office Lectionary
+        
+        Args:
+            date: Date to fetch readings for
+            
+        Returns:
+            Dictionary containing Evening Prayer readings or None if failed
+        """
+        try:
+            date_str = date.strftime('%Y-%m-%d')
+            self.logger.info(f"Fetching Evening Prayer readings for {date_str}")
+            
+            # Determine season and year
+            season = self._determine_liturgical_season(date)
+            office_year = self._get_daily_office_year(date)
+            url = self._get_daily_office_url(season)
+            
+            self.logger.info(f"Season: {season}, Year: {office_year}, URL: {url}")
+            
+            # Fetch the HTML page
+            response = self.session.get(url, timeout=10)
+            response.raise_for_status()
+            
+            # Parse the HTML
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Extract readings for the specific date
+            readings = self._parse_daily_office_page(soup, date, office_year, season)
+            
+            if readings:
+                celebration_name = self._get_episcopal_celebration_name(date)
+                return {
+                    'date': date_str,
+                    'celebration': f'{celebration_name} - Evening Prayer',
+                    'source': 'Daily Office Lectionary (BCP Online)',
+                    'liturgical_year': office_year,
+                    'readings': readings
+                }
+            else:
+                self.logger.warning(f"Could not parse Evening Prayer readings for {date_str}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Error fetching Evening Prayer readings: {str(e)}")
+            return None
+    
+    def _parse_daily_office_page(self, soup: BeautifulSoup, date: datetime, office_year: str, season: str) -> Optional[Dict[str, Dict[str, str]]]:
+        """Parse the Daily Office Lectionary HTML page to extract readings
+        
+        Args:
+            soup: BeautifulSoup object of the page
+            date: Target date
+            office_year: "Year One" or "Year Two"
+            season: Liturgical season
+            
+        Returns:
+            Dictionary of readings or None if parsing fails
+        """
+        try:
+            # Get day of week
+            day_name = date.strftime('%A')  # Monday, Tuesday, etc.
+            
+            # Find all tables on the page (lectionary readings are typically in tables)
+            tables = soup.find_all('table')
+            
+            if not tables:
+                self.logger.warning("No tables found on Daily Office page")
+                return None
+            
+            # Look for the correct week/proper and day
+            # The structure varies by season, so we'll search for the day name
+            for table in tables:
+                rows = table.find_all('tr')
+                
+                for i, row in enumerate(rows):
+                    cells = row.find_all(['td', 'th'])
+                    
+                    # Look for a row that contains the day name
+                    for cell in cells:
+                        cell_text = cell.get_text(strip=True)
+                        
+                        if day_name in cell_text:
+                            # Found the correct day - now extract readings
+                            # The next cells or rows should contain the readings
+                            return self._extract_readings_from_row(row, rows[i:i+3] if i+3 < len(rows) else rows[i:], office_year)
+            
+            # If we didn't find the day by searching, try alternative parsing
+            self.logger.warning(f"Could not find {day_name} in Daily Office page")
+            return self._parse_alternative_format(soup, day_name, office_year)
+            
+        except Exception as e:
+            self.logger.error(f"Error parsing Daily Office page: {str(e)}")
+            return None
+    
+    def _extract_readings_from_row(self, header_row, nearby_rows: list, office_year: str) -> Optional[Dict[str, Dict[str, str]]]:
+        """Extract readings from a table row
+        
+        Args:
+            header_row: The row containing the day name
+            nearby_rows: List of nearby rows that might contain readings
+            office_year: "Year One" or "Year Two"
+            
+        Returns:
+            Dictionary of readings
+        """
+        try:
+            readings = {
+                'psalm': {'reference': '', 'text': ''},
+                'first_reading': {'reference': '', 'text': ''},
+                'second_reading': {'reference': '', 'text': ''},
+                'gospel': {'reference': '', 'text': ''}
+            }
+            
+            # Combine text from all nearby rows
+            combined_text = " ".join([row.get_text(separator=' ', strip=True) for row in nearby_rows])
+            
+            # Look for psalm pattern: "Morning Psalms v Evening Psalms"
+            # We want the evening psalms (after "v")
+            psalm_match = re.search(r'(\d+:\d+[\-\d:,\s]*)\s+v\s+(\d+:\d+[\-\d:,\s]*)', combined_text)
+            if psalm_match:
+                evening_psalms = psalm_match.group(2).strip()
+                readings['psalm']['reference'] = evening_psalms
+                self.logger.info(f"Found evening psalms: {evening_psalms}")
+                
+                # Remove the psalm portion from the text to avoid interference
+                psalm_text = psalm_match.group(0)
+                combined_text = combined_text.replace(psalm_text, ' ')
+            
+            # Remove day names and common liturgical terms to clean up the text
+            combined_text = re.sub(r'\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b', ' ', combined_text, flags=re.IGNORECASE)
+            
+            # Match scripture references with book names
+            # This pattern matches: [optional number] [book name with optional period] chapter:verse[-verse]
+            # Common books: Gen, Ex, Lev, Num, Deut, Josh, Judg, Ruth, Sam, Kings, Chron, Ezra, Neh, Esth, Job, Ps, Prov, Eccl, Song, Isa, Jer, Lam, Ezek, Dan, Hos, Joel, Amos, Obad, Jonah, Mic, Nah, Hab, Zeph, Hag, Zech, Mal
+            # NT: Matt, Mark, Luke, John, Acts, Rom, Cor, Gal, Eph, Phil, Col, Thess, Tim, Titus, Philem, Heb, James, Pet, John, Jude, Rev
+            
+            scripture_pattern = r'\b([1-3]?\s*(?:Gen|Ex|Exod|Lev|Num|Deut|Josh|Judg|Ruth|Sam|Kings|Chron|Ezra|Neh|Esth|Job|Ps|Psalm|Prov|Eccl|Song|Isa|Isaiah|Jer|Jeremiah|Lam|Ezek|Ezekiel|Dan|Daniel|Hos|Hosea|Joel|Amos|Obad|Obadiah|Jonah|Jon|Mic|Micah|Nah|Nahum|Hab|Habakkuk|Zeph|Zephaniah|Hag|Haggai|Zech|Zechariah|Mal|Malachi|Matt|Matthew|Mark|Luke|John|Acts|Rom|Romans|Cor|Corinthians|Gal|Galatians|Eph|Ephesians|Phil|Philippians|Col|Colossians|Thess|Thessalonians|Tim|Timothy|Titus|Tit|Philem|Philemon|Heb|Hebrews|James|Jas|Pet|Peter|Jude|Rev|Revelation)\.?\s+\d+:\d+(?:-\d+)?(?:\s*,\s*\d+(?:-\d+)?)*)\b'
+            
+            scripture_matches = re.findall(scripture_pattern, combined_text, re.IGNORECASE)
+            
+            # Clean up the matches and filter out any remaining psalm-only references
+            cleaned_matches = []
+            for match in scripture_matches:
+                match_clean = match.strip()
+                # Skip if it's just a number (psalm reference without book name)
+                if not re.match(r'^\d+:', match_clean):
+                    cleaned_matches.append(match_clean)
+            
+            if cleaned_matches:
+                self.logger.info(f"Found {len(cleaned_matches)} scripture references: {cleaned_matches}")
+                
+                # Assign based on position (typically OT, Epistle, Gospel)
+                if len(cleaned_matches) >= 1:
+                    readings['first_reading']['reference'] = cleaned_matches[0]
+                if len(cleaned_matches) >= 2:
+                    readings['second_reading']['reference'] = cleaned_matches[1]
+                if len(cleaned_matches) >= 3:
+                    readings['gospel']['reference'] = cleaned_matches[2]
+            
+            # Check if we found any readings
+            if any(readings[key]['reference'] for key in readings):
+                return readings
+            else:
+                self.logger.warning("No readings extracted from row")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Error extracting readings from row: {str(e)}")
+            return None
+    
+    def _parse_alternative_format(self, soup: BeautifulSoup, day_name: str, office_year: str) -> Optional[Dict[str, Dict[str, str]]]:
+        """Alternative parsing method for different HTML structures"""
+        try:
+            # Look for the day name anywhere in the page
+            all_text = soup.get_text(separator=' ', strip=True)
+            
+            # Find position of day name
+            day_position = all_text.find(day_name)
+            if day_position == -1:
+                return None
+            
+            # Extract ~500 characters after the day name
+            context = all_text[day_position:day_position+500]
+            
+            readings = {
+                'psalm': {'reference': '', 'text': ''},
+                'first_reading': {'reference': '', 'text': ''},
+                'second_reading': {'reference': '', 'text': ''},
+                'gospel': {'reference': '', 'text': ''}
+            }
+            
+            # Extract evening psalms
+            psalm_match = re.search(r'(\d+:\d+[\-\d:,\s]*)\s+v\s+(\d+:\d+[\-\d:,\s]*)', context)
+            if psalm_match:
+                readings['psalm']['reference'] = psalm_match.group(2).strip()
+            
+            # Extract scripture references
+            scripture_pattern = r'([1-3]?\s*[A-Za-z]+\.?\s+\d+:\d+(?:-\d+)?)'
+            scripture_matches = re.findall(scripture_pattern, context)
+            
+            if scripture_matches and len(scripture_matches) >= 2:
+                readings['first_reading']['reference'] = scripture_matches[0].strip()
+                if len(scripture_matches) >= 2:
+                    readings['second_reading']['reference'] = scripture_matches[1].strip()
+                if len(scripture_matches) >= 3:
+                    readings['gospel']['reference'] = scripture_matches[2].strip()
+            
+            if any(readings[key]['reference'] for key in readings):
+                return readings
+            
+            return None
+            
+        except Exception as e:
+            self.logger.error(f"Error in alternative parsing: {str(e)}")
             return None
