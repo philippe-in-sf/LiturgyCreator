@@ -2329,6 +2329,115 @@ def special_service():
             'message': 'Failed to generate special service materials'
         }), 500
 
+@app.route('/api/evensong_service', methods=['POST'])
+def evensong_service():
+    """Generate service details export for Evensong services"""
+    try:
+        data = request.get_json()
+        service_date = data.get('date', '')
+        evensong_details = data.get('evensong_details', {})
+        
+        if not service_date:
+            return jsonify({
+                'success': False,
+                'error': 'Service date is required'
+            }), 400
+        
+        # Parse date
+        selected_date = datetime.fromisoformat(service_date)
+        date_folder_name = f"Evensong_{service_date.replace('-', '')}"
+        
+        # Create ZIP file in memory
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            # ===== Export Evensong service details as text files =====
+            evensong_fields = {
+                'responsoryComposer': 'Responsory Composer',
+                'eveningHymn': 'Evening Hymn',
+                'firstReadingRef': 'First Reading Reference',
+                'magnificatSetting': 'Magnificat Setting',
+                'magnificatComposer': 'Magnificat Composer',
+                'secondReadingRef': 'Second Reading Reference',
+                'nuncDimittisSetting': 'Nunc Dimittis Setting',
+                'nuncDimittisComposer': 'Nunc Dimittis Composer',
+                'organistName': 'Organist',
+                'preludeName': 'Prelude Title',
+                'preludeComposer': 'Prelude Composer',
+                'postludeName': 'Postlude Title',
+                'postludeComposer': 'Postlude Composer'
+            }
+            
+            for field_key, field_label in evensong_fields.items():
+                field_value = evensong_details.get(field_key, '').strip()
+                if field_value:
+                    formatted_value = textwrap.fill(field_value, width=50, break_long_words=False, break_on_hyphens=False)
+                    filename = f"{field_label}.txt"
+                    filepath = f"{date_folder_name}/service_details/{filename}"
+                    zip_file.writestr(filepath, formatted_value)
+            
+            # Fetch Evening Hymn text from Hymnary.org if provided
+            evening_hymn = evensong_details.get('eveningHymn', '').strip()
+            if evening_hymn:
+                hymn_text = fetch_hymn_text_from_hymnary(evening_hymn)
+                if hymn_text:
+                    formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
+                    filename = "Evening Hymn Text.txt"
+                    filepath = f"{date_folder_name}/service_details/{filename}"
+                    zip_file.writestr(filepath, formatted_hymn_text)
+            
+            # ===== Generate title card for Evensong service =====
+            formatted_date = selected_date.strftime("%B %d, %Y")
+            title_reference = f"Evensong\n{formatted_date}"
+            title_card = create_title_card(title_reference, service_date)
+            title_card_buffer = io.BytesIO()
+            title_card.save(title_card_buffer, format='PNG')
+            title_card_buffer.seek(0)
+            zip_file.writestr(f"{date_folder_name}/graphics/Title Card.png", title_card_buffer.read())
+            
+            # ===== Generate lower third graphics for Evensong elements =====
+            lower_third_fields = {
+                'eveningHymn': 'Evening Hymn',
+                'magnificatSetting': 'Magnificat',
+                'nuncDimittisSetting': 'Nunc Dimittis',
+                'firstReadingRef': 'First Reading',
+                'secondReadingRef': 'Second Reading'
+            }
+            
+            for field_key, field_label in lower_third_fields.items():
+                field_value = evensong_details.get(field_key, '').strip()
+                if field_value:
+                    # Generate lower third image
+                    img = create_lower_third(field_label, field_value, service_date)
+                    
+                    # Save image to buffer
+                    img_buffer = io.BytesIO()
+                    img.save(img_buffer, format='PNG')
+                    img_buffer.seek(0)
+                    
+                    # Add to ZIP
+                    filename = f"{field_label}.png"
+                    filepath = f"{date_folder_name}/graphics/{filename}"
+                    zip_file.writestr(filepath, img_buffer.read())
+        
+        # Prepare the ZIP file for download
+        zip_buffer.seek(0)
+        download_name = f"evensong_service_{service_date.replace('-', '')}.zip"
+        
+        return send_file(
+            io.BytesIO(zip_buffer.read()),
+            as_attachment=True,
+            download_name=download_name,
+            mimetype='application/zip'
+        )
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate Evensong service materials'
+        }), 500
+
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5000))
