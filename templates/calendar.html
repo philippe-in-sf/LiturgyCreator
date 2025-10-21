@@ -1392,15 +1392,19 @@
             
             <form id="evensongServiceForm">
                 <div class="form-section">
-                    <h3>Service Information</h3>
+                    <h3>Service Date</h3>
                     <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
-                        Build a complete Evensong service with canticle settings and readings
+                        Build a complete Evensong service following the Evening Prayer liturgy
                     </p>
                     
                     <div class="form-group">
                         <label for="evensongServiceDate">Service Date *</label>
                         <input type="date" id="evensongServiceDate" name="evensongServiceDate" required>
                     </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Invitatory and Psalter</h3>
                     
                     <div class="form-group">
                         <label for="evensongResponsoryComposer">Responsory Composer</label>
@@ -1408,17 +1412,47 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="evensongEveningHymn">Evening Hymn</label>
-                        <input type="text" id="evensongEveningHymn" name="evensongEveningHymn" placeholder="e.g., Hymn 25 - O Gracious Light">
+                        <label for="evensongPrecesResponsesSetting">Preces and Responses Setting</label>
+                        <input type="text" id="evensongPrecesResponsesSetting" name="evensongPrecesResponsesSetting" placeholder="e.g., Smith of Durham">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongPrecesResponsesComposer">Preces and Responses Composer</label>
+                        <input type="text" id="evensongPrecesResponsesComposer" name="evensongPrecesResponsesComposer" placeholder="e.g., Philip Radcliffe">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongOfficeHymn">Office Hymn</label>
+                        <input type="text" id="evensongOfficeHymn" name="evensongOfficeHymn" placeholder="e.g., Hymn 25 - O Gracious Light">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongFirstPsalmRef">First Psalm Reference</label>
+                        <input type="text" id="evensongFirstPsalmRef" name="evensongFirstPsalmRef" placeholder="e.g., Psalm 84">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongFirstPsalmComposer">First Psalm Composer</label>
+                        <input type="text" id="evensongFirstPsalmComposer" name="evensongFirstPsalmComposer" placeholder="e.g., Thomas Attwood">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongSecondPsalmRef">Second Psalm Reference</label>
+                        <input type="text" id="evensongSecondPsalmRef" name="evensongSecondPsalmRef" placeholder="e.g., Psalm 150">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongSecondPsalmComposer">Second Psalm Composer</label>
+                        <input type="text" id="evensongSecondPsalmComposer" name="evensongSecondPsalmComposer" placeholder="e.g., John Goss">
                     </div>
                 </div>
                 
                 <div class="form-section">
-                    <h3>First Reading & Magnificat</h3>
+                    <h3>The Lessons</h3>
                     
                     <div class="form-group">
-                        <label for="evensongFirstReadingRef">First Reading Reference</label>
-                        <input type="text" id="evensongFirstReadingRef" name="evensongFirstReadingRef" placeholder="e.g., Isaiah 55:1-11">
+                        <label for="evensongFirstLesson">The First Lesson</label>
+                        <input type="text" id="evensongFirstLesson" name="evensongFirstLesson" placeholder="e.g., Isaiah 55:1-11">
                     </div>
                     
                     <div class="form-group">
@@ -1430,14 +1464,10 @@
                         <label for="evensongMagnificatComposer">Magnificat Composer</label>
                         <input type="text" id="evensongMagnificatComposer" name="evensongMagnificatComposer" placeholder="e.g., Charles Villiers Stanford">
                     </div>
-                </div>
-                
-                <div class="form-section">
-                    <h3>Second Reading & Nunc Dimittis</h3>
                     
                     <div class="form-group">
-                        <label for="evensongSecondReadingRef">Second Reading Reference</label>
-                        <input type="text" id="evensongSecondReadingRef" name="evensongSecondReadingRef" placeholder="e.g., Luke 1:46-55">
+                        <label for="evensongSecondLesson">The Second Lesson</label>
+                        <input type="text" id="evensongSecondLesson" name="evensongSecondLesson" placeholder="e.g., Luke 1:46-55">
                     </div>
                     
                     <div class="form-group">
@@ -1452,31 +1482,35 @@
                 </div>
                 
                 <div class="form-section">
-                    <h3>Additional Musicians (Optional)</h3>
+                    <h3>Prayers</h3>
                     
                     <div class="form-group">
-                        <label for="evensongOrganistName">Organist Name</label>
-                        <input type="text" id="evensongOrganistName" name="evensongOrganistName" placeholder="e.g., Dr. Sarah Johnson">
+                        <label for="evensongResponsesSetting">Responses Setting</label>
+                        <input type="text" id="evensongResponsesSetting" name="evensongResponsesSetting" placeholder="e.g., Plainsong">
                     </div>
                     
                     <div class="form-group">
-                        <label for="evensongPreludeName">Prelude Title</label>
-                        <input type="text" id="evensongPreludeName" name="evensongPreludeName" placeholder="e.g., Elegy">
+                        <label for="evensongResponsesComposer">Responses Composer</label>
+                        <input type="text" id="evensongResponsesComposer" name="evensongResponsesComposer" placeholder="e.g., Traditional">
                     </div>
                     
                     <div class="form-group">
-                        <label for="evensongPreludeComposer">Prelude Composer</label>
-                        <input type="text" id="evensongPreludeComposer" name="evensongPreludeComposer" placeholder="e.g., George Thalben-Ball">
+                        <label for="evensongAnthem">Anthem</label>
+                        <input type="text" id="evensongAnthem" name="evensongAnthem" placeholder="e.g., O Taste and See - Ralph Vaughan Williams">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Conclusion</h3>
+                    
+                    <div class="form-group">
+                        <label for="evensongHymn">Hymn</label>
+                        <input type="text" id="evensongHymn" name="evensongHymn" placeholder="e.g., Hymn 429 - I'll Praise My Maker">
                     </div>
                     
                     <div class="form-group">
-                        <label for="evensongPostludeName">Postlude Title</label>
-                        <input type="text" id="evensongPostludeName" name="evensongPostludeName" placeholder="e.g., Sortie in E-flat">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="evensongPostludeComposer">Postlude Composer</label>
-                        <input type="text" id="evensongPostludeComposer" name="evensongPostludeComposer" placeholder="e.g., Louis Lefébure-Wély">
+                        <label for="evensongPostlude">Postlude</label>
+                        <input type="text" id="evensongPostlude" name="evensongPostlude" placeholder="e.g., Toccata in F - Charles-Marie Widor">
                     </div>
                 </div>
                 
@@ -2301,18 +2335,24 @@
             // Collect Evensong service details
             const evensongDetails = {
                 responsoryComposer: document.getElementById('evensongResponsoryComposer').value.trim(),
-                eveningHymn: document.getElementById('evensongEveningHymn').value.trim(),
-                firstReadingRef: document.getElementById('evensongFirstReadingRef').value.trim(),
+                precesResponsesSetting: document.getElementById('evensongPrecesResponsesSetting').value.trim(),
+                precesResponsesComposer: document.getElementById('evensongPrecesResponsesComposer').value.trim(),
+                officeHymn: document.getElementById('evensongOfficeHymn').value.trim(),
+                firstPsalmRef: document.getElementById('evensongFirstPsalmRef').value.trim(),
+                firstPsalmComposer: document.getElementById('evensongFirstPsalmComposer').value.trim(),
+                secondPsalmRef: document.getElementById('evensongSecondPsalmRef').value.trim(),
+                secondPsalmComposer: document.getElementById('evensongSecondPsalmComposer').value.trim(),
+                firstLesson: document.getElementById('evensongFirstLesson').value.trim(),
                 magnificatSetting: document.getElementById('evensongMagnificatSetting').value.trim(),
                 magnificatComposer: document.getElementById('evensongMagnificatComposer').value.trim(),
-                secondReadingRef: document.getElementById('evensongSecondReadingRef').value.trim(),
+                secondLesson: document.getElementById('evensongSecondLesson').value.trim(),
                 nuncDimittisSetting: document.getElementById('evensongNuncDimittisSetting').value.trim(),
                 nuncDimittisComposer: document.getElementById('evensongNuncDimittisComposer').value.trim(),
-                organistName: document.getElementById('evensongOrganistName').value.trim(),
-                preludeName: document.getElementById('evensongPreludeName').value.trim(),
-                preludeComposer: document.getElementById('evensongPreludeComposer').value.trim(),
-                postludeName: document.getElementById('evensongPostludeName').value.trim(),
-                postludeComposer: document.getElementById('evensongPostludeComposer').value.trim()
+                responsesSetting: document.getElementById('evensongResponsesSetting').value.trim(),
+                responsesComposer: document.getElementById('evensongResponsesComposer').value.trim(),
+                anthem: document.getElementById('evensongAnthem').value.trim(),
+                hymn: document.getElementById('evensongHymn').value.trim(),
+                postlude: document.getElementById('evensongPostlude').value.trim()
             };
             
             // Check if at least one field is filled
@@ -2571,7 +2611,7 @@
     
     <footer style="background-color: #f8f9fa; border-top: 1px solid #dee2e6; padding: 20px; margin-top: 40px; text-align: center; color: #6c757d; font-size: 14px;">
         <div style="margin-bottom: 10px;">
-            <strong>Episcopal Liturgical Calendar Tool v2.3.1</strong>
+            <strong>Episcopal Liturgical Calendar Tool v2.3.2</strong>
         </div>
         <div>
             This tool is provided under a public domain license, without copyright attached. Please courtesy credit Philippe Beaudette/Trinity Episcopal Church, Tulsa, OK.

@@ -2354,18 +2354,24 @@ def evensong_service():
             # ===== Export Evensong service details as text files =====
             evensong_fields = {
                 'responsoryComposer': 'Responsory Composer',
-                'eveningHymn': 'Evening Hymn',
-                'firstReadingRef': 'First Reading Reference',
+                'precesResponsesSetting': 'Preces and Responses Setting',
+                'precesResponsesComposer': 'Preces and Responses Composer',
+                'officeHymn': 'Office Hymn',
+                'firstPsalmRef': 'First Psalm Reference',
+                'firstPsalmComposer': 'First Psalm Composer',
+                'secondPsalmRef': 'Second Psalm Reference',
+                'secondPsalmComposer': 'Second Psalm Composer',
+                'firstLesson': 'The First Lesson',
                 'magnificatSetting': 'Magnificat Setting',
                 'magnificatComposer': 'Magnificat Composer',
-                'secondReadingRef': 'Second Reading Reference',
+                'secondLesson': 'The Second Lesson',
                 'nuncDimittisSetting': 'Nunc Dimittis Setting',
                 'nuncDimittisComposer': 'Nunc Dimittis Composer',
-                'organistName': 'Organist',
-                'preludeName': 'Prelude Title',
-                'preludeComposer': 'Prelude Composer',
-                'postludeName': 'Postlude Title',
-                'postludeComposer': 'Postlude Composer'
+                'responsesSetting': 'Responses Setting',
+                'responsesComposer': 'Responses Composer',
+                'anthem': 'Anthem',
+                'hymn': 'Hymn',
+                'postlude': 'Postlude'
             }
             
             for field_key, field_label in evensong_fields.items():
@@ -2376,13 +2382,22 @@ def evensong_service():
                     filepath = f"{date_folder_name}/service_details/{filename}"
                     zip_file.writestr(filepath, formatted_value)
             
-            # Fetch Evening Hymn text from Hymnary.org if provided
-            evening_hymn = evensong_details.get('eveningHymn', '').strip()
-            if evening_hymn:
-                hymn_text = fetch_hymn_text_from_hymnary(evening_hymn)
+            # Fetch hymn text from Hymnary.org for Office Hymn and Hymn
+            office_hymn = evensong_details.get('officeHymn', '').strip()
+            if office_hymn:
+                hymn_text = fetch_hymn_text_from_hymnary(office_hymn)
                 if hymn_text:
                     formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
-                    filename = "Evening Hymn Text.txt"
+                    filename = "Office Hymn Text.txt"
+                    filepath = f"{date_folder_name}/service_details/{filename}"
+                    zip_file.writestr(filepath, formatted_hymn_text)
+            
+            hymn = evensong_details.get('hymn', '').strip()
+            if hymn:
+                hymn_text = fetch_hymn_text_from_hymnary(hymn)
+                if hymn_text:
+                    formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
+                    filename = "Hymn Text.txt"
                     filepath = f"{date_folder_name}/service_details/{filename}"
                     zip_file.writestr(filepath, formatted_hymn_text)
             
@@ -2397,11 +2412,13 @@ def evensong_service():
             
             # ===== Generate lower third graphics for Evensong elements =====
             lower_third_fields = {
-                'eveningHymn': 'Evening Hymn',
+                'officeHymn': 'Office Hymn',
+                'firstLesson': 'First Lesson',
                 'magnificatSetting': 'Magnificat',
+                'secondLesson': 'Second Lesson',
                 'nuncDimittisSetting': 'Nunc Dimittis',
-                'firstReadingRef': 'First Reading',
-                'secondReadingRef': 'Second Reading'
+                'anthem': 'Anthem',
+                'hymn': 'Hymn'
             }
             
             for field_key, field_label in lower_third_fields.items():
