@@ -989,6 +989,7 @@
                     <button class="action-btn btn-secondary" onclick="showServiceDetails()">Service Details</button>
                     <button class="action-btn btn-primary" onclick="loadReadings()">Load Readings</button>
                     <button class="action-btn" onclick="showSpecialService()" style="background-color: #9b59b6; color: white;">✨ Special Service</button>
+                    <button id="constructEvensongBtn" class="action-btn" onclick="showEvensongService()" style="background-color: #6a5acd; color: white; display: none;">🕯️ Construct Evensong</button>
                     <button class="action-btn btn-warning" onclick="showPreview()" style="background-color: #ffc107; color: #000;">👁️ Preview</button>
                     <button class="action-btn btn-success" onclick="exportAll()" style="background-color: #28a745;">Export All</button>
                     <button class="action-btn btn-info" onclick="showSettings()" style="background-color: #6c757d;">⚙️ Settings</button>
@@ -1381,6 +1382,112 @@
         </div>
     </div>
 
+    <!-- Evensong Service Construction Modal -->
+    <div id="evensongServiceModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <span class="close" onclick="closeEvensongService()">&times;</span>
+                <h2 class="modal-title">🕯️ Construct Evensong Service</h2>
+            </div>
+            
+            <form id="evensongServiceForm">
+                <div class="form-section">
+                    <h3>Service Information</h3>
+                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
+                        Build a complete Evensong service with canticle settings and readings
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="evensongServiceDate">Service Date *</label>
+                        <input type="date" id="evensongServiceDate" name="evensongServiceDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongResponsoryComposer">Responsory Composer</label>
+                        <input type="text" id="evensongResponsoryComposer" name="evensongResponsoryComposer" placeholder="e.g., Robert Knox Kennedy">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongEveningHymn">Evening Hymn</label>
+                        <input type="text" id="evensongEveningHymn" name="evensongEveningHymn" placeholder="e.g., Hymn 25 - O Gracious Light">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>First Reading & Magnificat</h3>
+                    
+                    <div class="form-group">
+                        <label for="evensongFirstReadingRef">First Reading Reference</label>
+                        <input type="text" id="evensongFirstReadingRef" name="evensongFirstReadingRef" placeholder="e.g., Isaiah 55:1-11">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongMagnificatSetting">Magnificat Setting</label>
+                        <input type="text" id="evensongMagnificatSetting" name="evensongMagnificatSetting" placeholder="e.g., Service in B-flat">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongMagnificatComposer">Magnificat Composer</label>
+                        <input type="text" id="evensongMagnificatComposer" name="evensongMagnificatComposer" placeholder="e.g., Charles Villiers Stanford">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Second Reading & Nunc Dimittis</h3>
+                    
+                    <div class="form-group">
+                        <label for="evensongSecondReadingRef">Second Reading Reference</label>
+                        <input type="text" id="evensongSecondReadingRef" name="evensongSecondReadingRef" placeholder="e.g., Luke 1:46-55">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongNuncDimittisSetting">Nunc Dimittis Setting</label>
+                        <input type="text" id="evensongNuncDimittisSetting" name="evensongNuncDimittisSetting" placeholder="e.g., Service in B-flat">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongNuncDimittisComposer">Nunc Dimittis Composer</label>
+                        <input type="text" id="evensongNuncDimittisComposer" name="evensongNuncDimittisComposer" placeholder="e.g., Charles Villiers Stanford">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Additional Musicians (Optional)</h3>
+                    
+                    <div class="form-group">
+                        <label for="evensongOrganistName">Organist Name</label>
+                        <input type="text" id="evensongOrganistName" name="evensongOrganistName" placeholder="e.g., Dr. Sarah Johnson">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongPreludeName">Prelude Title</label>
+                        <input type="text" id="evensongPreludeName" name="evensongPreludeName" placeholder="e.g., Elegy">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongPreludeComposer">Prelude Composer</label>
+                        <input type="text" id="evensongPreludeComposer" name="evensongPreludeComposer" placeholder="e.g., George Thalben-Ball">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongPostludeName">Postlude Title</label>
+                        <input type="text" id="evensongPostludeName" name="evensongPostludeName" placeholder="e.g., Sortie in E-flat">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evensongPostludeComposer">Postlude Composer</label>
+                        <input type="text" id="evensongPostludeComposer" name="evensongPostludeComposer" placeholder="e.g., Louis Lefébure-Wély">
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeEvensongService()">Cancel</button>
+                    <button type="button" class="btn-save" onclick="saveEvensongService()">Generate Evensong Service</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         let currentDate = new Date();
         let selectedDate = new Date();
@@ -1530,6 +1637,14 @@
                 document.getElementById('serviceTypeEucharist').classList.add('active');
             } else {
                 document.getElementById('serviceTypeEvensong').classList.add('active');
+            }
+            
+            // Show/hide Construct Evensong button based on service type
+            const constructEvensongBtn = document.getElementById('constructEvensongBtn');
+            if (serviceType === 'evensong') {
+                constructEvensongBtn.style.display = 'inline-block';
+            } else {
+                constructEvensongBtn.style.display = 'none';
             }
             
             // If a date is selected, reload readings for the new service type
@@ -2157,12 +2272,103 @@
             });
         }
 
+        // Evensong Service Functions
+        function showEvensongService() {
+            const modal = document.getElementById('evensongServiceModal');
+            modal.style.display = 'block';
+            
+            // Set default date to selected date or today
+            const defaultDate = selectedDate ? selectedDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+            document.getElementById('evensongServiceDate').value = defaultDate;
+        }
+        
+        function closeEvensongService() {
+            const modal = document.getElementById('evensongServiceModal');
+            modal.style.display = 'none';
+            
+            // Reset form
+            document.getElementById('evensongServiceForm').reset();
+        }
+        
+        function saveEvensongService() {
+            const serviceDate = document.getElementById('evensongServiceDate').value;
+            
+            if (!serviceDate) {
+                showError('Please select a service date');
+                return;
+            }
+            
+            // Collect Evensong service details
+            const evensongDetails = {
+                responsoryComposer: document.getElementById('evensongResponsoryComposer').value.trim(),
+                eveningHymn: document.getElementById('evensongEveningHymn').value.trim(),
+                firstReadingRef: document.getElementById('evensongFirstReadingRef').value.trim(),
+                magnificatSetting: document.getElementById('evensongMagnificatSetting').value.trim(),
+                magnificatComposer: document.getElementById('evensongMagnificatComposer').value.trim(),
+                secondReadingRef: document.getElementById('evensongSecondReadingRef').value.trim(),
+                nuncDimittisSetting: document.getElementById('evensongNuncDimittisSetting').value.trim(),
+                nuncDimittisComposer: document.getElementById('evensongNuncDimittisComposer').value.trim(),
+                organistName: document.getElementById('evensongOrganistName').value.trim(),
+                preludeName: document.getElementById('evensongPreludeName').value.trim(),
+                preludeComposer: document.getElementById('evensongPreludeComposer').value.trim(),
+                postludeName: document.getElementById('evensongPostludeName').value.trim(),
+                postludeComposer: document.getElementById('evensongPostludeComposer').value.trim()
+            };
+            
+            // Check if at least one field is filled
+            const hasContent = Object.values(evensongDetails).some(val => val !== '');
+            
+            if (!hasContent) {
+                showError('Please fill in at least one field');
+                return;
+            }
+            
+            // Send to backend
+            showSuccess('Generating Evensong service details...');
+            
+            fetch('/api/evensong_service', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    date: serviceDate,
+                    evensong_details: evensongDetails
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to generate Evensong service');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Download the ZIP file
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `evensong_service_${serviceDate.replace(/-/g, '')}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showSuccess('Evensong service details exported successfully!');
+                closeEvensongService();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Failed to generate Evensong service: ' + error.message);
+            });
+        }
+
         // Close modal when clicking outside of it
         window.onclick = function(event) {
             const serviceModal = document.getElementById('serviceDetailsModal');
             const settingsModal = document.getElementById('settingsModal');
             const previewModal = document.getElementById('previewModal');
             const specialServiceModal = document.getElementById('specialServiceModal');
+            const evensongServiceModal = document.getElementById('evensongServiceModal');
             
             if (event.target === serviceModal) {
                 closeServiceDetails();
@@ -2172,6 +2378,8 @@
                 closePreview();
             } else if (event.target === specialServiceModal) {
                 closeSpecialService();
+            } else if (event.target === evensongServiceModal) {
+                closeEvensongService();
             }
         }
 
