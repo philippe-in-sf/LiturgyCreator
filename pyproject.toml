@@ -1,6 +1,6 @@
 [project]
 name = "liturgical-calendar-web"
-version = "2.3.3"
+version = "2.3.4"
 description = "Daily Liturgical Scripture Calendar with OBS Integration - Episcopal Church liturgical readings from the Revised Common Lectionary"
 requires-python = ">=3.11"
 dependencies = [

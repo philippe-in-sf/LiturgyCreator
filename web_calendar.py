@@ -1662,13 +1662,21 @@ def preview_graphics():
         })
         
         # Generate lower thirds previews for ALL readings (not limited)
-        # Check for user overrides in service details
-        reading_ref_overrides = {
-            'first_reading': service_details.get('firstReadingRef', '').strip(),
-            'psalm': service_details.get('psalmRef', '').strip(),
-            'second_reading': service_details.get('secondReadingRef', '').strip(),
-            'gospel': service_details.get('gospelRef', '').strip()
-        }
+        # Check for user overrides in service details based on service type
+        if service_type == 'evensong':
+            # For Evensong, use different field names
+            reading_ref_overrides = {
+                'first_reading': service_details.get('firstLesson', '').strip(),
+                'second_reading': service_details.get('secondLesson', '').strip()
+            }
+        else:
+            # For Eucharist, use traditional field names
+            reading_ref_overrides = {
+                'first_reading': service_details.get('firstReadingRef', '').strip(),
+                'psalm': service_details.get('psalmRef', '').strip(),
+                'second_reading': service_details.get('secondReadingRef', '').strip(),
+                'gospel': service_details.get('gospelRef', '').strip()
+            }
         
         for reading_type in readings.keys():
             reading_data = readings[reading_type]
@@ -1691,24 +1699,35 @@ def preview_graphics():
             })
         
         # Generate lower thirds for service details (hymns, musicians, clergy)
-        hymn_fields = {
-            'openingHymn': 'Opening Hymn',
-            'sequenceHymn': 'Sequence Hymn',
-            'offertory': 'Offertory',
-            'communionMotet': 'Communion Motet',
-            'communionHymn': 'Communion Hymn',
-            'closingHymn': 'Closing Hymn',
-            'preludeTitle': 'Prelude Title',
-            'preludeComposer': 'Prelude Composer',
-            'postludeTitle': 'Postlude Title',
-            'postludeComposer': 'Postlude Composer'
-        }
+        # Different fields for Eucharist vs Evensong
+        if service_type == 'evensong':
+            # Evensong-specific fields
+            service_detail_fields = {
+                'officeHymn': 'Office Hymn',
+                'magnificatSetting': 'Magnificat',
+                'nuncDimittisSetting': 'Nunc Dimittis',
+                'anthem': 'Anthem',
+                'hymn': 'Hymn',
+                'postlude': 'Postlude'
+            }
+        else:
+            # Eucharist fields
+            service_detail_fields = {
+                'openingHymn': 'Opening Hymn',
+                'sequenceHymn': 'Sequence Hymn',
+                'offertory': 'Offertory',
+                'communionMotet': 'Communion Motet',
+                'communionHymn': 'Communion Hymn',
+                'closingHymn': 'Closing Hymn',
+                'preludeName': 'Prelude',
+                'postludeName': 'Postlude'
+            }
         
-        for field_key, field_label in hymn_fields.items():
-            hymn_value = service_details.get(field_key, '').strip()
-            if hymn_value:  # Only create graphic if field has content
+        for field_key, field_label in service_detail_fields.items():
+            field_value = service_details.get(field_key, '').strip()
+            if field_value:  # Only create graphic if field has content
                 # Create lower third image
-                lower_third = create_lower_third(field_label, hymn_value, date_str)
+                lower_third = create_lower_third(field_label, field_value, date_str)
                 
                 # Convert to base64
                 lt_buffer = io.BytesIO()
@@ -1795,64 +1814,105 @@ def export_all():
             
             # Create individual service detail files if provided
             if service_details:
-                # Individual hymn files with text from Hymnary.org
-                if service_details.get('openingHymn'):
-                    formatted_hymn = textwrap.fill(service_details['openingHymn'], width=50, break_long_words=False, break_on_hyphens=False)
-                    zip_file.writestr(f"{date_folder_name}/service_details/Opening Hymn.txt", formatted_hymn)
+                # Handle different fields for Eucharist vs Evensong
+                if service_type == 'evensong':
+                    # Evensong-specific service details
+                    evensong_detail_fields = {
+                        'responsoryComposer': 'Responsory Composer',
+                        'precesResponsesSetting': 'Preces and Responses Setting',
+                        'precesResponsesComposer': 'Preces and Responses Composer',
+                        'officeHymn': 'Office Hymn',
+                        'firstPsalmRef': 'First Psalm Reference',
+                        'firstPsalmComposer': 'First Psalm Composer',
+                        'secondPsalmRef': 'Second Psalm Reference',
+                        'secondPsalmComposer': 'Second Psalm Composer',
+                        'magnificatSetting': 'Magnificat Setting',
+                        'magnificatComposer': 'Magnificat Composer',
+                        'nuncDimittisSetting': 'Nunc Dimittis Setting',
+                        'nuncDimittisComposer': 'Nunc Dimittis Composer',
+                        'responsesSetting': 'Responses Setting',
+                        'responsesComposer': 'Responses Composer',
+                        'anthem': 'Anthem',
+                        'hymn': 'Hymn',
+                        'postlude': 'Postlude'
+                    }
                     
-                    hymn_text = fetch_hymn_text_from_hymnary(service_details['openingHymn'])
-                    formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
-                    zip_file.writestr(f"{date_folder_name}/service_details/Opening Hymn Text.txt", formatted_hymn_text)
-                
-                if service_details.get('sequenceHymn'):
-                    formatted_hymn = textwrap.fill(service_details['sequenceHymn'], width=50, break_long_words=False, break_on_hyphens=False)
-                    zip_file.writestr(f"{date_folder_name}/service_details/Sequence Hymn.txt", formatted_hymn)
+                    for field_key, field_label in evensong_detail_fields.items():
+                        field_value = service_details.get(field_key, '').strip()
+                        if field_value:
+                            formatted_value = textwrap.fill(field_value, width=50, break_long_words=False, break_on_hyphens=False)
+                            zip_file.writestr(f"{date_folder_name}/service_details/{field_label}.txt", formatted_value)
                     
-                    hymn_text = fetch_hymn_text_from_hymnary(service_details['sequenceHymn'])
-                    formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
-                    zip_file.writestr(f"{date_folder_name}/service_details/Sequence Hymn Text.txt", formatted_hymn_text)
-                
-                if service_details.get('communionMotet'):
-                    formatted_motet = textwrap.fill(service_details['communionMotet'], width=50, break_long_words=False, break_on_hyphens=False)
-                    zip_file.writestr(f"{date_folder_name}/service_details/Communion Motet.txt", formatted_motet)
-                
-                if service_details.get('closingHymn'):
-                    formatted_hymn = textwrap.fill(service_details['closingHymn'], width=50, break_long_words=False, break_on_hyphens=False)
-                    zip_file.writestr(f"{date_folder_name}/service_details/Closing Hymn.txt", formatted_hymn)
+                    # Fetch hymn text for Office Hymn and Hymn
+                    if service_details.get('officeHymn'):
+                        hymn_text = fetch_hymn_text_from_hymnary(service_details['officeHymn'])
+                        formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Office Hymn Text.txt", formatted_hymn_text)
                     
-                    hymn_text = fetch_hymn_text_from_hymnary(service_details['closingHymn'])
-                    formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
-                    zip_file.writestr(f"{date_folder_name}/service_details/Closing Hymn Text.txt", formatted_hymn_text)
-                
-                # Individual musician files
-                if service_details.get('organistName'):
-                    formatted_organist = textwrap.fill(service_details['organistName'], width=50, break_long_words=False, break_on_hyphens=False)
-                    zip_file.writestr(f"{date_folder_name}/service_details/Organist.txt", formatted_organist)
-                
-                if service_details.get('preludeTitle'):
-                    formatted_prelude = textwrap.fill(service_details['preludeTitle'], width=50, break_long_words=False, break_on_hyphens=False)
-                    zip_file.writestr(f"{date_folder_name}/service_details/Prelude Title.txt", formatted_prelude)
-                
-                if service_details.get('preludeComposer'):
-                    formatted_composer = textwrap.fill(service_details['preludeComposer'], width=50, break_long_words=False, break_on_hyphens=False)
-                    zip_file.writestr(f"{date_folder_name}/service_details/Prelude Composer.txt", formatted_composer)
-                
-                if service_details.get('postludeTitle'):
-                    formatted_postlude = textwrap.fill(service_details['postludeTitle'], width=50, break_long_words=False, break_on_hyphens=False)
-                    zip_file.writestr(f"{date_folder_name}/service_details/Postlude Title.txt", formatted_postlude)
-                
-                if service_details.get('postludeComposer'):
-                    formatted_composer = textwrap.fill(service_details['postludeComposer'], width=50, break_long_words=False, break_on_hyphens=False)
-                    zip_file.writestr(f"{date_folder_name}/service_details/Postlude Composer.txt", formatted_composer)
-                
-                # Individual clergy files
-                if service_details.get('preacherName'):
-                    formatted_preacher = textwrap.fill(service_details['preacherName'], width=50, break_long_words=False, break_on_hyphens=False)
-                    zip_file.writestr(f"{date_folder_name}/service_details/Preacher.txt", formatted_preacher)
-                
-                if service_details.get('presiderName'):
-                    formatted_presider = textwrap.fill(service_details['presiderName'], width=50, break_long_words=False, break_on_hyphens=False)
-                    zip_file.writestr(f"{date_folder_name}/service_details/Presider.txt", formatted_presider)
+                    if service_details.get('hymn'):
+                        hymn_text = fetch_hymn_text_from_hymnary(service_details['hymn'])
+                        formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Hymn Text.txt", formatted_hymn_text)
+                else:
+                    # Eucharist-specific service details
+                    # Individual hymn files with text from Hymnary.org
+                    if service_details.get('openingHymn'):
+                        formatted_hymn = textwrap.fill(service_details['openingHymn'], width=50, break_long_words=False, break_on_hyphens=False)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Opening Hymn.txt", formatted_hymn)
+                        
+                        hymn_text = fetch_hymn_text_from_hymnary(service_details['openingHymn'])
+                        formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Opening Hymn Text.txt", formatted_hymn_text)
+                    
+                    if service_details.get('sequenceHymn'):
+                        formatted_hymn = textwrap.fill(service_details['sequenceHymn'], width=50, break_long_words=False, break_on_hyphens=False)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Sequence Hymn.txt", formatted_hymn)
+                        
+                        hymn_text = fetch_hymn_text_from_hymnary(service_details['sequenceHymn'])
+                        formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Sequence Hymn Text.txt", formatted_hymn_text)
+                    
+                    if service_details.get('communionMotet'):
+                        formatted_motet = textwrap.fill(service_details['communionMotet'], width=50, break_long_words=False, break_on_hyphens=False)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Communion Motet.txt", formatted_motet)
+                    
+                    if service_details.get('closingHymn'):
+                        formatted_hymn = textwrap.fill(service_details['closingHymn'], width=50, break_long_words=False, break_on_hyphens=False)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Closing Hymn.txt", formatted_hymn)
+                        
+                        hymn_text = fetch_hymn_text_from_hymnary(service_details['closingHymn'])
+                        formatted_hymn_text = format_text_with_paragraphs(hymn_text, width=50)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Closing Hymn Text.txt", formatted_hymn_text)
+                    
+                    # Individual musician files
+                    if service_details.get('organistName'):
+                        formatted_organist = textwrap.fill(service_details['organistName'], width=50, break_long_words=False, break_on_hyphens=False)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Organist.txt", formatted_organist)
+                    
+                    if service_details.get('preludeName'):
+                        formatted_prelude = textwrap.fill(service_details['preludeName'], width=50, break_long_words=False, break_on_hyphens=False)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Prelude.txt", formatted_prelude)
+                    
+                    if service_details.get('preludeComposer'):
+                        formatted_composer = textwrap.fill(service_details['preludeComposer'], width=50, break_long_words=False, break_on_hyphens=False)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Prelude Composer.txt", formatted_composer)
+                    
+                    if service_details.get('postludeName'):
+                        formatted_postlude = textwrap.fill(service_details['postludeName'], width=50, break_long_words=False, break_on_hyphens=False)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Postlude.txt", formatted_postlude)
+                    
+                    if service_details.get('postludeComposer'):
+                        formatted_composer = textwrap.fill(service_details['postludeComposer'], width=50, break_long_words=False, break_on_hyphens=False)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Postlude Composer.txt", formatted_composer)
+                    
+                    # Individual clergy files
+                    if service_details.get('preacherName'):
+                        formatted_preacher = textwrap.fill(service_details['preacherName'], width=50, break_long_words=False, break_on_hyphens=False)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Preacher.txt", formatted_preacher)
+                    
+                    if service_details.get('presiderName'):
+                        formatted_presider = textwrap.fill(service_details['presiderName'], width=50, break_long_words=False, break_on_hyphens=False)
+                        zip_file.writestr(f"{date_folder_name}/service_details/Presider.txt", formatted_presider)
             
             # ===== PART 2: Generate lower third graphics =====
             # Generate full-screen title card with just the liturgical reference and date
@@ -1877,13 +1937,19 @@ def export_all():
             zip_file.writestr(f"{date_folder_name}/Title_Card.png", title_card_buffer.read())
             
             # Create lower third graphic for each reading
-            # Check for user overrides in service details
-            reading_ref_overrides = {
-                'first_reading': service_details.get('firstReadingRef', '').strip(),
-                'psalm': service_details.get('psalmRef', '').strip(),
-                'second_reading': service_details.get('secondReadingRef', '').strip(),
-                'gospel': service_details.get('gospelRef', '').strip()
-            }
+            # Check for user overrides in service details based on service type
+            if service_type == 'evensong':
+                reading_ref_overrides = {
+                    'first_reading': service_details.get('firstLesson', '').strip(),
+                    'second_reading': service_details.get('secondLesson', '').strip()
+                }
+            else:
+                reading_ref_overrides = {
+                    'first_reading': service_details.get('firstReadingRef', '').strip(),
+                    'psalm': service_details.get('psalmRef', '').strip(),
+                    'second_reading': service_details.get('secondReadingRef', '').strip(),
+                    'gospel': service_details.get('gospelRef', '').strip()
+                }
             
             for reading_type, reading_data in readings.items():
                 # Use override if provided, otherwise use lectionary reference
@@ -1903,24 +1969,33 @@ def export_all():
                 zip_file.writestr(filepath, img_buffer.read())
             
             # Create lower third graphics for hymns and music
-            hymn_fields = {
-                'openingHymn': 'Opening Hymn',
-                'sequenceHymn': 'Sequence Hymn',
-                'offertory': 'Offertory',
-                'communionMotet': 'Communion Motet',
-                'communionHymn': 'Communion Hymn',
-                'closingHymn': 'Closing Hymn',
-                'preludeTitle': 'Prelude Title',
-                'preludeComposer': 'Prelude Composer',
-                'postludeTitle': 'Postlude Title',
-                'postludeComposer': 'Postlude Composer'
-            }
+            # Different fields for Eucharist vs Evensong
+            if service_type == 'evensong':
+                service_detail_graphics = {
+                    'officeHymn': 'Office Hymn',
+                    'magnificatSetting': 'Magnificat',
+                    'nuncDimittisSetting': 'Nunc Dimittis',
+                    'anthem': 'Anthem',
+                    'hymn': 'Hymn',
+                    'postlude': 'Postlude'
+                }
+            else:
+                service_detail_graphics = {
+                    'openingHymn': 'Opening Hymn',
+                    'sequenceHymn': 'Sequence Hymn',
+                    'offertory': 'Offertory',
+                    'communionMotet': 'Communion Motet',
+                    'communionHymn': 'Communion Hymn',
+                    'closingHymn': 'Closing Hymn',
+                    'preludeName': 'Prelude',
+                    'postludeName': 'Postlude'
+                }
             
-            for field_key, field_label in hymn_fields.items():
-                hymn_value = service_details.get(field_key, '').strip()
-                if hymn_value:  # Only create graphic if field has content
+            for field_key, field_label in service_detail_graphics.items():
+                field_value = service_details.get(field_key, '').strip()
+                if field_value:  # Only create graphic if field has content
                     # Generate lower third image with liturgical season colors
-                    img = create_lower_third(field_label, hymn_value, date_str)
+                    img = create_lower_third(field_label, field_value, date_str)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
