@@ -989,7 +989,6 @@
                     <button class="action-btn btn-secondary" onclick="showServiceDetails()">Service Details</button>
                     <button class="action-btn btn-primary" onclick="loadReadings()">Load Readings</button>
                     <button class="action-btn" onclick="showSpecialService()" style="background-color: #9b59b6; color: white;">✨ Special Service</button>
-                    <button id="constructEvensongBtn" class="action-btn" onclick="showEvensongService()" style="background-color: #6a5acd; color: white; display: none;">🕯️ Construct Evensong</button>
                     <button class="action-btn btn-warning" onclick="showPreview()" style="background-color: #ffc107; color: #000;">👁️ Preview</button>
                     <button class="action-btn btn-success" onclick="exportAll()" style="background-color: #28a745;">Export All</button>
                     <button class="action-btn btn-info" onclick="showSettings()" style="background-color: #6c757d;">⚙️ Settings</button>
@@ -1036,114 +1035,234 @@
         <div class="modal-content">
             <div class="modal-header">
                 <span class="close" onclick="closeServiceDetails()">&times;</span>
-                <h2 class="modal-title">Service Details</h2>
+                <h2 class="modal-title" id="serviceDetailsTitle">Service Details</h2>
             </div>
             
             <form id="serviceDetailsForm">
-                <div class="form-section">
-                    <h3>Prelude</h3>
-                    
-                    <div class="form-group">
-                        <label for="organistName">Organist Name</label>
-                        <input type="text" id="organistName" name="organistName" placeholder="e.g., Dr. Sarah Johnson">
+                <!-- Eucharist Service Fields -->
+                <div id="eucharistFields" style="display: none;">
+                    <div class="form-section">
+                        <h3>Prelude</h3>
+                        
+                        <div class="form-group">
+                            <label for="organistName">Organist Name</label>
+                            <input type="text" id="organistName" name="organistName" placeholder="e.g., Dr. Sarah Johnson">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="preludeName">Prelude Title</label>
+                            <input type="text" id="preludeName" name="preludeName" placeholder="e.g., Jesu, Joy of Man's Desiring">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="preludeComposer">Prelude Composer</label>
+                            <input type="text" id="preludeComposer" name="preludeComposer" placeholder="e.g., J.S. Bach">
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="preludeName">Prelude Title</label>
-                        <input type="text" id="preludeName" name="preludeName" placeholder="e.g., Jesu, Joy of Man's Desiring">
+                    <div class="form-section">
+                        <h3>Hymns & Music</h3>
+                        
+                        <div class="form-group">
+                            <label for="openingHymn">Opening Hymn</label>
+                            <input type="text" id="openingHymn" name="openingHymn" placeholder="e.g., Hymn 362 - Holy, Holy, Holy">
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="preludeComposer">Prelude Composer</label>
-                        <input type="text" id="preludeComposer" name="preludeComposer" placeholder="e.g., J.S. Bach">
+                    <div class="form-section">
+                        <h3>Scripture Readings</h3>
+                        <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
+                            Pre-filled with lectionary readings. You can override these with different references if needed.
+                        </p>
+                        
+                        <div class="form-group">
+                            <label for="firstReadingRef">First Reading Reference</label>
+                            <input type="text" id="firstReadingRef" name="firstReadingRef" placeholder="e.g., Genesis 1:1-5">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="psalmRef">Psalm Reference</label>
+                            <input type="text" id="psalmRef" name="psalmRef" placeholder="e.g., Psalm 23">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="secondReadingRef">Second Reading Reference</label>
+                            <input type="text" id="secondReadingRef" name="secondReadingRef" placeholder="e.g., Romans 8:1-11">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="sequenceHymn">Sequence Hymn</label>
+                            <input type="text" id="sequenceHymn" name="sequenceHymn" placeholder="e.g., Hymn 632 - O Christ, the Word Incarnate">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="gospelRef">Gospel Reference</label>
+                            <input type="text" id="gospelRef" name="gospelRef" placeholder="e.g., John 1:1-14">
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Sermon & Offertory</h3>
+                        
+                        <div class="form-group">
+                            <label for="preacherName">Preacher's Name</label>
+                            <input type="text" id="preacherName" name="preacherName" placeholder="e.g., The Rev. Dr. Michael Smith">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="offertory">Offertory</label>
+                            <input type="text" id="offertory" name="offertory" placeholder="e.g., Offertory Anthem - Come, Thou Fount of Every Blessing">
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Communion</h3>
+                        
+                        <div class="form-group">
+                            <label for="communionMotet">Communion Motet</label>
+                            <input type="text" id="communionMotet" name="communionMotet" placeholder="e.g., Ave Verum Corpus - Mozart">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="communionHymn">Communion Hymn</label>
+                            <input type="text" id="communionHymn" name="communionHymn" placeholder="e.g., Hymn 304 - I come with joy to meet my Lord">
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Closing</h3>
+                        
+                        <div class="form-group">
+                            <label for="closingHymn">Closing Hymn</label>
+                            <input type="text" id="closingHymn" name="closingHymn" placeholder="e.g., Hymn 432 - O praise ye the Lord!">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="postludeName">Postlude Title</label>
+                            <input type="text" id="postludeName" name="postludeName" placeholder="e.g., Toccata in D Minor">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="postludeComposer">Postlude Composer</label>
+                            <input type="text" id="postludeComposer" name="postludeComposer" placeholder="e.g., J.S. Bach">
+                        </div>
                     </div>
                 </div>
                 
-                <div class="form-section">
-                    <h3>Hymns & Music</h3>
-                    
-                    <div class="form-group">
-                        <label for="openingHymn">Opening Hymn</label>
-                        <input type="text" id="openingHymn" name="openingHymn" placeholder="e.g., Hymn 362 - Holy, Holy, Holy">
-                    </div>
-                </div>
-                
-                <div class="form-section">
-                    <h3>Scripture Readings</h3>
-                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
-                        Pre-filled with lectionary readings. You can override these with different references if needed.
-                    </p>
-                    
-                    <div class="form-group">
-                        <label for="firstReadingRef">First Reading Reference</label>
-                        <input type="text" id="firstReadingRef" name="firstReadingRef" placeholder="e.g., Genesis 1:1-5">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="psalmRef">Psalm Reference</label>
-                        <input type="text" id="psalmRef" name="psalmRef" placeholder="e.g., Psalm 23">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="secondReadingRef">Second Reading Reference</label>
-                        <input type="text" id="secondReadingRef" name="secondReadingRef" placeholder="e.g., Romans 8:1-11">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="sequenceHymn">Sequence Hymn</label>
-                        <input type="text" id="sequenceHymn" name="sequenceHymn" placeholder="e.g., Hymn 632 - O Christ, the Word Incarnate">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="gospelRef">Gospel Reference</label>
-                        <input type="text" id="gospelRef" name="gospelRef" placeholder="e.g., John 1:1-14">
-                    </div>
-                </div>
-                
-                <div class="form-section">
-                    <h3>Sermon & Offertory</h3>
-                    
-                    <div class="form-group">
-                        <label for="preacherName">Preacher's Name</label>
-                        <input type="text" id="preacherName" name="preacherName" placeholder="e.g., The Rev. Dr. Michael Smith">
+                <!-- Evensong Service Fields -->
+                <div id="evensongFields" style="display: none;">
+                    <div class="form-section">
+                        <h3>Invitatory and Psalter</h3>
+                        
+                        <div class="form-group">
+                            <label for="evResponsoryComposer">Responsory Composer</label>
+                            <input type="text" id="evResponsoryComposer" name="responsoryComposer" placeholder="e.g., Robert Knox Kennedy">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evPrecesResponsesSetting">Preces and Responses Setting</label>
+                            <input type="text" id="evPrecesResponsesSetting" name="precesResponsesSetting" placeholder="e.g., Smith of Durham">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evPrecesResponsesComposer">Preces and Responses Composer</label>
+                            <input type="text" id="evPrecesResponsesComposer" name="precesResponsesComposer" placeholder="e.g., Philip Radcliffe">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evOfficeHymn">Office Hymn</label>
+                            <input type="text" id="evOfficeHymn" name="officeHymn" placeholder="e.g., Hymn 25 - O Gracious Light">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evFirstPsalmRef">First Psalm Reference</label>
+                            <input type="text" id="evFirstPsalmRef" name="firstPsalmRef" placeholder="e.g., Psalm 84">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evFirstPsalmComposer">First Psalm Composer</label>
+                            <input type="text" id="evFirstPsalmComposer" name="firstPsalmComposer" placeholder="e.g., Thomas Attwood">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evSecondPsalmRef">Second Psalm Reference</label>
+                            <input type="text" id="evSecondPsalmRef" name="secondPsalmRef" placeholder="e.g., Psalm 150">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evSecondPsalmComposer">Second Psalm Composer</label>
+                            <input type="text" id="evSecondPsalmComposer" name="secondPsalmComposer" placeholder="e.g., John Goss">
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="offertory">Offertory</label>
-                        <input type="text" id="offertory" name="offertory" placeholder="e.g., Offertory Anthem - Come, Thou Fount of Every Blessing">
+                    <div class="form-section">
+                        <h3>The Lessons</h3>
+                        <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
+                            Pre-filled with Daily Office lectionary readings. You can override these if needed.
+                        </p>
+                        
+                        <div class="form-group">
+                            <label for="evFirstLesson">The First Lesson</label>
+                            <input type="text" id="evFirstLesson" name="firstLesson" placeholder="e.g., Isaiah 55:1-11">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evMagnificatSetting">Magnificat Setting</label>
+                            <input type="text" id="evMagnificatSetting" name="magnificatSetting" placeholder="e.g., Service in B-flat">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evMagnificatComposer">Magnificat Composer</label>
+                            <input type="text" id="evMagnificatComposer" name="magnificatComposer" placeholder="e.g., Charles Villiers Stanford">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evSecondLesson">The Second Lesson</label>
+                            <input type="text" id="evSecondLesson" name="secondLesson" placeholder="e.g., Luke 1:46-55">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evNuncDimittisSetting">Nunc Dimittis Setting</label>
+                            <input type="text" id="evNuncDimittisSetting" name="nuncDimittisSetting" placeholder="e.g., Service in B-flat">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evNuncDimittisComposer">Nunc Dimittis Composer</label>
+                            <input type="text" id="evNuncDimittisComposer" name="nuncDimittisComposer" placeholder="e.g., Charles Villiers Stanford">
+                        </div>
                     </div>
-                </div>
-                
-                <div class="form-section">
-                    <h3>Communion</h3>
                     
-                    <div class="form-group">
-                        <label for="communionMotet">Communion Motet</label>
-                        <input type="text" id="communionMotet" name="communionMotet" placeholder="e.g., Ave Verum Corpus - Mozart">
+                    <div class="form-section">
+                        <h3>Prayers</h3>
+                        
+                        <div class="form-group">
+                            <label for="evResponsesSetting">Responses Setting</label>
+                            <input type="text" id="evResponsesSetting" name="responsesSetting" placeholder="e.g., Plainsong">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evResponsesComposer">Responses Composer</label>
+                            <input type="text" id="evResponsesComposer" name="responsesComposer" placeholder="e.g., Traditional">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evAnthem">Anthem</label>
+                            <input type="text" id="evAnthem" name="anthem" placeholder="e.g., O Taste and See - Ralph Vaughan Williams">
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="communionHymn">Communion Hymn</label>
-                        <input type="text" id="communionHymn" name="communionHymn" placeholder="e.g., Hymn 304 - I come with joy to meet my Lord">
-                    </div>
-                </div>
-                
-                <div class="form-section">
-                    <h3>Closing</h3>
-                    
-                    <div class="form-group">
-                        <label for="closingHymn">Closing Hymn</label>
-                        <input type="text" id="closingHymn" name="closingHymn" placeholder="e.g., Hymn 432 - O praise ye the Lord!">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="postludeName">Postlude Title</label>
-                        <input type="text" id="postludeName" name="postludeName" placeholder="e.g., Toccata in D Minor">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="postludeComposer">Postlude Composer</label>
-                        <input type="text" id="postludeComposer" name="postludeComposer" placeholder="e.g., J.S. Bach">
+                    <div class="form-section">
+                        <h3>Conclusion</h3>
+                        
+                        <div class="form-group">
+                            <label for="evHymn">Hymn</label>
+                            <input type="text" id="evHymn" name="hymn" placeholder="e.g., Hymn 429 - I'll Praise My Maker">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evPostlude">Postlude</label>
+                            <input type="text" id="evPostlude" name="postlude" placeholder="e.g., Toccata in F - Charles-Marie Widor">
+                        </div>
                     </div>
                 </div>
                 
@@ -1673,14 +1792,6 @@
                 document.getElementById('serviceTypeEvensong').classList.add('active');
             }
             
-            // Show/hide Construct Evensong button based on service type
-            const constructEvensongBtn = document.getElementById('constructEvensongBtn');
-            if (serviceType === 'evensong') {
-                constructEvensongBtn.style.display = 'inline-block';
-            } else {
-                constructEvensongBtn.style.display = 'none';
-            }
-            
             // If a date is selected, reload readings for the new service type
             if (selectedDate) {
                 const dateStr = selectedDate.toISOString().split('T')[0];
@@ -1942,6 +2053,21 @@
             const modal = document.getElementById('serviceDetailsModal');
             modal.style.display = 'block';
             
+            // Update title and show appropriate fields based on service type
+            const title = document.getElementById('serviceDetailsTitle');
+            const eucharistFields = document.getElementById('eucharistFields');
+            const evensongFields = document.getElementById('evensongFields');
+            
+            if (selectedServiceType === 'evensong') {
+                title.textContent = '🕯️ Evensong Service Details';
+                eucharistFields.style.display = 'none';
+                evensongFields.style.display = 'block';
+            } else {
+                title.textContent = 'Eucharist Service Details';
+                eucharistFields.style.display = 'block';
+                evensongFields.style.display = 'none';
+            }
+            
             // Load existing service details for the selected date
             loadServiceDetailsFromStorage();
         }
@@ -2030,21 +2156,38 @@
                 if (currentReadings && currentReadings.has_readings && currentReadings.readings) {
                     const readings = currentReadings.readings;
                     
-                    // Pre-fill reading references only if they haven't been manually set
-                    if (!details.firstReadingRef && readings.first_reading && readings.first_reading.reference) {
-                        document.getElementById('firstReadingRef').value = readings.first_reading.reference;
-                    }
-                    
-                    if (!details.psalmRef && readings.psalm && readings.psalm.reference) {
-                        document.getElementById('psalmRef').value = readings.psalm.reference;
-                    }
-                    
-                    if (!details.secondReadingRef && readings.second_reading && readings.second_reading.reference) {
-                        document.getElementById('secondReadingRef').value = readings.second_reading.reference;
-                    }
-                    
-                    if (!details.gospelRef && readings.gospel && readings.gospel.reference) {
-                        document.getElementById('gospelRef').value = readings.gospel.reference;
+                    if (selectedServiceType === 'evensong') {
+                        // Pre-fill Evensong reading fields
+                        if (!details.firstLesson && readings.first_reading && readings.first_reading.reference) {
+                            const evFirstLesson = document.getElementById('evFirstLesson');
+                            if (evFirstLesson) evFirstLesson.value = readings.first_reading.reference;
+                        }
+                        
+                        if (!details.secondLesson && readings.second_reading && readings.second_reading.reference) {
+                            const evSecondLesson = document.getElementById('evSecondLesson');
+                            if (evSecondLesson) evSecondLesson.value = readings.second_reading.reference;
+                        }
+                    } else {
+                        // Pre-fill Eucharist reading references
+                        if (!details.firstReadingRef && readings.first_reading && readings.first_reading.reference) {
+                            const firstReadingRef = document.getElementById('firstReadingRef');
+                            if (firstReadingRef) firstReadingRef.value = readings.first_reading.reference;
+                        }
+                        
+                        if (!details.psalmRef && readings.psalm && readings.psalm.reference) {
+                            const psalmRef = document.getElementById('psalmRef');
+                            if (psalmRef) psalmRef.value = readings.psalm.reference;
+                        }
+                        
+                        if (!details.secondReadingRef && readings.second_reading && readings.second_reading.reference) {
+                            const secondReadingRef = document.getElementById('secondReadingRef');
+                            if (secondReadingRef) secondReadingRef.value = readings.second_reading.reference;
+                        }
+                        
+                        if (!details.gospelRef && readings.gospel && readings.gospel.reference) {
+                            const gospelRef = document.getElementById('gospelRef');
+                            if (gospelRef) gospelRef.value = readings.gospel.reference;
+                        }
                     }
                 }
             } catch (error) {
@@ -2611,7 +2754,7 @@
     
     <footer style="background-color: #f8f9fa; border-top: 1px solid #dee2e6; padding: 20px; margin-top: 40px; text-align: center; color: #6c757d; font-size: 14px;">
         <div style="margin-bottom: 10px;">
-            <strong>Episcopal Liturgical Calendar Tool v2.3.2</strong>
+            <strong>Episcopal Liturgical Calendar Tool v2.3.3</strong>
         </div>
         <div>
             This tool is provided under a public domain license, without copyright attached. Please courtesy credit Philippe Beaudette/Trinity Episcopal Church, Tulsa, OK.
