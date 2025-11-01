@@ -979,14 +979,32 @@ def get_liturgical_season_colors(date_str: Optional[str] = None) -> Dict[str, tu
     
     return color_schemes.get(season, color_schemes['season_after_pentecost'])
 
-def create_lower_third(reading_type: str, reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080) -> Image.Image:
-    """Create a lower third graphic for broadcast use with liturgical season colors and banner-style design"""
+def create_lower_third(reading_type: str, reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False) -> Image.Image:
+    """Create a lower third graphic for broadcast use with liturgical season colors and banner-style design
+    
+    Args:
+        reading_type: Type of reading (e.g., 'gospel', 'first_reading')
+        reference: Scripture reference or text
+        date_str: Date string for liturgical season detection
+        width: Image width in pixels
+        height: Image height in pixels
+        is_funeral: If True, use black background with white text instead of liturgical colors
+    """
     # Create image with transparent background (RGBA mode)
     img = Image.new('RGBA', (width, height), color=(0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     
-    # Determine liturgical season colors
-    liturgical_colors = get_liturgical_season_colors(date_str)
+    # Determine liturgical season colors or use funeral colors
+    if is_funeral:
+        # Funeral: black background with white text
+        liturgical_colors = {
+            'background': (0, 0, 0, 255),        # Black
+            'accent': (40, 40, 40, 255),         # Very dark gray
+            'title': (255, 255, 255, 255),       # White
+            'text': (255, 255, 255, 255)         # White
+        }
+    else:
+        liturgical_colors = get_liturgical_season_colors(date_str)
     
     # Try to load fonts, fallback to default if not available
     try:
@@ -1178,14 +1196,37 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     
     return img
 
-def create_title_card(liturgical_reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080) -> Image.Image:
-    """Create a full-screen title card with liturgical reference and church name"""
-    # Create image with white background and 50% opacity (alpha 128 = 50%)
-    img = Image.new('RGBA', (width, height), color=(255, 255, 255, 128))
+def create_title_card(liturgical_reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False) -> Image.Image:
+    """Create a full-screen title card with liturgical reference and church name
+    
+    Args:
+        liturgical_reference: The liturgical reference text to display
+        date_str: Date string for liturgical season detection
+        width: Image width in pixels
+        height: Image height in pixels
+        is_funeral: If True, use black background with white text instead of liturgical colors
+    """
+    # Create image with appropriate background based on service type
+    if is_funeral:
+        # Funeral: black background
+        img = Image.new('RGBA', (width, height), color=(0, 0, 0, 255))
+    else:
+        # Regular: white background and 50% opacity (alpha 128 = 50%)
+        img = Image.new('RGBA', (width, height), color=(255, 255, 255, 128))
+    
     draw = ImageDraw.Draw(img)
     
-    # Determine liturgical season colors
-    liturgical_colors = get_liturgical_season_colors(date_str)
+    # Determine liturgical season colors or use funeral colors
+    if is_funeral:
+        # Funeral: white text on black background
+        liturgical_colors = {
+            'background': (0, 0, 0, 255),        # Black
+            'accent': (255, 255, 255, 255),      # White
+            'title': (255, 255, 255, 255),       # White
+            'text': (255, 255, 255, 255)         # White
+        }
+    else:
+        liturgical_colors = get_liturgical_season_colors(date_str)
     
     # Try to load elegant serif fonts for a classic, timeless look
     try:
@@ -2244,6 +2285,7 @@ def special_service():
         service_date = data.get('date', '')
         readings = data.get('readings', {})
         service_details = data.get('service_details', {})
+        is_funeral = data.get('is_funeral', False)
         
         if not service_title:
             return jsonify({
@@ -2331,7 +2373,7 @@ def special_service():
             # ===== PART 3: Generate title card with service title and date =====
             formatted_date = selected_date.strftime("%B %d, %Y")
             title_reference = f"{service_title}\n{formatted_date}"
-            title_card = create_title_card(title_reference, service_date)
+            title_card = create_title_card(title_reference, service_date, is_funeral=is_funeral)
             title_card_buffer = io.BytesIO()
             title_card.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
@@ -2343,8 +2385,8 @@ def special_service():
                 reference = reading_data.get('reference', '').strip()
                 
                 if reference:
-                    # Generate lower third image (use generic color scheme for special services)
-                    img = create_lower_third(reading_label, reference, service_date)
+                    # Generate lower third image (use funeral colors if flagged, otherwise liturgical colors)
+                    img = create_lower_third(reading_label, reference, service_date, is_funeral=is_funeral)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -2369,8 +2411,8 @@ def special_service():
             for field_key, field_label in hymn_fields.items():
                 hymn_value = service_details.get(field_key, '').strip()
                 if hymn_value:
-                    # Generate lower third image
-                    img = create_lower_third(field_label, hymn_value, service_date)
+                    # Generate lower third image (use funeral colors if flagged, otherwise liturgical colors)
+                    img = create_lower_third(field_label, hymn_value, service_date, is_funeral=is_funeral)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
