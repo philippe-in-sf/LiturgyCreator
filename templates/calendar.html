@@ -1372,6 +1372,13 @@
                         <label for="specialServiceDate">Service Date *</label>
                         <input type="date" id="specialServiceDate" name="specialServiceDate" required>
                     </div>
+                    
+                    <div class="form-group" style="display: flex; align-items: center; margin-top: 15px;">
+                        <input type="checkbox" id="isFuneralService" name="isFuneralService" style="width: auto; margin-right: 10px;">
+                        <label for="isFuneralService" style="margin: 0; font-weight: normal; cursor: pointer;">
+                            This is a funeral service (use black background with white text for graphics)
+                        </label>
+                    </div>
                 </div>
                 
                 <div class="form-section">
@@ -2363,6 +2370,7 @@
         function saveSpecialService() {
             const serviceTitle = document.getElementById('specialServiceTitle').value.trim();
             const serviceDate = document.getElementById('specialServiceDate').value;
+            const isFuneral = document.getElementById('isFuneralService').checked;
             
             if (!serviceTitle) {
                 showError('Please enter a service title');
@@ -2429,7 +2437,8 @@
                     title: serviceTitle,
                     date: serviceDate,
                     readings: readings,
-                    service_details: specialServiceDetails
+                    service_details: specialServiceDetails,
+                    is_funeral: isFuneral
                 })
             })
             .then(response => response.blob())
