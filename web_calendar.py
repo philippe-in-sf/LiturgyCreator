@@ -319,16 +319,16 @@ class WebLiturgicalCalendar:
         if date_obj.year == 2025:
             # First Sunday of Advent 2025 is Nov 30 - this begins Year A
             if (date_obj.month == 11 and date_obj.day >= 30) or date_obj.month == 12:
-                return "A"
+                return "Year A"
             else:
-                return "C"
+                return "Year C"
         elif date_obj.year == 2024:
-            return "C"
+            return "Year C"
         elif date_obj.year == 2026:
-            return "A"
+            return "Year A"
         else:
             cycle_year = (date_obj.year - 2022) % 3
-            return ['A', 'B', 'C'][cycle_year]
+            return ['Year A', 'Year B', 'Year C'][cycle_year]
             
     def get_liturgical_season(self, date_obj: datetime) -> str:
         """Determine the current liturgical season"""
@@ -929,7 +929,7 @@ def get_liturgical_season_colors_by_name(season: str) -> Dict[str, tuple]:
         'christmas': {
             'background': (255, 255, 255, 230),  # White with opacity
             'accent': (212, 175, 55, 255),       # Gold
-            'title': (102, 51, 153, 255),        # Purple
+            'title': (212, 175, 55, 255),        # Gold
             'text': (60, 60, 60, 255)            # Dark gray
         },
         'season_after_epiphany': {

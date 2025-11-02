@@ -247,7 +247,7 @@ class LiturgyFetcher:
         liturgical_year = self._get_liturgical_year(target_date)
         
         # Try to load from Year A readings if applicable
-        if liturgical_year == 'A' and hasattr(self, 'year_a_readings') and self.year_a_readings:
+        if liturgical_year == 'Year A' and hasattr(self, 'year_a_readings') and self.year_a_readings:
             if date_str in self.year_a_readings:
                 self.logger.info(f"Found Year A readings for {date_str}")
                 return self.year_a_readings[date_str]
@@ -740,16 +740,16 @@ class LiturgyFetcher:
         if date_obj.year == 2025:
             # First Sunday of Advent 2025 is Nov 30 - this begins Year A
             if (date_obj.month == 11 and date_obj.day >= 30) or date_obj.month == 12:
-                return "A"  # Advent 2025 begins Year A
+                return "Year A"  # Advent 2025 begins Year A
             else:
-                return "C"
+                return "Year C"
         elif date_obj.year == 2024:
-            return "C"
+            return "Year C"
         elif date_obj.year == 2026:
-            return "A"
+            return "Year A"
         else:
             cycle_year = (date_obj.year - 2022) % 3
-            return ['A', 'B', 'C'][cycle_year]
+            return ['Year A', 'Year B', 'Year C'][cycle_year]
     
     def _parse_specific_reading_page(self, html_content: str, celebration_name: str, target_date: datetime) -> Optional[Dict[str, Any]]:
         """Parse a specific reading page from The Lectionary Page"""
