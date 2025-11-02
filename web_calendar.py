@@ -1991,6 +1991,116 @@ def preview_graphics():
             'error': str(e)
         }), 500
 
+@app.route('/api/preview_special_service', methods=['POST'])
+def preview_special_service():
+    """Generate preview images for special service graphics"""
+    try:
+        data = request.get_json()
+        service_title = data.get('title', '')
+        service_date = data.get('date', '')
+        readings = data.get('readings', {})
+        service_details = data.get('service_details', {})
+        liturgical_season = data.get('liturgical_season', '')
+        is_funeral = data.get('is_funeral', False)
+        
+        if not service_title or not service_date:
+            return jsonify({
+                'success': False,
+                'error': 'Service title and date are required'
+            }), 400
+        
+        previews = []
+        
+        # Generate title card preview
+        selected_date = datetime.fromisoformat(service_date)
+        formatted_date = selected_date.strftime("%B %d, %Y")
+        title_reference = f"{service_title}\n{formatted_date}"
+        title_card = create_title_card(title_reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
+        
+        # Convert to base64
+        title_buffer = io.BytesIO()
+        title_card.save(title_buffer, format='PNG')
+        title_buffer.seek(0)
+        title_b64 = base64.b64encode(title_buffer.read()).decode('utf-8')
+        
+        previews.append({
+            'name': 'Title Card',
+            'image': f'data:image/png;base64,{title_b64}'
+        })
+        
+        # Generate reading graphics
+        reading_types = {
+            'gospel': 'Gospel',
+            'old_testament': 'Old Testament',
+            'epistle': 'Epistle',
+            'psalm': 'Psalm'
+        }
+        
+        for reading_key, reading_label in reading_types.items():
+            reading_data = readings.get(reading_key, {})
+            reference = reading_data.get('reference', '').strip()
+            
+            if reference:
+                lower_third = create_lower_third(reading_label, reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
+                
+                lt_buffer = io.BytesIO()
+                lower_third.save(lt_buffer, format='PNG')
+                lt_buffer.seek(0)
+                lt_b64 = base64.b64encode(lt_buffer.read()).decode('utf-8')
+                
+                previews.append({
+                    'name': reading_label,
+                    'image': f'data:image/png;base64,{lt_b64}'
+                })
+        
+        # Generate hymn/music graphics
+        hymn_fields = {
+            'openingHymn': 'Opening Hymn',
+            'sequenceHymn': 'Sequence Hymn',
+            'offertory': 'Offertory',
+            'communionMotet': 'Communion Motet',
+            'communionHymn': 'Communion Hymn',
+            'closingHymn': 'Closing Hymn'
+        }
+        
+        for field_key, field_label in hymn_fields.items():
+            hymn_value = service_details.get(field_key, '').strip()
+            if hymn_value:
+                lower_third = create_lower_third(field_label, hymn_value, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
+                
+                lt_buffer = io.BytesIO()
+                lower_third.save(lt_buffer, format='PNG')
+                lt_buffer.seek(0)
+                lt_b64 = base64.b64encode(lt_buffer.read()).decode('utf-8')
+                
+                previews.append({
+                    'name': field_label,
+                    'image': f'data:image/png;base64,{lt_b64}'
+                })
+        
+        # Generate blank template preview
+        blank_template = create_blank_lower_third(service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
+        blank_buffer = io.BytesIO()
+        blank_template.save(blank_buffer, format='PNG')
+        blank_buffer.seek(0)
+        blank_b64 = base64.b64encode(blank_buffer.read()).decode('utf-8')
+        
+        previews.append({
+            'name': 'Blank Template',
+            'image': f'data:image/png;base64,{blank_b64}'
+        })
+        
+        return jsonify({
+            'success': True,
+            'previews': previews
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @app.route('/api/export_all', methods=['POST'])
 def export_all():
     """Combined export: readings text files + lower third graphics in one ZIP"""

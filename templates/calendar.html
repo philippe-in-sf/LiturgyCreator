@@ -1657,7 +1657,8 @@
                 
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="closeSpecialService()">Cancel</button>
-                    <button type="button" class="btn-save" onclick="saveSpecialService()">Generate Graphics</button>
+                    <button type="button" class="btn-warning" onclick="previewSpecialService()" style="background-color: #ffc107; color: #000;">👁️ Preview Graphics</button>
+                    <button type="button" class="btn-save" onclick="saveSpecialService()">Generate & Download</button>
                 </div>
             </form>
         </div>
@@ -2692,6 +2693,100 @@
             .catch(error => {
                 console.error('Error:', error);
                 showError('Failed to generate special service graphics');
+            });
+        }
+        
+        function previewSpecialService() {
+            const serviceTitle = document.getElementById('specialServiceTitle').value.trim();
+            const serviceDate = document.getElementById('specialServiceDate').value;
+            const liturgicalSeason = document.getElementById('specialServiceSeason').value;
+            const isFuneral = document.getElementById('isFuneralService').checked;
+            
+            if (!serviceTitle) {
+                showError('Please enter a service title');
+                return;
+            }
+            
+            if (!serviceDate) {
+                showError('Please select a service date');
+                return;
+            }
+            
+            // Collect readings
+            const readings = {
+                gospel: {
+                    reference: document.getElementById('specialGospelRef').value.trim(),
+                    text: document.getElementById('specialGospelText').value.trim()
+                },
+                old_testament: {
+                    reference: document.getElementById('specialOTRef').value.trim(),
+                    text: document.getElementById('specialOTText').value.trim()
+                },
+                epistle: {
+                    reference: document.getElementById('specialEpistleRef').value.trim(),
+                    text: document.getElementById('specialEpistleText').value.trim()
+                },
+                psalm: {
+                    reference: document.getElementById('specialPsalmRef').value.trim(),
+                    text: document.getElementById('specialPsalmText').value.trim()
+                }
+            };
+            
+            // Collect service details
+            const specialServiceDetails = {
+                organistName: document.getElementById('specialOrganistName').value.trim(),
+                preludeName: document.getElementById('specialPreludeName').value.trim(),
+                preludeComposer: document.getElementById('specialPreludeComposer').value.trim(),
+                openingHymn: document.getElementById('specialOpeningHymn').value.trim(),
+                sequenceHymn: document.getElementById('specialSequenceHymn').value.trim(),
+                preacherName: document.getElementById('specialPreacherName').value.trim(),
+                offertory: document.getElementById('specialOffertory').value.trim(),
+                communionMotet: document.getElementById('specialCommunionMotet').value.trim(),
+                communionHymn: document.getElementById('specialCommunionHymn').value.trim(),
+                closingHymn: document.getElementById('specialClosingHymn').value.trim(),
+                postludeName: document.getElementById('specialPostludeName').value.trim(),
+                postludeComposer: document.getElementById('specialPostludeComposer').value.trim()
+            };
+            
+            // Open preview modal
+            const modal = document.getElementById('previewModal');
+            const loadingDiv = document.getElementById('previewLoading');
+            const imagesDiv = document.getElementById('previewImages');
+            
+            modal.style.display = 'block';
+            loadingDiv.style.display = 'block';
+            imagesDiv.style.display = 'none';
+            
+            // Fetch preview
+            fetch('/api/preview_special_service', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: serviceTitle,
+                    date: serviceDate,
+                    readings: readings,
+                    service_details: specialServiceDetails,
+                    liturgical_season: liturgicalSeason,
+                    is_funeral: isFuneral
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingDiv.style.display = 'none';
+                
+                if (data.success) {
+                    displayPreviews(data.previews);
+                } else {
+                    showError('Failed to load preview: ' + data.error);
+                    closePreview();
+                }
+            })
+            .catch(error => {
+                console.error('Preview error:', error);
+                showError('Failed to load preview');
+                closePreview();
             });
         }
 
