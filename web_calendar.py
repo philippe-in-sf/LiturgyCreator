@@ -388,11 +388,15 @@ class WebLiturgicalCalendar:
         feast_days = {
             (1, 1): "New Year's Day",
             (1, 6): "Epiphany",
+            (4, 2): "Maundy Thursday",
+            (4, 3): "Good Friday",
+            (4, 4): "Holy Saturday",
             (7, 4): "Independence Day",
             (8, 15): "St Mary, the Virgin",
             (9, 29): "St Michael and All Angels",
             (11, 1): "All Saints' Day",
             (11, 2): "All Souls' Day",
+            (12, 24): "Christmas Eve",
             (12, 25): "Christmas Day",
             (12, 26): "St Stephen, Deacon and Martyr"
         }
