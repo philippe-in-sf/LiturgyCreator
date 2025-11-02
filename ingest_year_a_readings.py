@@ -29,6 +29,7 @@ class YearAReadingsIngester:
             print(f"  Fetching: {url}")
             response = self.session.get(url, timeout=15)
             response.raise_for_status()
+            response.encoding = 'utf-8'
             time.sleep(self.delay)
             return response.text
         except Exception as e:
