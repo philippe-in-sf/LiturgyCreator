@@ -72,15 +72,17 @@ def normalize_tokens(tokens: List[Dict[str, str]]) -> str:
 
 def fix_merged_tokens(text: str) -> str:
     """
-    Fix merged tokens where capital letters were incorrectly merged with words.
+    Fix merged tokens where single-letter vocatives were incorrectly merged with words.
     
     Patterns fixed:
-    - "Ohouse" → "O house"
-    - "Ofsuch" → "O fsuch" (though this is rare)
-    - Single capital letter followed by lowercase word
+    - "Ohouse" → "O house" (vocative O)
+    - "Opeople" → "O people"
+    
+    CONSERVATIVE APPROACH: Only fixes vocative "O" followed by lowercase.
+    This is the most common issue in liturgical text.
     
     Does NOT split:
-    - Normal capitalized words (e.g., "House", "Jerusalem")
+    - Normal capitalized words (e.g., "House", "Jerusalem", "Of")
     - Acronyms (e.g., "USA")
     - Roman numerals (e.g., "II")
     
@@ -93,13 +95,10 @@ def fix_merged_tokens(text: str) -> str:
     if not text:
         return text
     
-    # Fix pattern: Single capital letter (not I or A) directly followed by lowercase letter
-    # This handles "Ohouse" → "O house", "Ychildren" → "Y children"
-    # Preserve word boundaries to avoid splitting normal words
-    text = re.sub(r'\b([B-HJ-Z])([a-z]+)', r'\1 \2', text)
-    
-    # Special case: "O " at start of sentences/phrases (common in liturgical text)
-    # Already handled by above pattern
+    # Fix pattern: Vocative "O" directly followed by lowercase letter
+    # This handles "Ohouse" → "O house", "Opeople" → "O people"
+    # Only matches "O" (not other capitals) to avoid false positives
+    text = re.sub(r'\bO([a-z])', r'O \1', text)
     
     return text
 
@@ -133,6 +132,10 @@ def fix_punctuation_spacing(text: str) -> str:
     # Special case: Add space after punctuation if followed by digit (verse numbers)
     # "Lord."2 → "Lord." 2
     text = re.sub(r'([.,;:!?])(\d)', r'\1 \2', text)
+    
+    # Add space after closing quote if followed by digit (verse numbers)
+    # 'Lord."2' → 'Lord." 2'
+    text = re.sub(r'(["\u201D\u2019])(\d)', r'\1 \2', text)
     
     # Fix closing quote followed by punctuation: ensure no space between
     text = re.sub(r'(["\u201D\u2019])\s+([.,;:!?])', r'\1\2', text)
