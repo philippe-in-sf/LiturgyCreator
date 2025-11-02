@@ -2345,6 +2345,48 @@ def generate_lower_thirds():
             'message': 'Failed to generate lower thirds'
         }), 500
 
+@app.route('/api/generate_custom_title_card', methods=['POST'])
+def generate_custom_title_card():
+    """Generate a custom title card with user-specified text"""
+    try:
+        data = request.get_json()
+        custom_text = data.get('customText', '').strip()
+        date_str = data.get('date')  # Optional: for liturgical season colors
+        is_funeral = data.get('isFuneral', False)  # Optional: for black/white theme
+        
+        if not custom_text:
+            return jsonify({
+                'success': False,
+                'error': 'No text provided for title card'
+            }), 400
+        
+        # Generate the title card using the existing function
+        title_card_img = create_title_card(custom_text, date_str, is_funeral=is_funeral)
+        
+        # Convert to PNG and send as file download
+        img_buffer = io.BytesIO()
+        title_card_img.save(img_buffer, format='PNG')
+        img_buffer.seek(0)
+        
+        # Create a filename from the custom text (sanitized)
+        safe_filename = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in custom_text)
+        safe_filename = safe_filename[:50]  # Limit length
+        safe_filename = safe_filename.strip() or 'Custom_Title_Card'
+        
+        return send_file(
+            io.BytesIO(img_buffer.read()),
+            as_attachment=True,
+            download_name=f"{safe_filename}.png",
+            mimetype='image/png'
+        )
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate custom title card'
+        }), 500
+
 @app.route('/api/upload_pdf', methods=['POST'])
 def upload_pdf():
     """Handle PDF file upload and text extraction"""
