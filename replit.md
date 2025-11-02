@@ -44,6 +44,7 @@ The application features a modular architecture:
 - **Readings API Resolution**: Enhanced fallback system for liturgical APIs.
 - **Folder Naming Standardization**: Consistent ZIP export folder structure ("lower_thirds", "readings", "service_details").
 - **Blank Lower Third Template**: All ZIP exports include a blank lower third template (BLANK_TEMPLATE.png) with liturgical or funeral season colors for manual service element additions.
+- **Custom Title Card Generator**: On-demand custom title card generation feature allowing users to create title cards with custom text, optional liturgical season colors, and funeral theme support. Perfect for video editing purposes and creating title cards for past services.
 
 ## Configuration Management
 
