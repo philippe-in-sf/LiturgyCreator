@@ -903,34 +903,15 @@ def export_readings():
             'message': 'Failed to export readings'
         }), 500
 
-def get_liturgical_season_colors(date_str: Optional[str] = None) -> Dict[str, tuple]:
-    """Get liturgical season colors for lower third graphics"""
-    if not date_str:
-        date_str = datetime.now().strftime('%Y-%m-%d')
+def get_liturgical_season_colors_by_name(season: str) -> Dict[str, tuple]:
+    """Get liturgical season colors by season name directly
     
-    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
-    month = date_obj.month
-    day = date_obj.day
+    Args:
+        season: Liturgical season name (advent, christmas, lent, easter, etc.)
     
-    # Determine liturgical season (Episcopal terminology)
-    season = 'season_after_pentecost'  # default
-    
-    if month == 12 and day >= 25:
-        season = 'christmas'
-    elif month == 1 and day <= 6:
-        season = 'christmas'
-    elif month == 1 and day > 6:
-        season = 'season_after_epiphany'
-    elif month in [2, 3] or (month == 4 and day < 15):
-        # Rough Lent/Easter season (needs refinement for actual Easter dates)
-        season = 'lent'
-    elif month in [4, 5, 6] and (month > 4 or day >= 15):
-        season = 'easter'
-    elif (month == 11 and day >= 27) or (month == 12 and day < 25):
-        season = 'advent'
-    else:
-        season = 'season_after_pentecost'
-    
+    Returns:
+        Dictionary of color tuples for the specified season
+    """
     # Color mapping with RGBA tuples (R, G, B, A)
     color_schemes = {
         'advent': {
@@ -978,6 +959,37 @@ def get_liturgical_season_colors(date_str: Optional[str] = None) -> Dict[str, tu
     }
     
     return color_schemes.get(season, color_schemes['season_after_pentecost'])
+
+def get_liturgical_season_colors(date_str: Optional[str] = None) -> Dict[str, tuple]:
+    """Get liturgical season colors for lower third graphics"""
+    if not date_str:
+        date_str = datetime.now().strftime('%Y-%m-%d')
+    
+    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+    month = date_obj.month
+    day = date_obj.day
+    
+    # Determine liturgical season (Episcopal terminology)
+    season = 'season_after_pentecost'  # default
+    
+    if month == 12 and day >= 25:
+        season = 'christmas'
+    elif month == 1 and day <= 6:
+        season = 'christmas'
+    elif month == 1 and day > 6:
+        season = 'season_after_epiphany'
+    elif month in [2, 3] or (month == 4 and day < 15):
+        # Rough Lent/Easter season (needs refinement for actual Easter dates)
+        season = 'lent'
+    elif month in [4, 5, 6] and (month > 4 or day >= 15):
+        season = 'easter'
+    elif (month == 11 and day >= 27) or (month == 12 and day < 25):
+        season = 'advent'
+    else:
+        season = 'season_after_pentecost'
+    
+    # Use the helper function to get colors
+    return get_liturgical_season_colors_by_name(season)
 
 def create_lower_third(reading_type: str, reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False) -> Image.Image:
     """Create a lower third graphic for broadcast use with liturgical season colors and banner-style design
@@ -1358,15 +1370,16 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
     
     return img
 
-def create_title_card(liturgical_reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False) -> Image.Image:
+def create_title_card(liturgical_reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None) -> Image.Image:
     """Create a full-screen title card with liturgical reference and church name
     
     Args:
         liturgical_reference: The liturgical reference text to display
-        date_str: Date string for liturgical season detection
+        date_str: Date string for liturgical season detection (ignored if liturgical_season is provided)
         width: Image width in pixels
         height: Image height in pixels
         is_funeral: If True, use black background with white text instead of liturgical colors
+        liturgical_season: Directly specify liturgical season (advent, christmas, lent, etc.)
     """
     # Create image with appropriate background based on service type
     if is_funeral:
@@ -1387,7 +1400,11 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
             'title': (255, 255, 255, 255),       # White
             'text': (255, 255, 255, 255)         # White
         }
+    elif liturgical_season:
+        # Use directly specified liturgical season
+        liturgical_colors = get_liturgical_season_colors_by_name(liturgical_season)
     else:
+        # Compute from date string
         liturgical_colors = get_liturgical_season_colors(date_str)
     
     # Try to load elegant serif fonts for a classic, timeless look
@@ -2351,7 +2368,7 @@ def generate_custom_title_card():
     try:
         data = request.get_json()
         custom_text = data.get('customText', '').strip()
-        date_str = data.get('date')  # Optional: for liturgical season colors
+        liturgical_season = data.get('liturgicalSeason')  # Optional: liturgical season for colors
         is_funeral = data.get('isFuneral', False)  # Optional: for black/white theme
         
         if not custom_text:
@@ -2361,7 +2378,7 @@ def generate_custom_title_card():
             }), 400
         
         # Generate the title card using the existing function
-        title_card_img = create_title_card(custom_text, date_str, is_funeral=is_funeral)
+        title_card_img = create_title_card(custom_text, liturgical_season=liturgical_season, is_funeral=is_funeral)
         
         # Convert to PNG and send as file download
         img_buffer = io.BytesIO()

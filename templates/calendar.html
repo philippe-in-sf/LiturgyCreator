@@ -1420,10 +1420,19 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="customTitleDate">Liturgical Colors (Optional)</label>
-                        <input type="date" id="customTitleDate" name="customTitleDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                        <label for="customTitleSeason">Liturgical Season (Optional)</label>
+                        <select id="customTitleSeason" name="customTitleSeason" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                            <option value="">None (White Background)</option>
+                            <option value="advent">Advent (Purple)</option>
+                            <option value="christmas">Christmas (White & Gold)</option>
+                            <option value="season_after_epiphany">Season after Epiphany (Green)</option>
+                            <option value="lent">Lent (Purple)</option>
+                            <option value="easter">Easter (White & Gold)</option>
+                            <option value="pentecost">Pentecost (Red)</option>
+                            <option value="season_after_pentecost">Season after Pentecost (Green)</option>
+                        </select>
                         <small style="color: #6c757d; display: block; margin-top: 5px;">
-                            Select a date to apply the liturgical season colors. Leave blank for default white background.
+                            Select a liturgical season to apply its colors. Leave as "None" for default white background.
                         </small>
                     </div>
                     
@@ -1439,7 +1448,7 @@
                         <small>
                             • The title card will be 1920x1080 pixels (Full HD)<br>
                             • Text will be centered and formatted automatically<br>
-                            • Use the date field to match liturgical season colors<br>
+                            • Select a liturgical season to match your service<br>
                             • Check the funeral option for memorial services
                         </small>
                     </div>
@@ -2409,7 +2418,7 @@
             
             // Clear previous inputs
             document.getElementById('customTitleText').value = '';
-            document.getElementById('customTitleDate').value = '';
+            document.getElementById('customTitleSeason').value = '';
             document.getElementById('customTitleFuneral').checked = false;
         }
 
@@ -2420,7 +2429,7 @@
 
         async function generateCustomTitleCard() {
             const customText = document.getElementById('customTitleText').value.trim();
-            const dateInput = document.getElementById('customTitleDate').value;
+            const liturgicalSeason = document.getElementById('customTitleSeason').value;
             const isFuneral = document.getElementById('customTitleFuneral').checked;
             
             if (!customText) {
@@ -2436,7 +2445,7 @@
                     },
                     body: JSON.stringify({
                         customText: customText,
-                        date: dateInput || null,
+                        liturgicalSeason: liturgicalSeason || null,
                         isFuneral: isFuneral
                     })
                 });
