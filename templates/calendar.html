@@ -1382,59 +1382,16 @@
                 </div>
                 
                 <div class="form-section">
-                    <h3>Scripture Readings</h3>
-                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
-                        Enter the readings for this service manually
-                    </p>
-                    
-                    <div class="form-group">
-                        <label for="specialGospelRef">Gospel Reference</label>
-                        <input type="text" id="specialGospelRef" name="specialGospelRef" placeholder="e.g., John 15:9-17">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="specialGospelText">Gospel Text</label>
-                        <textarea id="specialGospelText" name="specialGospelText" rows="4" placeholder="Enter the full Gospel text..." style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-family: inherit; font-size: 1rem;"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="specialOTRef">Old Testament Reference</label>
-                        <input type="text" id="specialOTRef" name="specialOTRef" placeholder="e.g., Isaiah 61:1-4">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="specialOTText">Old Testament Text</label>
-                        <textarea id="specialOTText" name="specialOTText" rows="4" placeholder="Enter the Old Testament text..." style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-family: inherit; font-size: 1rem;"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="specialEpistleRef">Epistle Reference</label>
-                        <input type="text" id="specialEpistleRef" name="specialEpistleRef" placeholder="e.g., 1 Corinthians 13:1-13">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="specialEpistleText">Epistle Text</label>
-                        <textarea id="specialEpistleText" name="specialEpistleText" rows="4" placeholder="Enter the Epistle text..." style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-family: inherit; font-size: 1rem;"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="specialPsalmRef">Psalm Reference</label>
-                        <input type="text" id="specialPsalmRef" name="specialPsalmRef" placeholder="e.g., Psalm 23">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="specialPsalmText">Psalm Text</label>
-                        <textarea id="specialPsalmText" name="specialPsalmText" rows="4" placeholder="Enter the Psalm text..." style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-family: inherit; font-size: 1rem;"></textarea>
-                    </div>
-                </div>
-                
-                <div class="form-section">
                     <h3>Musicians</h3>
                     
                     <div class="form-group">
                         <label for="specialOrganistName">Organist Name</label>
                         <input type="text" id="specialOrganistName" name="specialOrganistName" placeholder="e.g., Dr. Sarah Johnson">
                     </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Prelude</h3>
                     
                     <div class="form-group">
                         <label for="specialPreludeName">Prelude Title</label>
@@ -1448,27 +1405,90 @@
                 </div>
                 
                 <div class="form-section">
-                    <h3>Hymns & Music</h3>
+                    <h3>Opening Hymn</h3>
                     
                     <div class="form-group">
                         <label for="specialOpeningHymn">Opening Hymn</label>
                         <input type="text" id="specialOpeningHymn" name="specialOpeningHymn" placeholder="e.g., Hymn 362 - Holy, Holy, Holy">
                     </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Scripture Readings</h3>
+                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
+                        Enter the readings for this service manually (in lectionary order)
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="specialOTRef">Old Testament Reference</label>
+                        <input type="text" id="specialOTRef" name="specialOTRef" placeholder="e.g., Isaiah 61:1-4">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="specialOTText">Old Testament Text</label>
+                        <textarea id="specialOTText" name="specialOTText" rows="4" placeholder="Enter the Old Testament text..." style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-family: inherit; font-size: 1rem;"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="specialPsalmRef">Psalm Reference</label>
+                        <input type="text" id="specialPsalmRef" name="specialPsalmRef" placeholder="e.g., Psalm 23">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="specialPsalmText">Psalm Text</label>
+                        <textarea id="specialPsalmText" name="specialPsalmText" rows="4" placeholder="Enter the Psalm text..." style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-family: inherit; font-size: 1rem;"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="specialEpistleRef">Epistle Reference</label>
+                        <input type="text" id="specialEpistleRef" name="specialEpistleRef" placeholder="e.g., 1 Corinthians 13:1-13">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="specialEpistleText">Epistle Text</label>
+                        <textarea id="specialEpistleText" name="specialEpistleText" rows="4" placeholder="Enter the Epistle text..." style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-family: inherit; font-size: 1rem;"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="specialGospelRef">Gospel Reference</label>
+                        <input type="text" id="specialGospelRef" name="specialGospelRef" placeholder="e.g., John 15:9-17">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="specialGospelText">Gospel Text</label>
+                        <textarea id="specialGospelText" name="specialGospelText" rows="4" placeholder="Enter the full Gospel text..." style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-family: inherit; font-size: 1rem;"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Sequence Hymn</h3>
                     
                     <div class="form-group">
                         <label for="specialSequenceHymn">Sequence Hymn</label>
                         <input type="text" id="specialSequenceHymn" name="specialSequenceHymn" placeholder="e.g., Hymn 632 - O Christ, the Word Incarnate">
                     </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Sermon</h3>
                     
                     <div class="form-group">
                         <label for="specialPreacherName">Preacher's Name</label>
                         <input type="text" id="specialPreacherName" name="specialPreacherName" placeholder="e.g., The Rev. Dr. Michael Smith">
                     </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Offertory</h3>
                     
                     <div class="form-group">
                         <label for="specialOffertory">Offertory</label>
                         <input type="text" id="specialOffertory" name="specialOffertory" placeholder="e.g., Offertory Anthem - Come, Thou Fount of Every Blessing">
                     </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Communion</h3>
                     
                     <div class="form-group">
                         <label for="specialCommunionMotet">Communion Motet</label>
@@ -1479,6 +1499,10 @@
                         <label for="specialCommunionHymn">Communion Hymn</label>
                         <input type="text" id="specialCommunionHymn" name="specialCommunionHymn" placeholder="e.g., Hymn 304 - I come with joy to meet my Lord">
                     </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Closing</h3>
                     
                     <div class="form-group">
                         <label for="specialClosingHymn">Closing Hymn</label>
