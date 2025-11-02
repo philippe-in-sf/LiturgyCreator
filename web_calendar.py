@@ -1399,7 +1399,7 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
     
     return img
 
-def generate_obs_scene_collection(readings: dict, service_details: dict, date_str: str, obs_settings: dict = None) -> dict:
+def generate_obs_scene_collection(readings: dict, service_details: dict, date_str: str, obs_settings: dict | None = None) -> dict:
     """
     Generate an OBS scene collection JSON structure
     that references the exported Worship folder assets with absolute paths
@@ -2377,7 +2377,7 @@ def special_service():
             title_card_buffer = io.BytesIO()
             title_card.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
-            zip_file.writestr(f"{date_folder_name}/graphics/Title Card.png", title_card_buffer.read())
+            zip_file.writestr(f"{date_folder_name}/lower_thirds/Title Card.png", title_card_buffer.read())
             
             # ===== PART 4: Generate lower third graphics for readings =====
             for reading_key, reading_label in reading_types.items():
@@ -2395,7 +2395,7 @@ def special_service():
                     
                     # Add to ZIP
                     filename = f"{reading_label}.png"
-                    filepath = f"{date_folder_name}/graphics/{filename}"
+                    filepath = f"{date_folder_name}/lower_thirds/{filename}"
                     zip_file.writestr(filepath, img_buffer.read())
             
             # ===== PART 5: Generate lower third graphics for hymns/music =====
@@ -2421,7 +2421,7 @@ def special_service():
                     
                     # Add to ZIP
                     filename = f"{field_label}.png"
-                    filepath = f"{date_folder_name}/graphics/{filename}"
+                    filepath = f"{date_folder_name}/lower_thirds/{filename}"
                     zip_file.writestr(filepath, img_buffer.read())
         
         # Prepare the ZIP file for download
@@ -2525,7 +2525,7 @@ def evensong_service():
             title_card_buffer = io.BytesIO()
             title_card.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
-            zip_file.writestr(f"{date_folder_name}/graphics/Title Card.png", title_card_buffer.read())
+            zip_file.writestr(f"{date_folder_name}/lower_thirds/Title Card.png", title_card_buffer.read())
             
             # ===== Generate lower third graphics for Evensong elements =====
             lower_third_fields = {
@@ -2551,7 +2551,7 @@ def evensong_service():
                     
                     # Add to ZIP
                     filename = f"{field_label}.png"
-                    filepath = f"{date_folder_name}/graphics/{filename}"
+                    filepath = f"{date_folder_name}/lower_thirds/{filename}"
                     zip_file.writestr(filepath, img_buffer.read())
         
         # Prepare the ZIP file for download
