@@ -33,8 +33,9 @@ class ReadingsValidator:
             return issues
         
         # Check for space before lowercase letter (potential intra-word spacing)
-        # Pattern: capital letter, space, lowercase letter (e.g., "T he", "A lmighty")
-        intra_word_pattern = r'\b[A-Z]\s+[a-z]'
+        # Pattern: capital letter (except "I" and "A"), space, lowercase letter (e.g., "T he", "L ord")
+        # Exclude "I " and "A " as these are valid standalone words
+        intra_word_pattern = r'\b([B-HJ-Z])\s+([a-z])'
         matches = re.finditer(intra_word_pattern, text)
         for match in matches:
             issues.append(f"Intra-word spacing: '{match.group()}' at position {match.start()}")

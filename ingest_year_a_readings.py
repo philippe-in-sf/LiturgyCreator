@@ -40,12 +40,21 @@ class YearAReadingsIngester:
             return text
         
         # Fix intra-word spacing at start of text or after punctuation/whitespace
-        # Pattern: word boundary + capital letter + space(s) + lowercase letter(s)
-        # This handles: "T he" → "The", "A lmighty" → "Almighty", etc.
-        text = re.sub(r'\b([A-Z])\s+([a-z])', r'\1\2', text)
+        # Pattern: word boundary + capital letter (except "I" and "A") + space(s) + lowercase letter(s)
+        # This handles: "T he" → "The", "J esus" → "Jesus", "W hen" → "When", etc.
+        # But preserves: "I will" (not "Iwill"), "A man" (not "Aman")
+        text = re.sub(r'\b([B-HJ-Z])\s+([a-z])', r'\1\2', text)
         
-        # Fix possessive apostrophes: "word 's" → "word's"
-        text = re.sub(r'\s+\'s\b', "'s", text)
+        # Special case: "I n" → "In" (the preposition "In", not pronoun "I" + word starting with "n")
+        text = re.sub(r'\b(I)\s+(n)\b', r'\1\2', text)
+        
+        # Also fix "A l" at start (like "A lmighty") but not "A m" (like "A man")
+        # Special handling for "A" followed by specific letters that indicate split word
+        text = re.sub(r'\b(A)\s+(l|g|n[d])', r'\1\2', text)
+        
+        # Fix possessive apostrophes: "word 's" → "word's" or "word 's" → "word's"
+        # Handle both regular apostrophe (') and smart quote/right single quotation mark (')
+        text = re.sub(r'\s+[\'\u2019]s\b', '\u2019s', text)
         
         # Fix space before punctuation marks
         text = re.sub(r'\s+([,.:;!?])', r'\1', text)
