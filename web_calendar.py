@@ -297,7 +297,7 @@ class WebLiturgicalCalendar:
         # Liturgical colors
         self.liturgical_colors = {
             'advent': '#663399',      # Purple
-            'christmas': '#FFFFFF',   # White
+            'christmas': '#D4AF37',   # Gold
             'epiphany': '#00AA00',   # Green
             'lent': '#663399',       # Purple
             'palm_sunday': '#AA0000', # Red

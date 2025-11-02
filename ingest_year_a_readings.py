@@ -85,94 +85,99 @@ class YearAReadingsIngester:
         try:
             soup = BeautifulSoup(html, 'html.parser')
             
-            # Find all h2 headings to identify sections
-            h2_headings = soup.find_all('h2')
+            # Find all article sections
+            articles = soup.find_all('article')
             
-            for h2 in h2_headings:
+            for article in articles:
+                # Find the h2 heading in this article
+                h2 = article.find('h2', class_='lessonHeading')
+                if not h2:
+                    continue
+                    
                 heading_text = h2.get_text(strip=True)
                 
                 # Parse based on section type
                 if 'Collect' in heading_text:
-                    # Get the paragraph after the Collect heading
-                    next_p = h2.find_next('p')
-                    if next_p:
-                        collect_text = next_p.get_text(strip=True)
+                    # Get the collect text from <p class="collectText">
+                    collect_p = article.find('p', class_='collectText')
+                    if collect_p:
+                        collect_text = collect_p.get_text(strip=True)
                         readings['collect'] = {
                             'reference': 'The Collect',
                             'text': collect_text
                         }
                 
                 elif 'Old Testament' in heading_text or 'First Reading' in heading_text:
-                    # Get the h3 (scripture reference) and text
-                    h3 = h2.find_next('h3')
+                    # Get the h3 (scripture reference)
+                    h3 = article.find('h3', class_='lessonCitation')
                     if h3:
                         ref = h3.get_text(strip=True)
-                        text_parts = []
-                        # Get all paragraphs until next h2 or h3
-                        current = h3.find_next_sibling()
-                        while current and current.name not in ['h2', 'h3']:
-                            if current.name == 'p':
-                                text_parts.append(current.get_text(strip=True))
-                            current = current.find_next_sibling()
                         
-                        readings['first_reading'] = {
-                            'reference': ref,
-                            'text': ' '.join(text_parts)
-                        }
+                        # Get the div containing the text
+                        text_div = h3.find_next_sibling('div')
+                        if text_div:
+                            # Get all paragraph text (lessonText and poetryText)
+                            paragraphs = text_div.find_all('p', class_=['lessonText', 'poetryText'])
+                            text_parts = [p.get_text(strip=True) for p in paragraphs if p.get_text(strip=True)]
+                            
+                            readings['first_reading'] = {
+                                'reference': ref,
+                                'text': ' '.join(text_parts)
+                            }
                 
-                elif 'Psalm' in heading_text:
-                    # Get the h3 (psalm reference) and text
-                    h3 = h2.find_next('h3')
+                elif 'Psalm' in heading_text or 'Response' in heading_text:
+                    # Get the h3 (psalm reference)
+                    h3 = article.find('h3', class_='lessonCitation')
                     if h3:
                         ref = h3.get_text(strip=True)
-                        text_parts = []
-                        # Get all paragraphs until next h2
-                        current = h3.find_next_sibling()
-                        while current and current.name != 'h2':
-                            if current.name == 'p':
-                                text_parts.append(current.get_text(strip=True))
-                            current = current.find_next_sibling()
                         
-                        readings['psalm'] = {
-                            'reference': ref,
-                            'text': ' '.join(text_parts)
-                        }
+                        # Get the div containing the psalm text
+                        text_div = h3.find_next_sibling('div')
+                        if text_div:
+                            # Get all psalm text paragraphs
+                            paragraphs = text_div.find_all('p', class_='psalmText')
+                            text_parts = [p.get_text(strip=True) for p in paragraphs if p.get_text(strip=True)]
+                            
+                            readings['psalm'] = {
+                                'reference': ref,
+                                'text': ' '.join(text_parts)
+                            }
                 
                 elif 'Epistle' in heading_text or 'Second Reading' in heading_text:
-                    # Get the h3 (scripture reference) and text
-                    h3 = h2.find_next('h3')
+                    # Get the h3 (scripture reference)
+                    h3 = article.find('h3', class_='lessonCitation')
                     if h3:
                         ref = h3.get_text(strip=True)
-                        text_parts = []
-                        # Get all paragraphs until next h2
-                        current = h3.find_next_sibling()
-                        while current and current.name != 'h2':
-                            if current.name == 'p':
-                                text_parts.append(current.get_text(strip=True))
-                            current = current.find_next_sibling()
                         
-                        readings['second_reading'] = {
-                            'reference': ref,
-                            'text': ' '.join(text_parts)
-                        }
+                        # Get the div containing the text
+                        text_div = h3.find_next_sibling('div')
+                        if text_div:
+                            # Get all lesson text paragraphs
+                            paragraphs = text_div.find_all('p', class_='lessonText')
+                            text_parts = [p.get_text(strip=True) for p in paragraphs if p.get_text(strip=True)]
+                            
+                            readings['second_reading'] = {
+                                'reference': ref,
+                                'text': ' '.join(text_parts)
+                            }
                 
                 elif 'Gospel' in heading_text:
-                    # Get the h3 (scripture reference) and text
-                    h3 = h2.find_next('h3')
+                    # Get the h3 (scripture reference)
+                    h3 = article.find('h3', class_='lessonCitation')
                     if h3:
                         ref = h3.get_text(strip=True)
-                        text_parts = []
-                        # Get all paragraphs until next h2
-                        current = h3.find_next_sibling()
-                        while current and current.name != 'h2':
-                            if current.name == 'p':
-                                text_parts.append(current.get_text(strip=True))
-                            current = current.find_next_sibling()
                         
-                        readings['gospel'] = {
-                            'reference': ref,
-                            'text': ' '.join(text_parts)
-                        }
+                        # Get the div containing the text
+                        text_div = h3.find_next_sibling('div')
+                        if text_div:
+                            # Get all lesson text paragraphs
+                            paragraphs = text_div.find_all('p', class_='lessonText')
+                            text_parts = [p.get_text(strip=True) for p in paragraphs if p.get_text(strip=True)]
+                            
+                            readings['gospel'] = {
+                                'reference': ref,
+                                'text': ' '.join(text_parts)
+                            }
             
         except Exception as e:
             print(f"    ERROR parsing page for {celebration_name}: {e}")
