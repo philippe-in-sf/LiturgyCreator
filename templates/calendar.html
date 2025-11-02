@@ -991,6 +991,7 @@
                     <button class="action-btn" onclick="showSpecialService()" style="background-color: #9b59b6; color: white;">✨ Special Service</button>
                     <button class="action-btn btn-warning" onclick="showPreview()" style="background-color: #ffc107; color: #000;">👁️ Preview</button>
                     <button class="action-btn btn-success" onclick="exportAll()" style="background-color: #28a745;">Export All</button>
+                    <button class="action-btn" onclick="showCustomTitleCard()" style="background-color: #e74c3c; color: white;">🎬 Custom Title Card</button>
                     <button class="action-btn btn-info" onclick="showSettings()" style="background-color: #6c757d;">⚙️ Settings</button>
                 </div>
 
@@ -1345,6 +1346,62 @@
                 <button type="button" class="btn-cancel" onclick="closePreview()">Close</button>
                 <button type="button" class="btn-save" onclick="exportAll()" style="background-color: #28a745; color: white;">Download All</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Custom Title Card Modal -->
+    <div id="customTitleCardModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <span class="close" onclick="closeCustomTitleCard()">&times;</span>
+                <h2 class="modal-title">🎬 Custom Title Card Generator</h2>
+            </div>
+            
+            <form id="customTitleCardForm">
+                <div class="form-section">
+                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
+                        Create a custom title card with your own text. Perfect for editing videos from previous weeks or creating special announcements.
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="customTitleText">Title Card Text</label>
+                        <textarea id="customTitleText" name="customTitleText" rows="4" placeholder="Enter your custom text here...&#10;&#10;Example:&#10;Twenty-Third Sunday after Pentecost&#10;October 27, 2024" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; font-family: inherit; resize: vertical;"></textarea>
+                        <small style="color: #6c757d; display: block; margin-top: 5px;">
+                            Tip: Use line breaks to format your text. The text will be centered on the title card.
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customTitleDate">Liturgical Colors (Optional)</label>
+                        <input type="date" id="customTitleDate" name="customTitleDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                        <small style="color: #6c757d; display: block; margin-top: 5px;">
+                            Select a date to apply the liturgical season colors. Leave blank for default white background.
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="customTitleFuneral" name="customTitleFuneral" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
+                            <span>Use funeral theme (black background with white text)</span>
+                        </label>
+                    </div>
+                    
+                    <div style="background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 4px; padding: 12px; margin-top: 15px;">
+                        <strong>💡 Tips:</strong><br>
+                        <small>
+                            • The title card will be 1920x1080 pixels (Full HD)<br>
+                            • Text will be centered and formatted automatically<br>
+                            • Use the date field to match liturgical season colors<br>
+                            • Check the funeral option for memorial services
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeCustomTitleCard()">Cancel</button>
+                    <button type="button" class="btn-save" onclick="generateCustomTitleCard()">Generate & Download</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -2297,6 +2354,82 @@
             closeSettings();
         }
 
+        // Custom Title Card Functions
+        function showCustomTitleCard() {
+            const modal = document.getElementById('customTitleCardModal');
+            modal.style.display = 'block';
+            
+            // Clear previous inputs
+            document.getElementById('customTitleText').value = '';
+            document.getElementById('customTitleDate').value = '';
+            document.getElementById('customTitleFuneral').checked = false;
+        }
+
+        function closeCustomTitleCard() {
+            const modal = document.getElementById('customTitleCardModal');
+            modal.style.display = 'none';
+        }
+
+        async function generateCustomTitleCard() {
+            const customText = document.getElementById('customTitleText').value.trim();
+            const dateInput = document.getElementById('customTitleDate').value;
+            const isFuneral = document.getElementById('customTitleFuneral').checked;
+            
+            if (!customText) {
+                showError('Please enter text for your title card');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/generate_custom_title_card', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        customText: customText,
+                        date: dateInput || null,
+                        isFuneral: isFuneral
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    showError(errorData.error || 'Failed to generate title card');
+                    return;
+                }
+                
+                // Download the file
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                // Get filename from Content-Disposition header if available
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = 'Custom_Title_Card.png';
+                if (contentDisposition) {
+                    const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, '');
+                    }
+                }
+                
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showSuccess('Custom title card generated successfully!');
+                closeCustomTitleCard();
+                
+            } catch (error) {
+                console.error('Error generating custom title card:', error);
+                showError('Failed to generate custom title card');
+            }
+        }
+
         // Preview Functions
         function showPreview() {
             const dateStr = selectedDate.toISOString().split('T')[0];
@@ -2587,6 +2720,7 @@
             const serviceModal = document.getElementById('serviceDetailsModal');
             const settingsModal = document.getElementById('settingsModal');
             const previewModal = document.getElementById('previewModal');
+            const customTitleCardModal = document.getElementById('customTitleCardModal');
             const specialServiceModal = document.getElementById('specialServiceModal');
             const evensongServiceModal = document.getElementById('evensongServiceModal');
             
@@ -2596,6 +2730,8 @@
                 closeSettings();
             } else if (event.target === previewModal) {
                 closePreview();
+            } else if (event.target === customTitleCardModal) {
+                closeCustomTitleCard();
             } else if (event.target === specialServiceModal) {
                 closeSpecialService();
             } else if (event.target === evensongServiceModal) {
