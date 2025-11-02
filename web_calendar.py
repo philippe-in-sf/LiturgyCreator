@@ -1196,6 +1196,168 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     
     return img
 
+def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False) -> Image.Image:
+    """Create a blank lower third template for manual use with liturgical season colors
+    
+    This generates a lower third with all the design elements but no text,
+    allowing users to manually add content for custom service elements.
+    
+    Args:
+        date_str: Date string for liturgical season detection
+        width: Image width in pixels
+        height: Image height in pixels
+        is_funeral: If True, use black background instead of liturgical colors
+    """
+    # Create image with transparent background (RGBA mode)
+    img = Image.new('RGBA', (width, height), color=(0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    
+    # Determine liturgical season colors or use funeral colors
+    if is_funeral:
+        # Funeral: black background with white text
+        liturgical_colors = {
+            'background': (0, 0, 0, 255),
+            'accent': (40, 40, 40, 255),
+            'title': (255, 255, 255, 255),
+            'text': (255, 255, 255, 255)
+        }
+    else:
+        liturgical_colors = get_liturgical_season_colors(date_str)
+    
+    # Position lower third lower on screen (at 5/6 of the image height)
+    lower_third_start = int(height * 5 / 6)
+    background_end = height
+    
+    # Extract base color components from liturgical colors
+    bg_r, bg_g, bg_b, bg_a = liturgical_colors['background']
+    accent_r, accent_g, accent_b, accent_a = liturgical_colors['accent']
+    
+    # Create multiple shades for abstract layering
+    very_dark_r = int(bg_r * 0.4)
+    very_dark_g = int(bg_g * 0.4)
+    very_dark_b = int(bg_b * 0.4)
+    
+    dark_r = int(bg_r * 0.65)
+    dark_g = int(bg_g * 0.65)
+    dark_b = int(bg_b * 0.65)
+    
+    mid_r = int(bg_r * 0.85)
+    mid_g = int(bg_g * 0.85)
+    mid_b = int(bg_b * 0.85)
+    
+    light_r = min(255, int(bg_r * 1.1))
+    light_g = min(255, int(bg_g * 1.1))
+    light_b = min(255, int(bg_g * 1.1))
+    
+    very_light_r = min(255, int(bg_r * 1.25))
+    very_light_g = min(255, int(bg_g * 1.25))
+    very_light_b = min(255, int(bg_b * 1.25))
+    
+    # LAYER 1: Gradient background (left to right, dark to light)
+    gradient_steps = 120
+    for i in range(gradient_steps):
+        x_pos = int((width * i) / gradient_steps)
+        next_x = int((width * (i + 1)) / gradient_steps)
+        
+        factor = i / gradient_steps
+        r = int(dark_r + (mid_r - dark_r) * factor)
+        g = int(dark_g + (mid_g - dark_g) * factor)
+        b = int(dark_b + (mid_b - dark_b) * factor)
+        
+        draw.rectangle(
+            [x_pos, lower_third_start, next_x, background_end],
+            fill=(r, g, b, 255)
+        )
+    
+    # LAYER 2: Abstract angled panel on left
+    left_panel_width = 380
+    angle_cut = 45
+    draw.polygon([
+        (0, lower_third_start),
+        (left_panel_width, lower_third_start),
+        (left_panel_width - angle_cut, background_end),
+        (0, background_end)
+    ], fill=(light_r, light_g, light_b, 220))
+    
+    # LAYER 3: Narrow angled accent stripe
+    accent_width_1 = 180
+    draw.polygon([
+        (0, lower_third_start),
+        (accent_width_1, lower_third_start),
+        (accent_width_1 - 35, background_end),
+        (0, background_end)
+    ], fill=(very_light_r, very_light_g, very_light_b, 180))
+    
+    # LAYER 4: Bold accent stripe on far left
+    accent_width_2 = 120
+    draw.polygon([
+        (0, lower_third_start),
+        (accent_width_2, lower_third_start),
+        (accent_width_2 - 28, background_end),
+        (0, background_end)
+    ], fill=(accent_r, accent_g, accent_b, 255))
+    
+    # LAYER 5: Abstract angled panel on right
+    right_panel_start = width - 280
+    right_angle_cut = 38
+    draw.polygon([
+        (right_panel_start, lower_third_start),
+        (width, lower_third_start),
+        (width, background_end),
+        (right_panel_start + right_angle_cut, background_end)
+    ], fill=(very_dark_r, very_dark_g, very_dark_b, 200))
+    
+    # LAYER 6: Secondary right panel
+    right_panel_2 = width - 160
+    draw.polygon([
+        (right_panel_2, lower_third_start + 8),
+        (width, lower_third_start),
+        (width, background_end),
+        (right_panel_2 + 20, background_end - 8)
+    ], fill=(dark_r, dark_g, dark_b, 160))
+    
+    # LAYER 7: Top accent stripe
+    stripe_width = 7
+    top_slope = 5
+    draw.polygon([
+        (0, lower_third_start),
+        (width, lower_third_start + top_slope),
+        (width, lower_third_start + top_slope + stripe_width),
+        (0, lower_third_start + stripe_width)
+    ], fill=(accent_r, accent_g, accent_b, 255))
+    
+    # LAYER 8: Bottom accent stripe
+    bottom_slope = 5
+    draw.polygon([
+        (0, background_end - stripe_width),
+        (width, background_end - bottom_slope - stripe_width),
+        (width, background_end - bottom_slope),
+        (0, background_end)
+    ], fill=(accent_r, accent_g, accent_b, 240))
+    
+    # LAYER 9: Abstract diagonal stripes
+    diagonal_1_start = 500
+    diagonal_1_width = 80
+    draw.polygon([
+        (diagonal_1_start, lower_third_start),
+        (diagonal_1_start + diagonal_1_width, lower_third_start),
+        (diagonal_1_start + diagonal_1_width - 50, background_end),
+        (diagonal_1_start - 50, background_end)
+    ], fill=(very_light_r, very_light_g, very_light_b, 100))
+    
+    diagonal_2_start = 900
+    diagonal_2_width = 100
+    draw.polygon([
+        (diagonal_2_start, lower_third_start),
+        (diagonal_2_start + diagonal_2_width, lower_third_start),
+        (diagonal_2_start + diagonal_2_width - 60, background_end),
+        (diagonal_2_start - 60, background_end)
+    ], fill=(light_r, light_g, light_b, 90))
+    
+    # No text drawn - this is a blank template
+    
+    return img
+
 def create_title_card(liturgical_reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False) -> Image.Image:
     """Create a full-screen title card with liturgical reference and church name
     
@@ -2048,6 +2210,13 @@ def export_all():
                     filepath = f"{date_folder_name}/lower_thirds/{filename}"
                     zip_file.writestr(filepath, img_buffer.read())
             
+            # ===== Generate blank lower third template for manual use =====
+            blank_template = create_blank_lower_third(date_str)
+            blank_buffer = io.BytesIO()
+            blank_template.save(blank_buffer, format='PNG')
+            blank_buffer.seek(0)
+            zip_file.writestr(f"{date_folder_name}/lower_thirds/BLANK_TEMPLATE.png", blank_buffer.read())
+            
             # ===== PART 3: Generate OBS Scene Collection =====
             obs_collection = generate_obs_scene_collection(readings, service_details, date_str, obs_settings)
             obs_json = json.dumps(obs_collection, indent=2)
@@ -2423,6 +2592,13 @@ def special_service():
                     filename = f"{field_label}.png"
                     filepath = f"{date_folder_name}/lower_thirds/{filename}"
                     zip_file.writestr(filepath, img_buffer.read())
+            
+            # ===== PART 6: Generate blank lower third template for manual use =====
+            blank_template = create_blank_lower_third(service_date, is_funeral=is_funeral)
+            blank_buffer = io.BytesIO()
+            blank_template.save(blank_buffer, format='PNG')
+            blank_buffer.seek(0)
+            zip_file.writestr(f"{date_folder_name}/lower_thirds/BLANK_TEMPLATE.png", blank_buffer.read())
         
         # Prepare the ZIP file for download
         zip_buffer.seek(0)
@@ -2553,6 +2729,13 @@ def evensong_service():
                     filename = f"{field_label}.png"
                     filepath = f"{date_folder_name}/lower_thirds/{filename}"
                     zip_file.writestr(filepath, img_buffer.read())
+            
+            # ===== Generate blank lower third template for manual use =====
+            blank_template = create_blank_lower_third(service_date)
+            blank_buffer = io.BytesIO()
+            blank_template.save(blank_buffer, format='PNG')
+            blank_buffer.seek(0)
+            zip_file.writestr(f"{date_folder_name}/lower_thirds/BLANK_TEMPLATE.png", blank_buffer.read())
         
         # Prepare the ZIP file for download
         zip_buffer.seek(0)
