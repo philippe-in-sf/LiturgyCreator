@@ -1487,6 +1487,23 @@
                         <input type="date" id="specialServiceDate" name="specialServiceDate" required>
                     </div>
                     
+                    <div class="form-group">
+                        <label for="specialServiceSeason">Liturgical Season (Optional)</label>
+                        <select id="specialServiceSeason" name="specialServiceSeason" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                            <option value="">None (Default Colors)</option>
+                            <option value="advent">Advent (Royal Blue)</option>
+                            <option value="christmas">Christmas (White & Gold)</option>
+                            <option value="season_after_epiphany">Season after Epiphany (Green)</option>
+                            <option value="lent">Lent (Purple)</option>
+                            <option value="easter">Easter (White & Gold)</option>
+                            <option value="pentecost">Pentecost (Red)</option>
+                            <option value="season_after_pentecost">Season after Pentecost (Green)</option>
+                        </select>
+                        <small style="color: #6c757d; display: block; margin-top: 5px;">
+                            Select a liturgical season to apply its colors to the graphics. Leave as "None" for default white background.
+                        </small>
+                    </div>
+                    
                     <div class="form-group" style="display: flex; align-items: center; margin-top: 15px;">
                         <input type="checkbox" id="isFuneralService" name="isFuneralService" style="width: auto; margin-right: 10px;">
                         <label for="isFuneralService" style="margin: 0; font-weight: normal; cursor: pointer;">
@@ -2584,6 +2601,7 @@
         function saveSpecialService() {
             const serviceTitle = document.getElementById('specialServiceTitle').value.trim();
             const serviceDate = document.getElementById('specialServiceDate').value;
+            const liturgicalSeason = document.getElementById('specialServiceSeason').value;
             const isFuneral = document.getElementById('isFuneralService').checked;
             
             if (!serviceTitle) {
@@ -2652,6 +2670,7 @@
                     date: serviceDate,
                     readings: readings,
                     service_details: specialServiceDetails,
+                    liturgical_season: liturgicalSeason,
                     is_funeral: isFuneral
                 })
             })

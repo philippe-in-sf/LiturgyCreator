@@ -1001,7 +1001,7 @@ def get_liturgical_season_colors(date_str: Optional[str] = None) -> Dict[str, tu
     # Use the helper function to get colors
     return get_liturgical_season_colors_by_name(season)
 
-def create_lower_third(reading_type: str, reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False) -> Image.Image:
+def create_lower_third(reading_type: str, reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None) -> Image.Image:
     """Create a lower third graphic for broadcast use with liturgical season colors and banner-style design
     
     Args:
@@ -1011,6 +1011,7 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
         width: Image width in pixels
         height: Image height in pixels
         is_funeral: If True, use black background with white text instead of liturgical colors
+        liturgical_season: Optional liturgical season override (e.g., 'advent', 'christmas', 'lent')
     """
     # Create image with transparent background (RGBA mode)
     img = Image.new('RGBA', (width, height), color=(0, 0, 0, 0))
@@ -1025,7 +1026,11 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
             'title': (255, 255, 255, 255),       # White
             'text': (255, 255, 255, 255)         # White
         }
+    elif liturgical_season:
+        # Use explicitly specified liturgical season
+        liturgical_colors = get_liturgical_season_colors_by_name(liturgical_season)
     else:
+        # Auto-detect from date
         liturgical_colors = get_liturgical_season_colors(date_str)
     
     # Try to load fonts, fallback to default if not available
@@ -1218,7 +1223,7 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     
     return img
 
-def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False) -> Image.Image:
+def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None) -> Image.Image:
     """Create a blank lower third template for manual use with liturgical season colors
     
     This generates a lower third with all the design elements but no text,
@@ -1229,6 +1234,7 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
         width: Image width in pixels
         height: Image height in pixels
         is_funeral: If True, use black background instead of liturgical colors
+        liturgical_season: Optional liturgical season override (e.g., 'advent', 'christmas', 'lent')
     """
     # Create image with transparent background (RGBA mode)
     img = Image.new('RGBA', (width, height), color=(0, 0, 0, 0))
@@ -1243,7 +1249,11 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
             'title': (255, 255, 255, 255),
             'text': (255, 255, 255, 255)
         }
+    elif liturgical_season:
+        # Use explicitly specified liturgical season
+        liturgical_colors = get_liturgical_season_colors_by_name(liturgical_season)
     else:
+        # Auto-detect from date
         liturgical_colors = get_liturgical_season_colors(date_str)
     
     # Position lower third lower on screen (at 5/6 of the image height)
@@ -2523,6 +2533,7 @@ def special_service():
         service_date = data.get('date', '')
         readings = data.get('readings', {})
         service_details = data.get('service_details', {})
+        liturgical_season = data.get('liturgical_season', '')
         is_funeral = data.get('is_funeral', False)
         
         if not service_title:
@@ -2611,7 +2622,7 @@ def special_service():
             # ===== PART 3: Generate title card with service title and date =====
             formatted_date = selected_date.strftime("%B %d, %Y")
             title_reference = f"{service_title}\n{formatted_date}"
-            title_card = create_title_card(title_reference, service_date, is_funeral=is_funeral)
+            title_card = create_title_card(title_reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
             title_card_buffer = io.BytesIO()
             title_card.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
@@ -2624,7 +2635,7 @@ def special_service():
                 
                 if reference:
                     # Generate lower third image (use funeral colors if flagged, otherwise liturgical colors)
-                    img = create_lower_third(reading_label, reference, service_date, is_funeral=is_funeral)
+                    img = create_lower_third(reading_label, reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -2650,7 +2661,7 @@ def special_service():
                 hymn_value = service_details.get(field_key, '').strip()
                 if hymn_value:
                     # Generate lower third image (use funeral colors if flagged, otherwise liturgical colors)
-                    img = create_lower_third(field_label, hymn_value, service_date, is_funeral=is_funeral)
+                    img = create_lower_third(field_label, hymn_value, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -2663,7 +2674,7 @@ def special_service():
                     zip_file.writestr(filepath, img_buffer.read())
             
             # ===== PART 6: Generate blank lower third template for manual use =====
-            blank_template = create_blank_lower_third(service_date, is_funeral=is_funeral)
+            blank_template = create_blank_lower_third(service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
             blank_buffer = io.BytesIO()
             blank_template.save(blank_buffer, format='PNG')
             blank_buffer.seek(0)
