@@ -5,6 +5,7 @@ Fetches and parses readings for all Sundays in Year A
 """
 
 import json
+import re
 import time
 import requests
 from bs4 import BeautifulSoup
@@ -22,6 +23,46 @@ class YearAReadingsIngester:
             'Accept-Language': 'en-US,en;q=0.5',
         })
         self.delay = 1.5  # Respectful delay between requests
+    
+    @staticmethod
+    def clean_text(text: str) -> str:
+        """
+        Post-process text to fix spacing issues caused by BeautifulSoup's get_text(separator=" ")
+        
+        Fixes:
+        - Intra-word spacing (e.g., "T he" → "The", "L ord" → "Lord")
+        - Extra spaces (collapse multiple spaces to single space)
+        - Space before punctuation (e.g., " ," → ",")
+        - Possessive apostrophes (e.g., "Lord 's" → "Lord's")
+        - Normalizes whitespace
+        """
+        if not text:
+            return text
+        
+        # Fix intra-word spacing at start of text or after punctuation/whitespace
+        # Pattern: word boundary + capital letter + space(s) + lowercase letter(s)
+        # This handles: "T he" → "The", "A lmighty" → "Almighty", etc.
+        text = re.sub(r'\b([A-Z])\s+([a-z])', r'\1\2', text)
+        
+        # Fix possessive apostrophes: "word 's" → "word's"
+        text = re.sub(r'\s+\'s\b', "'s", text)
+        
+        # Fix space before punctuation marks
+        text = re.sub(r'\s+([,.:;!?])', r'\1', text)
+        
+        # Fix space before closing quotes/parentheses
+        text = re.sub(r'\s+(["\')\]])', r'\1', text)
+        
+        # Fix space after opening quotes/parentheses
+        text = re.sub(r'(["\'(\[])\s+', r'\1', text)
+        
+        # Collapse multiple spaces to single space
+        text = re.sub(r'\s+', ' ', text)
+        
+        # Strip leading/trailing whitespace
+        text = text.strip()
+        
+        return text
     
     def fetch_page(self, url: str) -> Optional[str]:
         """Fetch HTML content from URL"""
@@ -55,13 +96,13 @@ class YearAReadingsIngester:
             # Extract reference (usually in <strong>, <b>, or citation class)
             ref_tag = section.find(['strong', 'b', 'cite'])
             if ref_tag:
-                reading['reference'] = ref_tag.get_text(strip=True)
+                reading['reference'] = ref_tag.get_text(separator=" ", strip=True)
             
             # Extract text (remaining paragraph content)
             paragraphs = section.find_all('p')
             text_parts = []
             for p in paragraphs:
-                text = p.get_text(strip=True)
+                text = p.get_text(separator=" ", strip=True)
                 # Skip if it's just the reference
                 if text and text != reading['reference']:
                     text_parts.append(text)
@@ -95,89 +136,89 @@ class YearAReadingsIngester:
                 if not h2:
                     continue
                     
-                heading_text = h2.get_text(strip=True)
+                heading_text = h2.get_text(separator=" ", strip=True)
                 
                 # Parse based on section type
                 if 'Collect' in heading_text:
                     # Get the collect text from <p class="collectText">
                     collect_p = article.find('p', class_='collectText')
                     if collect_p:
-                        collect_text = collect_p.get_text(strip=True)
+                        collect_text = collect_p.get_text(separator=" ", strip=True)
                         readings['collect'] = {
                             'reference': 'The Collect',
-                            'text': collect_text
+                            'text': self.clean_text(collect_text)
                         }
                 
                 elif 'Old Testament' in heading_text or 'First Reading' in heading_text:
                     # Get the h3 (scripture reference)
                     h3 = article.find('h3', class_='lessonCitation')
                     if h3:
-                        ref = h3.get_text(strip=True)
+                        ref = h3.get_text(separator=" ", strip=True)
                         
                         # Get the div containing the text
                         text_div = h3.find_next_sibling('div')
                         if text_div:
                             # Get all paragraph text (lessonText and poetryText)
                             paragraphs = text_div.find_all('p', class_=['lessonText', 'poetryText'])
-                            text_parts = [p.get_text(strip=True) for p in paragraphs if p.get_text(strip=True)]
+                            text_parts = [p.get_text(separator=" ", strip=True) for p in paragraphs if p.get_text(separator=" ", strip=True)]
                             
                             readings['first_reading'] = {
-                                'reference': ref,
-                                'text': ' '.join(text_parts)
+                                'reference': self.clean_text(ref),
+                                'text': self.clean_text(' '.join(text_parts))
                             }
                 
                 elif 'Psalm' in heading_text or 'Response' in heading_text:
                     # Get the h3 (psalm reference)
                     h3 = article.find('h3', class_='lessonCitation')
                     if h3:
-                        ref = h3.get_text(strip=True)
+                        ref = h3.get_text(separator=" ", strip=True)
                         
                         # Get the div containing the psalm text
                         text_div = h3.find_next_sibling('div')
                         if text_div:
                             # Get all psalm text paragraphs
                             paragraphs = text_div.find_all('p', class_='psalmText')
-                            text_parts = [p.get_text(strip=True) for p in paragraphs if p.get_text(strip=True)]
+                            text_parts = [p.get_text(separator=" ", strip=True) for p in paragraphs if p.get_text(separator=" ", strip=True)]
                             
                             readings['psalm'] = {
-                                'reference': ref,
-                                'text': ' '.join(text_parts)
+                                'reference': self.clean_text(ref),
+                                'text': self.clean_text(' '.join(text_parts))
                             }
                 
                 elif 'Epistle' in heading_text or 'Second Reading' in heading_text:
                     # Get the h3 (scripture reference)
                     h3 = article.find('h3', class_='lessonCitation')
                     if h3:
-                        ref = h3.get_text(strip=True)
+                        ref = h3.get_text(separator=" ", strip=True)
                         
                         # Get the div containing the text
                         text_div = h3.find_next_sibling('div')
                         if text_div:
                             # Get all lesson text paragraphs
                             paragraphs = text_div.find_all('p', class_='lessonText')
-                            text_parts = [p.get_text(strip=True) for p in paragraphs if p.get_text(strip=True)]
+                            text_parts = [p.get_text(separator=" ", strip=True) for p in paragraphs if p.get_text(separator=" ", strip=True)]
                             
                             readings['second_reading'] = {
-                                'reference': ref,
-                                'text': ' '.join(text_parts)
+                                'reference': self.clean_text(ref),
+                                'text': self.clean_text(' '.join(text_parts))
                             }
                 
                 elif 'Gospel' in heading_text:
                     # Get the h3 (scripture reference)
                     h3 = article.find('h3', class_='lessonCitation')
                     if h3:
-                        ref = h3.get_text(strip=True)
+                        ref = h3.get_text(separator=" ", strip=True)
                         
                         # Get the div containing the text
                         text_div = h3.find_next_sibling('div')
                         if text_div:
                             # Get all lesson text paragraphs
                             paragraphs = text_div.find_all('p', class_='lessonText')
-                            text_parts = [p.get_text(strip=True) for p in paragraphs if p.get_text(strip=True)]
+                            text_parts = [p.get_text(separator=" ", strip=True) for p in paragraphs if p.get_text(separator=" ", strip=True)]
                             
                             readings['gospel'] = {
-                                'reference': ref,
-                                'text': ' '.join(text_parts)
+                                'reference': self.clean_text(ref),
+                                'text': self.clean_text(' '.join(text_parts))
                             }
             
         except Exception as e:
