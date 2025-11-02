@@ -227,16 +227,39 @@
             color: #444;
         }
         
-        .action-buttons {
-            display: flex;
-            gap: 10px;
+        .action-buttons-container {
             margin-top: 20px;
             padding-top: 15px;
             border-top: 1px solid #e9ecef;
         }
         
+        .action-section {
+            margin-bottom: 20px;
+        }
+        
+        .action-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .action-section-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            padding-left: 2px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
         .action-btn {
             flex: 1;
+            min-width: 140px;
             padding: 10px;
             border: none;
             border-radius: 6px;
@@ -739,8 +762,13 @@
             
             .action-btn {
                 width: 100%;
+                min-width: unset;
                 padding: 12px;
                 font-size: 1rem;
+            }
+            
+            .action-section {
+                margin-bottom: 15px;
             }
             
             /* Modal adjustments for mobile */
@@ -985,14 +1013,34 @@
                     <div class="loading">Click on a date to view liturgical information</div>
                 </div>
                 
-                <div class="action-buttons">
-                    <button class="action-btn btn-secondary" onclick="showServiceDetails()">Service Details</button>
-                    <button class="action-btn btn-primary" onclick="loadReadings()">Load Readings</button>
-                    <button class="action-btn" onclick="showSpecialService()" style="background-color: #9b59b6; color: white;">✨ Special Service</button>
-                    <button class="action-btn btn-warning" onclick="showPreview()" style="background-color: #ffc107; color: #000;">👁️ Preview</button>
-                    <button class="action-btn btn-success" onclick="exportAll()" style="background-color: #28a745;">Export All</button>
-                    <button class="action-btn" onclick="showCustomTitleCard()" style="background-color: #e74c3c; color: white;">🎬 Custom Title Card</button>
-                    <button class="action-btn btn-info" onclick="showSettings()" style="background-color: #6c757d;">⚙️ Settings</button>
+                <div class="action-buttons-container">
+                    <!-- Basic Section -->
+                    <div class="action-section">
+                        <div class="action-section-label">Basic</div>
+                        <div class="action-buttons">
+                            <button class="action-btn btn-primary" onclick="loadReadings()">Load Readings</button>
+                            <button class="action-btn btn-secondary" onclick="showServiceDetails()">Service Details</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Section -->
+                    <div class="action-section">
+                        <div class="action-section-label">Advanced</div>
+                        <div class="action-buttons">
+                            <button class="action-btn" onclick="showSpecialService()" style="background-color: #9b59b6; color: white;">✨ Special Service</button>
+                            <button class="action-btn" onclick="showCustomTitleCard()" style="background-color: #e74c3c; color: white;">🎬 Custom Title Card</button>
+                            <button class="action-btn btn-info" onclick="showSettings()" style="background-color: #6c757d;">⚙️ Settings</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Export Section -->
+                    <div class="action-section">
+                        <div class="action-section-label">Export</div>
+                        <div class="action-buttons">
+                            <button class="action-btn btn-warning" onclick="showPreview()" style="background-color: #ffc107; color: #000;">👁️ Preview</button>
+                            <button class="action-btn btn-success" onclick="exportAll()" style="background-color: #28a745;">Export All</button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- PDF Upload Section -->
@@ -2927,7 +2975,7 @@
     
     <footer style="background-color: #f8f9fa; border-top: 1px solid #dee2e6; padding: 20px; margin-top: 40px; text-align: center; color: #6c757d; font-size: 14px;">
         <div style="margin-bottom: 10px;">
-            <strong>Episcopal Liturgical Calendar Tool v2.3.8</strong>
+            <strong>Episcopal Liturgical Calendar Tool v2.3.9</strong>
         </div>
         <div>
             This tool is provided under a public domain license, without copyright attached. Please courtesy credit Philippe Beaudette/Trinity Episcopal Church, Tulsa, OK.
