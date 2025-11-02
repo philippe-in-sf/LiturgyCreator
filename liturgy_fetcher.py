@@ -39,6 +39,9 @@ class LiturgyFetcher:
                 'parser': self._parse_vanderbilt_response
             }
         ]
+        
+        # Load Year A readings from JSON file
+        self.year_a_readings = self._load_year_a_readings()
     
     def fetch_daily_readings(self, date: datetime, service_type: str = 'eucharist') -> Optional[Dict[str, Any]]:
         """
@@ -219,11 +222,38 @@ class LiturgyFetcher:
             self.logger.error(f"Error parsing Lectionary Page HTML: {str(e)}")
             return None
     
+    def _load_year_a_readings(self) -> Dict[str, Dict]:
+        """Load Year A readings from JSON file"""
+        try:
+            import os
+            json_path = os.path.join(os.path.dirname(__file__), 'year_a_readings.json')
+            if os.path.exists(json_path):
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    self.logger.info(f"Loaded {len(data.get('YearA', {}))} Year A readings from JSON")
+                    return data.get('YearA', {})
+            else:
+                self.logger.warning(f"Year A readings file not found at {json_path}")
+                return {}
+        except Exception as e:
+            self.logger.error(f"Error loading Year A readings: {e}")
+            return {}
+    
     def _get_date_specific_readings(self, target_date: datetime) -> Optional[Dict[str, Dict]]:
         """Get readings specific to the requested date"""
         date_str = target_date.strftime('%Y-%m-%d')
         
-        # Episcopal readings for specific dates in August 2025
+        # Determine liturgical year
+        liturgical_year = self._get_liturgical_year(target_date)
+        
+        # Try to load from Year A readings if applicable
+        if liturgical_year == 'A' and hasattr(self, 'year_a_readings') and self.year_a_readings:
+            if date_str in self.year_a_readings:
+                self.logger.info(f"Found Year A readings for {date_str}")
+                return self.year_a_readings[date_str]
+        
+        # Fallback to hardcoded Year C readings database
+        # Episcopal readings for specific dates in Year C (August-December 2025)
         readings_database = {
             '2025-08-18': {  # Monday after Tenth Sunday after Pentecost
                 'first_reading': {

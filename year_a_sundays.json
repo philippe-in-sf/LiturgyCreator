@@ -1,0 +1,314 @@
+[
+  {
+    "date": "2025-11-30",
+    "celebration_name": "First Sunday of Advent",
+    "season": "Advent",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Advent/AAdv1_RCL.html"
+  },
+  {
+    "date": "2025-12-07",
+    "celebration_name": "Second Sunday of Advent",
+    "season": "Advent",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Advent/AAdv2_RCL.html"
+  },
+  {
+    "date": "2025-12-14",
+    "celebration_name": "Third Sunday of Advent",
+    "season": "Advent",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Advent/AAdv3_RCL.html"
+  },
+  {
+    "date": "2025-12-21",
+    "celebration_name": "Fourth Sunday of Advent",
+    "season": "Advent",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Advent/AAdv4_RCL.html"
+  },
+  {
+    "date": "2025-12-28",
+    "celebration_name": "First Sunday after Christmas Day",
+    "season": "Christmas",
+    "url": "https://www.lectionarypage.net/YearABC/Christmas/Christmas1.html"
+  },
+  {
+    "date": "2026-01-04",
+    "celebration_name": "Second Sunday after Christmas Day",
+    "season": "Christmas",
+    "url": "https://www.lectionarypage.net/YearABC/Christmas/Christmas2.html"
+  },
+  {
+    "date": "2026-01-11",
+    "celebration_name": "First Sunday after the Epiphany: The Baptism of our Lord",
+    "season": "Epiphany",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Epiphany/AEpi1_RCL.html"
+  },
+  {
+    "date": "2026-01-18",
+    "celebration_name": "Second Sunday after the Epiphany",
+    "season": "Epiphany",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Epiphany/AEpi2_RCL.html"
+  },
+  {
+    "date": "2026-01-25",
+    "celebration_name": "Third Sunday after the Epiphany",
+    "season": "Epiphany",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Epiphany/AEpi3_RCL.html"
+  },
+  {
+    "date": "2026-02-01",
+    "celebration_name": "Fourth Sunday after the Epiphany",
+    "season": "Epiphany",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Epiphany/AEpi4_RCL.html"
+  },
+  {
+    "date": "2026-02-08",
+    "celebration_name": "Fifth Sunday after the Epiphany",
+    "season": "Epiphany",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Epiphany/AEpi5_RCL.html"
+  },
+  {
+    "date": "2026-02-15",
+    "celebration_name": "Sixth Sunday after the Epiphany",
+    "season": "Epiphany",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Epiphany/AEpi6_RCL.html"
+  },
+  {
+    "date": "2026-02-22",
+    "celebration_name": "Last Sunday after the Epiphany",
+    "season": "Epiphany",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Epiphany/AEpiLast_RCL.html"
+  },
+  {
+    "date": "2026-03-01",
+    "celebration_name": "First Sunday in Lent",
+    "season": "Lent",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Lent/ALent1_RCL.html"
+  },
+  {
+    "date": "2026-03-08",
+    "celebration_name": "Second Sunday in Lent",
+    "season": "Lent",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Lent/ALent2_RCL.html"
+  },
+  {
+    "date": "2026-03-15",
+    "celebration_name": "Third Sunday in Lent",
+    "season": "Lent",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Lent/ALent3_RCL.html"
+  },
+  {
+    "date": "2026-03-22",
+    "celebration_name": "Fourth Sunday in Lent",
+    "season": "Lent",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Lent/ALent4_RCL.html"
+  },
+  {
+    "date": "2026-03-29",
+    "celebration_name": "Fifth Sunday in Lent",
+    "season": "Lent",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Lent/ALent5_RCL.html"
+  },
+  {
+    "date": "2026-04-05",
+    "celebration_name": "Sunday of the Passion: Palm Sunday",
+    "season": "Lent",
+    "url": "https://www.lectionarypage.net/YearA_RCL/HolyWk/APalmSun_RCL.html"
+  },
+  {
+    "date": "2026-04-12",
+    "celebration_name": "Easter Day",
+    "season": "Easter",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Easter/AEasterPrin_RCL.html"
+  },
+  {
+    "date": "2026-04-19",
+    "celebration_name": "Second Sunday of Easter",
+    "season": "Easter",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Easter/AEaster2_RCL.html"
+  },
+  {
+    "date": "2026-04-26",
+    "celebration_name": "Third Sunday of Easter",
+    "season": "Easter",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Easter/AEaster3_RCL.html"
+  },
+  {
+    "date": "2026-05-03",
+    "celebration_name": "Fourth Sunday of Easter",
+    "season": "Easter",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Easter/AEaster4_RCL.html"
+  },
+  {
+    "date": "2026-05-10",
+    "celebration_name": "Fifth Sunday of Easter",
+    "season": "Easter",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Easter/AEaster5_RCL.html"
+  },
+  {
+    "date": "2026-05-17",
+    "celebration_name": "Sixth Sunday of Easter",
+    "season": "Easter",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Easter/AEaster6_RCL.html"
+  },
+  {
+    "date": "2026-05-24",
+    "celebration_name": "Seventh Sunday of Easter: The Sunday after Ascension Day",
+    "season": "Easter",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Easter/AEaster7_RCL.html"
+  },
+  {
+    "date": "2026-05-31",
+    "celebration_name": "The Day of Pentecost: Whitsunday",
+    "season": "Easter",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/APentDay_RCL.html"
+  },
+  {
+    "date": "2026-06-07",
+    "celebration_name": "First Sunday after Pentecost: Trinity Sunday",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/ATrinity_RCL.html"
+  },
+  {
+    "date": "2026-06-14",
+    "celebration_name": "Second Sunday after Pentecost (Proper 6)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp6_RCL.html"
+  },
+  {
+    "date": "2026-06-21",
+    "celebration_name": "Third Sunday after Pentecost (Proper 7)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp7_RCL.html"
+  },
+  {
+    "date": "2026-06-28",
+    "celebration_name": "Fourth Sunday after Pentecost (Proper 8)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/Aprop8_RCL.html"
+  },
+  {
+    "date": "2026-07-05",
+    "celebration_name": "Fifth Sunday after Pentecost (Proper 9)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp9_RCL.html"
+  },
+  {
+    "date": "2026-07-12",
+    "celebration_name": "Sixth Sunday after Pentecost (Proper 10)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp10_RCL.html"
+  },
+  {
+    "date": "2026-07-19",
+    "celebration_name": "Seventh Sunday after Pentecost (Proper 11)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp11_RCL.html"
+  },
+  {
+    "date": "2026-07-26",
+    "celebration_name": "Eighth Sunday after Pentecost (Proper 12)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp12_RCL.html"
+  },
+  {
+    "date": "2026-08-02",
+    "celebration_name": "Ninth Sunday after Pentecost (Proper 13)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp13_RCL.html"
+  },
+  {
+    "date": "2026-08-09",
+    "celebration_name": "Tenth Sunday after Pentecost (Proper 14)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp14_RCL.html"
+  },
+  {
+    "date": "2026-08-16",
+    "celebration_name": "Eleventh Sunday after Pentecost (Proper 15)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp15_RCL.html"
+  },
+  {
+    "date": "2026-08-23",
+    "celebration_name": "Twelfth Sunday after Pentecost (Proper 16)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp16_RCL.html"
+  },
+  {
+    "date": "2026-08-30",
+    "celebration_name": "Thirteenth Sunday after Pentecost (Proper 17)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp17_RCL.html"
+  },
+  {
+    "date": "2026-09-06",
+    "celebration_name": "Fourteenth Sunday after Pentecost (Proper 18)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp18_RCL.html"
+  },
+  {
+    "date": "2026-09-13",
+    "celebration_name": "Fifteenth Sunday after Pentecost (Proper 19)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp19_RCL.html"
+  },
+  {
+    "date": "2026-09-20",
+    "celebration_name": "Sixteenth Sunday after Pentecost (Proper 20)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp20_RCL.html"
+  },
+  {
+    "date": "2026-09-27",
+    "celebration_name": "Seventeenth Sunday after Pentecost (Proper 21)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp21_RCL.html"
+  },
+  {
+    "date": "2026-10-04",
+    "celebration_name": "Eighteenth Sunday after Pentecost (Proper 22)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp22_RCL.html"
+  },
+  {
+    "date": "2026-10-11",
+    "celebration_name": "Nineteenth Sunday after Pentecost (Proper 23)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp23_RCL.html"
+  },
+  {
+    "date": "2026-10-18",
+    "celebration_name": "Twentieth Sunday after Pentecost (Proper 24)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp24_RCL.html"
+  },
+  {
+    "date": "2026-10-25",
+    "celebration_name": "Twenty-first Sunday after Pentecost (Proper 25)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp25_RCL.html"
+  },
+  {
+    "date": "2026-11-01",
+    "celebration_name": "Twenty-second Sunday after Pentecost (Proper 26)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp26_RCL.html"
+  },
+  {
+    "date": "2026-11-08",
+    "celebration_name": "Twenty-third Sunday after Pentecost (Proper 27)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp27_RCL.html"
+  },
+  {
+    "date": "2026-11-15",
+    "celebration_name": "Twenty-fourth Sunday after Pentecost (Proper 28)",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp28_RCL.html"
+  },
+  {
+    "date": "2026-11-22",
+    "celebration_name": "Last Sunday after Pentecost: Christ the King",
+    "season": "Pentecost",
+    "url": "https://www.lectionarypage.net/YearA_RCL/Pentecost/AProp29_RCL.html"
+  }
+]
