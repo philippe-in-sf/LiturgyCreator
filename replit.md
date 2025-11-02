@@ -47,7 +47,7 @@ The application features a modular architecture:
 - **Custom Title Card Generator**: On-demand custom title card generation feature allowing users to create title cards with custom text, optional liturgical season colors, and funeral theme support. Perfect for video editing purposes and creating title cards for past services.
 - **Organized Action Buttons (v2.3.9)**: Action buttons reorganized into three clear sections (Basic, Advanced, Export) for better usability and reduced visual clutter.
 - **Custom Title Card Liturgical Season Selector (v2.4.0)**: Replaced date picker with dropdown menu for selecting liturgical seasons directly in custom title card generator, making it easier to choose colors without knowing specific dates.
-- **Corrected Advent Liturgical Colors (v2.4.1)**: Updated Advent liturgical color from purple to royal blue per Episcopal tradition. Added Gaudete Sunday (third Sunday of Advent) option with rose/pink colors for custom title cards.
+- **Corrected Advent Liturgical Colors (v2.4.1)**: Updated Advent liturgical color from purple to royal blue per Episcopal tradition.
 
 ## Configuration Management
 
