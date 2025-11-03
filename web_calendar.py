@@ -296,7 +296,8 @@ class WebLiturgicalCalendar:
         
         # Liturgical colors
         self.liturgical_colors = {
-            'advent': '#663399',      # Purple
+            'advent': '#4169E1',      # Royal Blue (Episcopal tradition)
+            'gaudete': '#FF69B4',     # Pink/Rose for Gaudete Sunday (3rd Sunday of Advent)
             'christmas': '#D4AF37',   # Gold
             'epiphany': '#00AA00',   # Green
             'lent': '#663399',       # Purple
@@ -367,6 +368,11 @@ class WebLiturgicalCalendar:
         }
         
         color = color_map.get(season, 'default')
+        
+        # Check for Gaudete Sunday (3rd Sunday of Advent - pink)
+        if self.is_gaudete_sunday(date_obj):
+            color = 'gaudete'
+        
         feast_day = self.get_feast_day(date_obj)
         if feast_day:
             color = 'feast'
@@ -406,6 +412,35 @@ class WebLiturgicalCalendar:
         if key in feast_days:
             return feast_days[key]
         return None
+        
+    def is_gaudete_sunday(self, date_obj: date) -> bool:
+        """Check if the given date is Gaudete Sunday (3rd Sunday of Advent)"""
+        # First, check if we're in Advent season
+        if date_obj.month not in [11, 12]:
+            return False
+        
+        # Check if it's a Sunday
+        if date_obj.weekday() != 6:  # 6 = Sunday
+            return False
+        
+        # Find Christmas Day of this year
+        year = date_obj.year
+        christmas = date(year, 12, 25)
+        
+        # Find the 4th Sunday before Christmas (First Sunday of Advent)
+        # Christmas can fall on any day, so we need to count backwards
+        days_until_sunday = (christmas.weekday() + 1) % 7
+        if days_until_sunday == 0:
+            days_until_sunday = 7
+        
+        # Fourth Sunday before Christmas
+        fourth_sunday_before = christmas - timedelta(days=(3 * 7 + days_until_sunday))
+        first_advent = fourth_sunday_before
+        
+        # Third Sunday of Advent (Gaudete) is 2 weeks after First Advent
+        gaudete_sunday = first_advent + timedelta(days=14)
+        
+        return date_obj == gaudete_sunday
         
     def get_sunday_name(self, date_obj: datetime) -> str:
         """Get the proper name for Sunday in the liturgical calendar"""
