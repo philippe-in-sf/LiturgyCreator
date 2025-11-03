@@ -331,25 +331,80 @@ class WebLiturgicalCalendar:
             cycle_year = (date_obj.year - 2022) % 3
             return ['Year A', 'Year B', 'Year C'][cycle_year]
             
+    def calculate_easter(self, year: int) -> date:
+        """Calculate Easter Sunday for a given year using Computus algorithm (Western/Gregorian)"""
+        # Anonymous Gregorian algorithm
+        a = year % 19
+        b = year // 100
+        c = year % 100
+        d = b // 4
+        e = b % 4
+        f = (b + 8) // 25
+        g = (b - f + 1) // 3
+        h = (19 * a + b - d - g + 15) % 30
+        i = c // 4
+        k = c % 4
+        l = (32 + 2 * e + 2 * i - h - k) % 7
+        m = (a + 11 * h + 22 * l) // 451
+        month = (h + l - 7 * m + 114) // 31
+        day = ((h + l - 7 * m + 114) % 31) + 1
+        
+        return date(year, month, day)
+            
     def get_liturgical_season(self, date_obj: datetime) -> str:
         """Determine the current liturgical season"""
-        month = date_obj.month
-        day = date_obj.day
-        
-        if month == 12 and day >= 25:
-            return "Christmas Season"
-        elif month == 1 and day <= 6:
-            return "Christmas Season"
-        elif month == 1 and day > 6:
-            return "Season after Epiphany"
-        elif month in [2, 3, 4]:
-            return "Lenten Season / Easter Season"
-        elif month in [5, 6]:
-            return "Easter Season"
-        elif (month == 11 and day >= 27) or (month == 12 and day < 25):
-            return "Advent Season"
+        # Convert to date if datetime
+        if isinstance(date_obj, datetime):
+            check_date = date_obj.date()
         else:
-            return "Season after Pentecost"
+            check_date = date_obj
+        
+        year = check_date.year
+        month = check_date.month
+        day = check_date.day
+        
+        # Calculate Easter for this year
+        easter_date = self.calculate_easter(year)
+        
+        # Calculate key liturgical dates
+        ash_wednesday = easter_date - timedelta(days=46)
+        holy_saturday = easter_date - timedelta(days=1)
+        pentecost = easter_date + timedelta(days=49)
+        
+        # Christmas Season: Dec 25 - Jan 6
+        if (month == 12 and day >= 25) or (month == 1 and day <= 6):
+            return "Christmas Season"
+        
+        # Season after Epiphany: Jan 7 until Ash Wednesday
+        if month == 1 and day > 6:
+            return "Season after Epiphany"
+        
+        # Check if we're before Ash Wednesday (still Epiphany season)
+        if check_date < ash_wednesday:
+            return "Season after Epiphany"
+        
+        # Lent: Ash Wednesday through Holy Saturday
+        if ash_wednesday <= check_date <= holy_saturday:
+            return "Lenten Season"
+        
+        # Easter Season: Easter Sunday through Pentecost (50 days)
+        if easter_date <= check_date <= pentecost:
+            return "Easter Season"
+        
+        # Advent: 4 Sundays before Christmas
+        christmas = date(year, 12, 25)
+        days_until_sunday = (christmas.weekday() + 1) % 7
+        if days_until_sunday == 0:
+            days_until_sunday = 7
+        fourth_sunday_before = christmas - timedelta(days=(3 * 7 + days_until_sunday))
+        
+        if check_date >= fourth_sunday_before and month == 11:
+            return "Advent Season"
+        if month == 12 and day < 25:
+            return "Advent Season"
+        
+        # Everything else is Season after Pentecost (Ordinary Time)
+        return "Season after Pentecost"
             
     def get_liturgical_info(self, date_obj: date) -> Dict:
         """Get liturgical information for a specific date"""
@@ -362,7 +417,7 @@ class WebLiturgicalCalendar:
             'Advent Season': 'advent',
             'Christmas Season': 'christmas',
             'Season after Epiphany': 'epiphany',
-            'Lenten Season / Easter Season': 'lent',
+            'Lenten Season': 'lent',
             'Easter Season': 'easter',
             'Season after Pentecost': 'ordinary'
         }
