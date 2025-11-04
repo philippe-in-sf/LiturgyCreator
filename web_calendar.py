@@ -467,12 +467,13 @@ class WebLiturgicalCalendar:
         else:
             # Check for Gaudete Sunday (3rd Sunday of Advent - pink)
             if self.is_gaudete_sunday(date_obj):
+                feast_day = "Gaudete Sunday (Third Sunday of Advent)"
                 color = 'gaudete'
-            
-            # Check for fixed feast days
-            feast_day = self.get_feast_day(date_obj)
-            if feast_day:
-                color = 'feast'
+            else:
+                # Check for fixed feast days
+                feast_day = self.get_feast_day(date_obj)
+                if feast_day:
+                    color = 'feast'
             
         return {
             'is_sunday': is_sunday,
@@ -578,10 +579,11 @@ class WebLiturgicalCalendar:
                     liturgical_info = self.get_liturgical_info(cell_date)
                     
                     celebration = ""
-                    if liturgical_info['is_sunday']:
-                        celebration = self.get_sunday_name(datetime.combine(cell_date, datetime.min.time()))
-                    elif liturgical_info['feast_day']:
+                    # Check for feast day first (e.g., Pentecost, Easter) before generic Sunday name
+                    if liturgical_info.get('feast_day'):
                         celebration = liturgical_info['feast_day']
+                    elif liturgical_info['is_sunday']:
+                        celebration = self.get_sunday_name(datetime.combine(cell_date, datetime.min.time()))
                     
                     week_info.append({
                         'day': day,
