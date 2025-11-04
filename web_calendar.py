@@ -350,6 +350,41 @@ class WebLiturgicalCalendar:
         day = ((h + l - 7 * m + 114) % 31) + 1
         
         return date(year, month, day)
+    
+    def get_movable_feast_day(self, date_obj: date) -> Optional[tuple]:
+        """Check if date is a movable feast day (based on Easter)
+        Returns tuple of (feast_name, color_override) or None"""
+        
+        year = date_obj.year
+        easter_date = self.calculate_easter(year)
+        
+        # Calculate movable feast days
+        ash_wednesday = easter_date - timedelta(days=46)
+        palm_sunday = easter_date - timedelta(days=7)
+        maundy_thursday = easter_date - timedelta(days=3)
+        good_friday = easter_date - timedelta(days=2)
+        holy_saturday = easter_date - timedelta(days=1)
+        ascension = easter_date + timedelta(days=39)  # 40 days after Easter
+        pentecost = easter_date + timedelta(days=49)  # 50 days after Easter
+        trinity_sunday = easter_date + timedelta(days=56)  # Week after Pentecost
+        
+        # Check for movable feasts with their liturgical colors
+        movable_feasts = {
+            ash_wednesday: ("Ash Wednesday", "lent"),
+            palm_sunday: ("Palm Sunday", "palm_sunday"),
+            maundy_thursday: ("Maundy Thursday", "maundy_thursday"),
+            good_friday: ("Good Friday", "good_friday"),
+            holy_saturday: ("Holy Saturday", "lent"),
+            easter_date: ("Easter Sunday", "easter"),
+            ascension: ("Ascension Day", "easter"),
+            pentecost: ("Pentecost", "pentecost"),
+            trinity_sunday: ("Trinity Sunday", "feast")
+        }
+        
+        if date_obj in movable_feasts:
+            return movable_feasts[date_obj]
+        
+        return None
             
     def get_liturgical_season(self, date_obj: datetime) -> str:
         """Determine the current liturgical season"""
@@ -424,13 +459,20 @@ class WebLiturgicalCalendar:
         
         color = color_map.get(season, 'default')
         
-        # Check for Gaudete Sunday (3rd Sunday of Advent - pink)
-        if self.is_gaudete_sunday(date_obj):
-            color = 'gaudete'
-        
-        feast_day = self.get_feast_day(date_obj)
-        if feast_day:
-            color = 'feast'
+        # Check for movable feast days first (these override seasonal colors)
+        movable_feast = self.get_movable_feast_day(date_obj)
+        if movable_feast:
+            feast_day = movable_feast[0]
+            color = movable_feast[1]
+        else:
+            # Check for Gaudete Sunday (3rd Sunday of Advent - pink)
+            if self.is_gaudete_sunday(date_obj):
+                color = 'gaudete'
+            
+            # Check for fixed feast days
+            feast_day = self.get_feast_day(date_obj)
+            if feast_day:
+                color = 'feast'
             
         return {
             'is_sunday': is_sunday,
@@ -446,12 +488,11 @@ class WebLiturgicalCalendar:
         day = date_obj.day
         
         # Dictionary mapping (month, day) tuples to feast day names
+        # Note: Movable feasts (Maundy Thursday, Good Friday, Holy Saturday, Easter, Pentecost, etc.)
+        # are handled by get_movable_feast_day() and should not be listed here
         feast_days = {
             (1, 1): "New Year's Day",
             (1, 6): "Epiphany",
-            (4, 2): "Maundy Thursday",
-            (4, 3): "Good Friday",
-            (4, 4): "Holy Saturday",
             (7, 4): "Independence Day",
             (8, 15): "St Mary, the Virgin",
             (9, 29): "St Michael and All Angels",
