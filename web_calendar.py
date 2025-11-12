@@ -1364,10 +1364,26 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     
     # Draw top text (large font) - indented to start at 1/5 from left
     top_y = lower_third_start + top_padding
+    
+    # Black outline for top text
+    outline_width = 4
+    for offset_x in range(-outline_width, outline_width + 1):
+        for offset_y in range(-outline_width, outline_width + 1):
+            if offset_x != 0 or offset_y != 0:
+                draw.text((text_indent + offset_x, top_y + offset_y), top_text, fill=(0, 0, 0, 255), font=top_font)
+    # Main top text
     draw.text((text_indent, top_y), top_text, fill=(255, 255, 255, 255), font=top_font)
     
     # Draw bottom text (small font) below top text
     bottom_y = top_y + top_height + text_spacing
+    
+    # Black outline for bottom text
+    outline_width = 3
+    for offset_x in range(-outline_width, outline_width + 1):
+        for offset_y in range(-outline_width, outline_width + 1):
+            if offset_x != 0 or offset_y != 0:
+                draw.text((text_indent + offset_x, bottom_y + offset_y), bottom_text, fill=(0, 0, 0, 255), font=bottom_font)
+    # Main bottom text
     draw.text((text_indent, bottom_y), bottom_text, fill=(241, 241, 241, 255), font=bottom_font)
     
     return img
@@ -3111,11 +3127,12 @@ def concert_program():
                 'error': 'Concert time is required'
             }), 400
         
+        # Filter pieces: accept if either title or composer is provided
         filtered_pieces = []
         for piece in pieces:
             title = piece.get('title', '').strip()
             composer = piece.get('composer', '').strip()
-            if title and composer:
+            if title or composer:  # Accept if either field has data
                 filtered_pieces.append({
                     'title': title,
                     'composer': composer
@@ -3134,8 +3151,17 @@ def concert_program():
             zip_file.writestr(f"{date_folder_name}/Title_Card.png", title_card_buffer.read())
             
             for idx, piece in enumerate(filtered_pieces, 1):
-                piece_text = f"{piece['title']} - {piece['composer']}"
-                lower_third = create_lower_third(piece['title'], piece['composer'], theme='concert')
+                # Format text based on available fields
+                if piece['title'] and piece['composer']:
+                    piece_text = f"{piece['title']} - {piece['composer']}"
+                elif piece['title']:
+                    piece_text = piece['title']
+                else:
+                    piece_text = piece['composer']
+                
+                lower_third = create_lower_third(piece['title'] if piece['title'] else 'Piece', 
+                                                piece['composer'] if piece['composer'] else '', 
+                                                theme='concert')
                 
                 img_buffer = io.BytesIO()
                 lower_third.save(img_buffer, format='PNG')
@@ -3160,6 +3186,99 @@ def concert_program():
             'success': False,
             'error': str(e),
             'message': 'Failed to generate concert program'
+        }), 500
+
+@app.route('/api/preview_concert_program', methods=['POST'])
+def preview_concert_program():
+    """Generate preview images for concert program title card and lower thirds"""
+    try:
+        data = request.get_json()
+        performer = data.get('performer', '').strip()
+        concert_date = data.get('date', '').strip()
+        concert_time = data.get('time', '').strip()
+        pieces = data.get('pieces', [])
+        
+        if not performer:
+            return jsonify({
+                'success': False,
+                'error': 'Performer name is required'
+            }), 400
+        
+        if not concert_date:
+            return jsonify({
+                'success': False,
+                'error': 'Concert date is required'
+            }), 400
+        
+        if not concert_time:
+            return jsonify({
+                'success': False,
+                'error': 'Concert time is required'
+            }), 400
+        
+        # Filter pieces: accept if either title or composer is provided
+        filtered_pieces = []
+        for piece in pieces:
+            title = piece.get('title', '').strip()
+            composer = piece.get('composer', '').strip()
+            if title or composer:  # Accept if either field has data
+                filtered_pieces.append({
+                    'title': title,
+                    'composer': composer
+                })
+        
+        previews = []
+        
+        # Generate title card preview
+        title_text = f"{performer}\n{concert_date} at {concert_time}"
+        title_card = create_title_card(title_text, theme='concert')
+        
+        # Convert title card to base64
+        title_buffer = io.BytesIO()
+        title_card.save(title_buffer, format='PNG')
+        title_buffer.seek(0)
+        title_b64 = base64.b64encode(title_buffer.read()).decode('utf-8')
+        
+        previews.append({
+            'name': 'Title Card',
+            'image': f'data:image/png;base64,{title_b64}'
+        })
+        
+        # Generate lower thirds previews for each piece
+        for idx, piece in enumerate(filtered_pieces, 1):
+            # Format display name based on available fields
+            if piece['title'] and piece['composer']:
+                display_name = f'Piece {idx}: {piece["title"]} - {piece["composer"]}'
+            elif piece['title']:
+                display_name = f'Piece {idx}: {piece["title"]}'
+            else:
+                display_name = f'Piece {idx}: {piece["composer"]}'
+            
+            lower_third = create_lower_third(piece['title'] if piece['title'] else 'Piece', 
+                                            piece['composer'] if piece['composer'] else '', 
+                                            theme='concert')
+            
+            # Convert lower third to base64
+            img_buffer = io.BytesIO()
+            lower_third.save(img_buffer, format='PNG')
+            img_buffer.seek(0)
+            img_b64 = base64.b64encode(img_buffer.read()).decode('utf-8')
+            
+            previews.append({
+                'name': f'Piece {idx}: {piece["title"]}',
+                'image': f'data:image/png;base64,{img_b64}'
+            })
+        
+        return jsonify({
+            'success': True,
+            'previews': previews
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate concert preview'
         }), 500
 
 if __name__ == '__main__':

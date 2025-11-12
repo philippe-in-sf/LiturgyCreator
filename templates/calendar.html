@@ -1692,6 +1692,7 @@
                 
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="closeConcertProgram()">Cancel</button>
+                    <button type="button" class="btn-warning" onclick="previewConcertProgram()" style="background-color: #ffc107; color: #000;">👁️ Preview</button>
                     <button type="button" class="btn-save" onclick="saveConcertProgram()">Generate & Download</button>
                 </div>
             </form>
@@ -2994,6 +2995,82 @@
                     addButton.style.display = 'inline-block';
                 }
             }
+        }
+        
+        function previewConcertProgram() {
+            const performer = document.getElementById('concertPerformer').value.trim();
+            const concertDate = document.getElementById('concertDate').value;
+            const concertTime = document.getElementById('concertTime').value.trim();
+            
+            if (!performer) {
+                showError('Please enter performer name');
+                return;
+            }
+            
+            if (!concertDate) {
+                showError('Please select concert date');
+                return;
+            }
+            
+            if (!concertTime) {
+                showError('Please enter concert time');
+                return;
+            }
+            
+            const pieces = [];
+            for (let i = 0; i < 10; i++) {
+                const titleInput = document.getElementById(`concertPieceTitle${i}`);
+                const composerInput = document.getElementById(`concertPieceComposer${i}`);
+                
+                if (titleInput && composerInput) {
+                    const title = titleInput.value.trim();
+                    const composer = composerInput.value.trim();
+                    
+                    if (title || composer) {
+                        pieces.push({
+                            title: title,
+                            composer: composer
+                        });
+                    }
+                }
+            }
+            
+            const modal = document.getElementById('previewModal');
+            const loadingDiv = document.getElementById('previewLoading');
+            const imagesDiv = document.getElementById('previewImages');
+            
+            modal.style.display = 'block';
+            loadingDiv.style.display = 'block';
+            imagesDiv.style.display = 'none';
+            
+            fetch('/api/preview_concert_program', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    performer: performer,
+                    date: concertDate,
+                    time: concertTime,
+                    pieces: pieces
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayPreviews(data.previews);
+                    loadingDiv.style.display = 'none';
+                    imagesDiv.style.display = 'block';
+                } else {
+                    showError('Failed to load preview: ' + data.error);
+                    closePreview();
+                }
+            })
+            .catch(error => {
+                console.error('Preview error:', error);
+                showError('Failed to load preview');
+                closePreview();
+            });
         }
         
         function saveConcertProgram() {
