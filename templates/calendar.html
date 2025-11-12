@@ -1645,6 +1645,59 @@
         </div>
     </div>
 
+    <!-- Concert Program Modal -->
+    <div id="concertProgramModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <span class="close" onclick="closeConcertProgram()">&times;</span>
+                <h2 class="modal-title">🎵 Concert Program Generator</h2>
+            </div>
+            
+            <form id="concertProgramForm">
+                <div class="form-section">
+                    <h3>Concert Information</h3>
+                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
+                        Create a concert program with title card and lower thirds for each piece performed.
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="concertPerformer">Performer Name *</label>
+                        <input type="text" id="concertPerformer" name="concertPerformer" placeholder="e.g., Trinity Choir" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="concertDate">Concert Date *</label>
+                        <input type="date" id="concertDate" name="concertDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="concertTime">Concert Time *</label>
+                        <input type="text" id="concertTime" name="concertTime" placeholder="e.g., 7:30 PM" required>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Program Pieces</h3>
+                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
+                        Add up to 10 pieces. Leave empty slots blank if you need fewer pieces.
+                    </p>
+                    
+                    <div id="concertPiecesContainer">
+                    </div>
+                    
+                    <button type="button" id="addPieceButton" onclick="addConcertPiece()" style="background-color: #17a2b8; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; margin-top: 10px;">
+                        ➕ Add Another Piece
+                    </button>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeConcertProgram()">Cancel</button>
+                    <button type="button" class="btn-save" onclick="saveConcertProgram()">Generate & Download</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Evensong Service Construction Modal -->
     <div id="evensongServiceModal" class="modal">
         <div class="modal-content" style="max-width: 800px;">
@@ -2863,6 +2916,163 @@
             });
         }
 
+        // Concert Program Functions
+        let concertPieceCount = 0;
+        
+        function showConcertProgram() {
+            const modal = document.getElementById('concertProgramModal');
+            modal.style.display = 'block';
+            
+            const container = document.getElementById('concertPiecesContainer');
+            container.innerHTML = '';
+            concertPieceCount = 0;
+            
+            for (let i = 0; i < 3; i++) {
+                addConcertPiece();
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('concertDate').value = today;
+        }
+        
+        function closeConcertProgram() {
+            const modal = document.getElementById('concertProgramModal');
+            modal.style.display = 'none';
+            
+            document.getElementById('concertProgramForm').reset();
+            document.getElementById('concertPiecesContainer').innerHTML = '';
+            concertPieceCount = 0;
+        }
+        
+        function addConcertPiece() {
+            if (concertPieceCount >= 10) {
+                showError('Maximum 10 pieces allowed');
+                return;
+            }
+            
+            const container = document.getElementById('concertPiecesContainer');
+            const pieceIndex = concertPieceCount;
+            concertPieceCount++;
+            
+            const pieceDiv = document.createElement('div');
+            pieceDiv.id = `concertPiece${pieceIndex}`;
+            pieceDiv.style.cssText = 'border: 1px solid #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 15px; position: relative; background: white;';
+            
+            pieceDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h4 style="margin: 0; color: #495057; font-size: 0.95rem;">Piece ${pieceIndex + 1}</h4>
+                    ${pieceIndex > 0 ? `<button type="button" onclick="removeConcertPiece(${pieceIndex})" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Remove</button>` : ''}
+                </div>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label for="concertPieceTitle${pieceIndex}">Piece Title</label>
+                    <input type="text" id="concertPieceTitle${pieceIndex}" placeholder="e.g., Ave Verum Corpus" style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 1rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="concertPieceComposer${pieceIndex}">Composer</label>
+                    <input type="text" id="concertPieceComposer${pieceIndex}" placeholder="e.g., Mozart" style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 1rem;">
+                </div>
+            `;
+            
+            container.appendChild(pieceDiv);
+            
+            const addButton = document.getElementById('addPieceButton');
+            if (concertPieceCount >= 10) {
+                addButton.style.display = 'none';
+            } else {
+                addButton.style.display = 'inline-block';
+            }
+        }
+        
+        function removeConcertPiece(index) {
+            const pieceDiv = document.getElementById(`concertPiece${index}`);
+            if (pieceDiv) {
+                pieceDiv.remove();
+                concertPieceCount--;
+                
+                const addButton = document.getElementById('addPieceButton');
+                if (concertPieceCount < 10) {
+                    addButton.style.display = 'inline-block';
+                }
+            }
+        }
+        
+        function saveConcertProgram() {
+            const performer = document.getElementById('concertPerformer').value.trim();
+            const concertDate = document.getElementById('concertDate').value;
+            const concertTime = document.getElementById('concertTime').value.trim();
+            
+            if (!performer) {
+                showError('Please enter performer name');
+                return;
+            }
+            
+            if (!concertDate) {
+                showError('Please select concert date');
+                return;
+            }
+            
+            if (!concertTime) {
+                showError('Please enter concert time');
+                return;
+            }
+            
+            const pieces = [];
+            for (let i = 0; i < 10; i++) {
+                const titleInput = document.getElementById(`concertPieceTitle${i}`);
+                const composerInput = document.getElementById(`concertPieceComposer${i}`);
+                
+                if (titleInput && composerInput) {
+                    const title = titleInput.value.trim();
+                    const composer = composerInput.value.trim();
+                    
+                    if (title || composer) {
+                        pieces.push({
+                            title: title,
+                            composer: composer
+                        });
+                    }
+                }
+            }
+            
+            showSuccess('Generating concert program...');
+            
+            fetch('/api/concert_program', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    performer: performer,
+                    date: concertDate,
+                    time: concertTime,
+                    pieces: pieces
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to generate concert program');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `concert_program_${concertDate.replace(/-/g, '')}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showSuccess('Concert program generated successfully!');
+                closeConcertProgram();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Failed to generate concert program: ' + error.message);
+            });
+        }
+
         // Close modal when clicking outside of it
         window.onclick = function(event) {
             const serviceModal = document.getElementById('serviceDetailsModal');
@@ -2871,6 +3081,7 @@
             const customTitleCardModal = document.getElementById('customTitleCardModal');
             const specialServiceModal = document.getElementById('specialServiceModal');
             const evensongServiceModal = document.getElementById('evensongServiceModal');
+            const concertProgramModal = document.getElementById('concertProgramModal');
             
             if (event.target === serviceModal) {
                 closeServiceDetails();
@@ -2884,6 +3095,8 @@
                 closeSpecialService();
             } else if (event.target === evensongServiceModal) {
                 closeEvensongService();
+            } else if (event.target === concertProgramModal) {
+                closeConcertProgram();
             }
         }
 

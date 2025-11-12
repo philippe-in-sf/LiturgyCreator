@@ -1126,8 +1126,34 @@ def get_liturgical_season_colors(date_str: Optional[str] = None) -> Dict[str, tu
     # Use the helper function to get colors
     return get_liturgical_season_colors_by_name(season)
 
-def create_lower_third(reading_type: str, reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None) -> Image.Image:
-    """Create a lower third graphic for broadcast use with liturgical season colors and banner-style design
+def get_theme(theme_name: str, date_str: Optional[str] = None, liturgical_season: Optional[str] = None) -> Dict[str, tuple]:
+    """Get theme colors for graphics generation
+    
+    Args:
+        theme_name: Theme name ('liturgical' or 'concert')
+        date_str: Date string for liturgical season detection (used only with 'liturgical' theme)
+        liturgical_season: Optional liturgical season override (used only with 'liturgical' theme)
+    
+    Returns:
+        Dictionary of color tuples for the specified theme
+    """
+    if theme_name == 'concert':
+        return {
+            'background': (128, 128, 128, 217),
+            'accent': (128, 128, 128, 255),
+            'title': (255, 255, 255, 255),
+            'text': (255, 255, 255, 255)
+        }
+    elif theme_name == 'liturgical':
+        if liturgical_season:
+            return get_liturgical_season_colors_by_name(liturgical_season)
+        else:
+            return get_liturgical_season_colors(date_str)
+    else:
+        return get_liturgical_season_colors(date_str)
+
+def create_lower_third(reading_type: str, reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None, theme: str = 'liturgical') -> Image.Image:
+    """Create a lower third graphic for broadcast use with theme-based colors and banner-style design
     
     Args:
         reading_type: Type of reading (e.g., 'gospel', 'first_reading')
@@ -1135,14 +1161,15 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
         date_str: Date string for liturgical season detection
         width: Image width in pixels
         height: Image height in pixels
-        is_funeral: If True, use black background with white text instead of liturgical colors
+        is_funeral: If True, use black background with white text instead of theme colors
         liturgical_season: Optional liturgical season override (e.g., 'advent', 'christmas', 'lent')
+        theme: Theme name ('liturgical' or 'concert'), defaults to 'liturgical'
     """
     # Create image with transparent background (RGBA mode)
     img = Image.new('RGBA', (width, height), color=(0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     
-    # Determine liturgical season colors or use funeral colors
+    # Determine theme colors or use funeral colors
     if is_funeral:
         # Funeral: black background with white text
         liturgical_colors = {
@@ -1151,12 +1178,9 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
             'title': (255, 255, 255, 255),       # White
             'text': (255, 255, 255, 255)         # White
         }
-    elif liturgical_season:
-        # Use explicitly specified liturgical season
-        liturgical_colors = get_liturgical_season_colors_by_name(liturgical_season)
     else:
-        # Auto-detect from date
-        liturgical_colors = get_liturgical_season_colors(date_str)
+        # Use theme system
+        liturgical_colors = get_theme(theme, date_str=date_str, liturgical_season=liturgical_season)
     
     # Try to load fonts, fallback to default if not available
     try:
@@ -1515,7 +1539,7 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
     
     return img
 
-def create_title_card(liturgical_reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None) -> Image.Image:
+def create_title_card(liturgical_reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None, theme: str = 'liturgical') -> Image.Image:
     """Create a full-screen title card with liturgical reference and church name
     
     Args:
@@ -1523,20 +1547,24 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
         date_str: Date string for liturgical season detection (ignored if liturgical_season is provided)
         width: Image width in pixels
         height: Image height in pixels
-        is_funeral: If True, use black background with white text instead of liturgical colors
+        is_funeral: If True, use black background with white text instead of theme colors
         liturgical_season: Directly specify liturgical season (advent, christmas, lent, etc.)
+        theme: Theme name ('liturgical' or 'concert'), defaults to 'liturgical'
     """
-    # Create image with appropriate background based on service type
+    # Create image with appropriate background based on service type and theme
     if is_funeral:
         # Funeral: black background
         img = Image.new('RGBA', (width, height), color=(0, 0, 0, 255))
+    elif theme == 'concert':
+        # Concert: grey background with 0.85 opacity (alpha 217 = 0.85 * 255)
+        img = Image.new('RGBA', (width, height), color=(128, 128, 128, 217))
     else:
-        # Regular: white background and 50% opacity (alpha 128 = 50%)
+        # Regular liturgical: white background and 50% opacity (alpha 128 = 50%)
         img = Image.new('RGBA', (width, height), color=(255, 255, 255, 128))
     
     draw = ImageDraw.Draw(img)
     
-    # Determine liturgical season colors or use funeral colors
+    # Determine theme colors or use funeral colors
     if is_funeral:
         # Funeral: white text on black background
         liturgical_colors = {
@@ -1545,12 +1573,9 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
             'title': (255, 255, 255, 255),       # White
             'text': (255, 255, 255, 255)         # White
         }
-    elif liturgical_season:
-        # Use directly specified liturgical season
-        liturgical_colors = get_liturgical_season_colors_by_name(liturgical_season)
     else:
-        # Compute from date string
-        liturgical_colors = get_liturgical_season_colors(date_str)
+        # Use theme system
+        liturgical_colors = get_theme(theme, date_str=date_str, liturgical_season=liturgical_season)
     
     # Try to load elegant serif fonts for a classic, timeless look
     try:
@@ -3056,6 +3081,85 @@ def evensong_service():
             'success': False,
             'error': str(e),
             'message': 'Failed to generate Evensong service materials'
+        }), 500
+
+@app.route('/api/concert_program', methods=['POST'])
+def concert_program():
+    """Generate concert program with title card and lower thirds for each piece"""
+    try:
+        data = request.get_json()
+        performer = data.get('performer', '').strip()
+        concert_date = data.get('date', '').strip()
+        concert_time = data.get('time', '').strip()
+        pieces = data.get('pieces', [])
+        
+        if not performer:
+            return jsonify({
+                'success': False,
+                'error': 'Performer name is required'
+            }), 400
+        
+        if not concert_date:
+            return jsonify({
+                'success': False,
+                'error': 'Concert date is required'
+            }), 400
+        
+        if not concert_time:
+            return jsonify({
+                'success': False,
+                'error': 'Concert time is required'
+            }), 400
+        
+        filtered_pieces = []
+        for piece in pieces:
+            title = piece.get('title', '').strip()
+            composer = piece.get('composer', '').strip()
+            if title and composer:
+                filtered_pieces.append({
+                    'title': title,
+                    'composer': composer
+                })
+        
+        date_folder_name = f"concert_{concert_date.replace('-', '')}"
+        
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            title_text = f"{performer}\n{concert_date} at {concert_time}"
+            title_card = create_title_card(title_text, theme='concert')
+            title_card_buffer = io.BytesIO()
+            title_card.save(title_card_buffer, format='PNG')
+            title_card_buffer.seek(0)
+            zip_file.writestr(f"{date_folder_name}/Title_Card.png", title_card_buffer.read())
+            
+            for idx, piece in enumerate(filtered_pieces, 1):
+                piece_text = f"{piece['title']} - {piece['composer']}"
+                lower_third = create_lower_third(piece['title'], piece['composer'], theme='concert')
+                
+                img_buffer = io.BytesIO()
+                lower_third.save(img_buffer, format='PNG')
+                img_buffer.seek(0)
+                
+                filename = f"Piece_{idx}.png"
+                filepath = f"{date_folder_name}/lower_thirds/{filename}"
+                zip_file.writestr(filepath, img_buffer.read())
+        
+        zip_buffer.seek(0)
+        download_name = f"concert_program_{concert_date.replace('-', '')}.zip"
+        
+        return send_file(
+            io.BytesIO(zip_buffer.read()),
+            as_attachment=True,
+            download_name=download_name,
+            mimetype='application/zip'
+        )
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate concert program'
         }), 500
 
 if __name__ == '__main__':
