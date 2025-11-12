@@ -53,6 +53,7 @@ The application features a modular architecture:
 - **Corrected Advent Liturgical Colors (v2.4.1)**: Updated Advent liturgical color from purple to royal blue per Episcopal tradition.
 - **Removed Composer Fields (v2.4.3)**: Removed prelude composer and postlude composer fields from all service forms (Eucharist, Special Services, Evensong) per user preference. Only prelude/postlude titles are now collected.
 - **Concert Program Feature (v2.4.3)**: Added comprehensive concert program creation with grey-themed graphics. Includes title card generation with performer name, date, and time, plus dynamic form for up to 10 concert pieces. Generates lower thirds for each piece with neutral grey theme suitable for concert broadcasts. Uses new theme system that supports both liturgical (seasonal colors) and concert (grey/neutral) styling.
+- **Concert Graphics Enhancements (v2.4.4)**: Improved concert program readability and usability. Added black text outline (4px for titles, 3px for secondary text) to concert lower thirds for better visibility on grey backgrounds. Implemented preview functionality allowing users to see title card and all piece lower thirds before downloading. Fixed filtering logic to accept pieces with either title or composer (previously required both), with smart text formatting for partial entries.
 
 ## Configuration Management
 
