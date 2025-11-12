@@ -987,17 +987,9 @@ def export_readings():
                     formatted_prelude = textwrap.fill(service_details['preludeTitle'], width=50, break_long_words=False, break_on_hyphens=False)
                     zip_file.writestr(f"{date_folder_name}/Prelude Title.txt", formatted_prelude)
                 
-                if service_details.get('preludeComposer'):
-                    formatted_composer = textwrap.fill(service_details['preludeComposer'], width=50, break_long_words=False, break_on_hyphens=False)
-                    zip_file.writestr(f"{date_folder_name}/Prelude Composer.txt", formatted_composer)
-                
                 if service_details.get('postludeTitle'):
                     formatted_postlude = textwrap.fill(service_details['postludeTitle'], width=50, break_long_words=False, break_on_hyphens=False)
                     zip_file.writestr(f"{date_folder_name}/Postlude Title.txt", formatted_postlude)
-                
-                if service_details.get('postludeComposer'):
-                    formatted_composer = textwrap.fill(service_details['postludeComposer'], width=50, break_long_words=False, break_on_hyphens=False)
-                    zip_file.writestr(f"{date_folder_name}/Postlude Composer.txt", formatted_composer)
                 
                 # Individual clergy files
                 if service_details.get('preacherName'):
@@ -2376,17 +2368,9 @@ def export_all():
                         formatted_prelude = textwrap.fill(service_details['preludeName'], width=50, break_long_words=False, break_on_hyphens=False)
                         zip_file.writestr(f"{date_folder_name}/service_details/Prelude.txt", formatted_prelude)
                     
-                    if service_details.get('preludeComposer'):
-                        formatted_composer = textwrap.fill(service_details['preludeComposer'], width=50, break_long_words=False, break_on_hyphens=False)
-                        zip_file.writestr(f"{date_folder_name}/service_details/Prelude Composer.txt", formatted_composer)
-                    
                     if service_details.get('postludeName'):
                         formatted_postlude = textwrap.fill(service_details['postludeName'], width=50, break_long_words=False, break_on_hyphens=False)
                         zip_file.writestr(f"{date_folder_name}/service_details/Postlude.txt", formatted_postlude)
-                    
-                    if service_details.get('postludeComposer'):
-                        formatted_composer = textwrap.fill(service_details['postludeComposer'], width=50, break_long_words=False, break_on_hyphens=False)
-                        zip_file.writestr(f"{date_folder_name}/service_details/Postlude Composer.txt", formatted_composer)
                     
                     # Individual clergy files
                     if service_details.get('preacherName'):
@@ -2587,9 +2571,7 @@ def generate_lower_thirds():
                 'communionHymn': 'Communion Hymn',
                 'closingHymn': 'Closing Hymn',
                 'preludeTitle': 'Prelude Title',
-                'preludeComposer': 'Prelude Composer',
-                'postludeTitle': 'Postlude Title',
-                'postludeComposer': 'Postlude Composer'
+                'postludeTitle': 'Postlude Title'
             }
             
             for field_key, field_label in hymn_fields.items():
@@ -2835,9 +2817,7 @@ def special_service():
                 'closingHymn': 'Closing Hymn',
                 'organistName': 'Organist',
                 'preludeName': 'Prelude Title',
-                'preludeComposer': 'Prelude Composer',
                 'postludeName': 'Postlude Title',
-                'postludeComposer': 'Postlude Composer',
                 'preacherName': 'Preacher',
                 'offertory': 'Offertory'
             }

@@ -6,6 +6,9 @@ This project is a Daily Liturgical Scripture OBS Automation system designed for 
 
 Preferred communication style: Simple, everyday language.
 
+## Form Field Preferences
+- **Music Credits**: Prelude composer and postlude composer fields have been removed from all service forms (Eucharist, Special Services, Evensong). Only prelude/postlude titles are collected.
+
 ## Deployment Preferences
 - **Version Updates**: When updating version number and deploying, always update both:
   1. Version number in `pyproject.toml` 

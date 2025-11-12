@@ -151,9 +151,7 @@ class OBSController:
             'closingHymn': 'closing_hymn',
             'organistName': 'organist_name',
             'preludeName': 'prelude_name',
-            'preludeComposer': 'prelude_composer',
             'postludeName': 'postlude_name',
-            'postludeComposer': 'postlude_composer',
             'preacherName': 'preacher_name',
             'presiderName': 'presider_name'
         }

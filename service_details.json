@@ -6,9 +6,7 @@
     "closingHymn": "Hymn 432, O Praise Ye the Lord",
     "organistName": "Casey Cantwell",
     "preludeName": "Jesu, Joy of Man's Desiring",
-    "preludeComposer": "J.S. Bach",
     "postludeName": "Improvisation",
-    "postludeComposer": "Casey Cantwell",
     "preacherName": "The Rev. Canon Elizabeth Radford",
     "presiderName": "The Archbishop of Canterbury"
   },
@@ -23,7 +21,6 @@
   "2025-10-13": {
     "organistName": "Casey Cantwelll",
     "preludeName": "Jesu, Joy",
-    "preludeComposer": "Bach",
     "openingHymn": "Holy Holy Holy",
     "sequenceHymn": "O Christ",
     "preacherName": "Canon Betsy",
@@ -31,13 +28,11 @@
     "communionMotet": "Ave Verum",
     "communionHymn": "I come with joy",
     "closingHymn": "O praise ye the Lord",
-    "postludeName": "Improvisation",
-    "postludeComposer": "Cantwell"
+    "postludeName": "Improvisation"
   },
   "2025-10-19": {
     "organistName": "Casey Cantwell",
     "preludeName": "Aria",
-    "preludeComposer": "Peeters",
     "openingHymn": "Holy holy moley",
     "firstReadingRef": "Jer 31:27-34",
     "psalmRef": "Psalm  121",
@@ -49,14 +44,12 @@
     "communionMotet": "",
     "communionHymn": "Let us Break Bread Together",
     "closingHymn": "O praise ye the Lord",
-    "postludeName": "Improvisation",
-    "postludeComposer": "Cantwell"
+    "postludeName": "Improvisation"
   },
   "2025-10-23": {
     "evensong": {
       "organistName": "",
       "preludeName": "",
-      "preludeComposer": "",
       "openingHymn": "",
       "firstReadingRef": "",
       "psalmRef": "",
@@ -69,7 +62,6 @@
       "communionHymn": "",
       "closingHymn": "",
       "postludeName": "",
-      "postludeComposer": "",
       "responsoryComposer": "Hancock",
       "precesResponsesSetting": "Hancock in A",
       "precesResponsesComposer": "Gerre Hancock",

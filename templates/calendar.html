@@ -1102,11 +1102,6 @@
                             <label for="preludeName">Prelude Title</label>
                             <input type="text" id="preludeName" name="preludeName" placeholder="e.g., Jesu, Joy of Man's Desiring">
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="preludeComposer">Prelude Composer</label>
-                            <input type="text" id="preludeComposer" name="preludeComposer" placeholder="e.g., J.S. Bach">
-                        </div>
                     </div>
                     
                     <div class="form-section">
@@ -1189,11 +1184,6 @@
                         <div class="form-group">
                             <label for="postludeName">Postlude Title</label>
                             <input type="text" id="postludeName" name="postludeName" placeholder="e.g., Toccata in D Minor">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="postludeComposer">Postlude Composer</label>
-                            <input type="text" id="postludeComposer" name="postludeComposer" placeholder="e.g., J.S. Bach">
                         </div>
                     </div>
                 </div>
@@ -1528,11 +1518,6 @@
                         <label for="specialPreludeName">Prelude Title</label>
                         <input type="text" id="specialPreludeName" name="specialPreludeName" placeholder="e.g., Jesu, Joy of Man's Desiring">
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="specialPreludeComposer">Prelude Composer</label>
-                        <input type="text" id="specialPreludeComposer" name="specialPreludeComposer" placeholder="e.g., J.S. Bach">
-                    </div>
                 </div>
                 
                 <div class="form-section">
@@ -1647,11 +1632,6 @@
                     <div class="form-group">
                         <label for="specialPostludeName">Postlude Title</label>
                         <input type="text" id="specialPostludeName" name="specialPostludeName" placeholder="e.g., Toccata in D Minor">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="specialPostludeComposer">Postlude Composer</label>
-                        <input type="text" id="specialPostludeComposer" name="specialPostludeComposer" placeholder="e.g., J.S. Bach">
                     </div>
                 </div>
                 
@@ -2639,7 +2619,6 @@
             const specialServiceDetails = {
                 organistName: document.getElementById('specialOrganistName').value.trim(),
                 preludeName: document.getElementById('specialPreludeName').value.trim(),
-                preludeComposer: document.getElementById('specialPreludeComposer').value.trim(),
                 openingHymn: document.getElementById('specialOpeningHymn').value.trim(),
                 sequenceHymn: document.getElementById('specialSequenceHymn').value.trim(),
                 preacherName: document.getElementById('specialPreacherName').value.trim(),
@@ -2647,8 +2626,7 @@
                 communionMotet: document.getElementById('specialCommunionMotet').value.trim(),
                 communionHymn: document.getElementById('specialCommunionHymn').value.trim(),
                 closingHymn: document.getElementById('specialClosingHymn').value.trim(),
-                postludeName: document.getElementById('specialPostludeName').value.trim(),
-                postludeComposer: document.getElementById('specialPostludeComposer').value.trim()
+                postludeName: document.getElementById('specialPostludeName').value.trim()
             };
             
             // Check if at least one reading is provided
@@ -2736,7 +2714,6 @@
             const specialServiceDetails = {
                 organistName: document.getElementById('specialOrganistName').value.trim(),
                 preludeName: document.getElementById('specialPreludeName').value.trim(),
-                preludeComposer: document.getElementById('specialPreludeComposer').value.trim(),
                 openingHymn: document.getElementById('specialOpeningHymn').value.trim(),
                 sequenceHymn: document.getElementById('specialSequenceHymn').value.trim(),
                 preacherName: document.getElementById('specialPreacherName').value.trim(),
@@ -2744,8 +2721,7 @@
                 communionMotet: document.getElementById('specialCommunionMotet').value.trim(),
                 communionHymn: document.getElementById('specialCommunionHymn').value.trim(),
                 closingHymn: document.getElementById('specialClosingHymn').value.trim(),
-                postludeName: document.getElementById('specialPostludeName').value.trim(),
-                postludeComposer: document.getElementById('specialPostludeComposer').value.trim()
+                postludeName: document.getElementById('specialPostludeName').value.trim()
             };
             
             // Open preview modal
