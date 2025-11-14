@@ -1522,6 +1522,7 @@
                 
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="closeCustomLowerThird()">Cancel</button>
+                    <button type="button" class="btn-info" onclick="previewCustomLowerThird()">👁️ Preview</button>
                     <button type="button" class="btn-save" onclick="generateCustomLowerThird()">Generate & Download</button>
                 </div>
             </form>
@@ -2691,6 +2692,58 @@
             } catch (error) {
                 console.error('Error generating custom lower third:', error);
                 showError('Failed to generate custom lower third');
+            }
+        }
+
+        // Custom Lower Third Preview Function
+        async function previewCustomLowerThird() {
+            const labelText = document.getElementById('lowerThirdLabel').value.trim();
+            const contentText = document.getElementById('lowerThirdContent').value.trim();
+            const liturgicalSeason = document.getElementById('lowerThirdSeason').value;
+            const isMemorial = document.getElementById('lowerThirdMemorial').checked;
+            
+            // Validate that at least one field is filled
+            if (!labelText && !contentText) {
+                showError('Please fill in at least one field (Label or Content)');
+                return;
+            }
+            
+            const modal = document.getElementById('previewModal');
+            const loadingDiv = document.getElementById('previewLoading');
+            const imagesDiv = document.getElementById('previewImages');
+            
+            modal.style.display = 'block';
+            loadingDiv.style.display = 'block';
+            imagesDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/preview_custom_lower_third', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        labelText: labelText,
+                        contentText: contentText,
+                        liturgicalSeason: liturgicalSeason,
+                        isMemorial: isMemorial
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayPreviews(data.previews);
+                    loadingDiv.style.display = 'none';
+                    imagesDiv.style.display = 'block';
+                } else {
+                    showError('Failed to load preview: ' + data.error);
+                    closePreview();
+                }
+            } catch (error) {
+                console.error('Preview error:', error);
+                showError('Failed to load preview');
+                closePreview();
             }
         }
 

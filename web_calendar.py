@@ -2741,6 +2741,54 @@ def generate_custom_lower_third():
             'message': 'Failed to generate custom lower third'
         }), 500
 
+@app.route('/api/preview_custom_lower_third', methods=['POST'])
+def preview_custom_lower_third():
+    """Generate preview for custom lower third"""
+    try:
+        data = request.get_json()
+        label_text = data.get('labelText', '').strip()
+        content_text = data.get('contentText', '').strip()
+        liturgical_season = data.get('liturgicalSeason', '').strip()
+        is_memorial = data.get('isMemorial', False)
+        
+        # Validate that at least one field is provided
+        if not label_text and not content_text:
+            return jsonify({
+                'success': False,
+                'error': 'At least one field (Label or Content) must be provided'
+            }), 400
+        
+        # Generate the lower third using the existing function
+        lower_third_img = create_lower_third(
+            reading_type=label_text or '',
+            reference=content_text or '',
+            liturgical_season=liturgical_season if liturgical_season else None,
+            is_funeral=is_memorial
+        )
+        
+        # Convert to base64
+        img_buffer = io.BytesIO()
+        lower_third_img.save(img_buffer, format='PNG')
+        img_buffer.seek(0)
+        img_b64 = base64.b64encode(img_buffer.read()).decode('utf-8')
+        
+        previews = [{
+            'name': 'Custom Lower Third',
+            'image': f'data:image/png;base64,{img_b64}'
+        }]
+        
+        return jsonify({
+            'success': True,
+            'previews': previews
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate preview'
+        }), 500
+
 @app.route('/api/upload_pdf', methods=['POST'])
 def upload_pdf():
     """Handle PDF file upload and text extraction"""
