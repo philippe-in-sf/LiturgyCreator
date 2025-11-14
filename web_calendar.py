@@ -2690,6 +2690,57 @@ def generate_custom_title_card():
             'message': 'Failed to generate custom title card'
         }), 500
 
+@app.route('/api/generate_custom_lower_third', methods=['POST'])
+def generate_custom_lower_third():
+    """Generate a custom lower third with user-provided text and liturgical season"""
+    try:
+        data = request.get_json()
+        label_text = data.get('labelText', '').strip()
+        content_text = data.get('contentText', '').strip()
+        liturgical_season = data.get('liturgicalSeason', '').strip()
+        is_memorial = data.get('isMemorial', False)
+        
+        # Validate that at least one field has content
+        if not label_text and not content_text:
+            return jsonify({
+                'success': False,
+                'error': 'At least one field (Label or Content) must be provided'
+            }), 400
+        
+        # Generate the lower third using the existing function
+        # The create_lower_third function takes reading_type and reference as parameters
+        lower_third_img = create_lower_third(
+            reading_type=label_text or '',
+            reference=content_text or '',
+            liturgical_season=liturgical_season if liturgical_season else None,
+            is_funeral=is_memorial
+        )
+        
+        # Convert to PNG and send as file download
+        img_buffer = io.BytesIO()
+        lower_third_img.save(img_buffer, format='PNG')
+        img_buffer.seek(0)
+        
+        # Create a filename from the label or content text (sanitized)
+        filename_base = label_text or content_text
+        safe_filename = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in filename_base)
+        safe_filename = safe_filename[:50]  # Limit length
+        safe_filename = safe_filename.strip() or 'Custom_Lower_Third'
+        
+        return send_file(
+            io.BytesIO(img_buffer.read()),
+            as_attachment=True,
+            download_name=f"{safe_filename}_Lower_Third.png",
+            mimetype='image/png'
+        )
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate custom lower third'
+        }), 500
+
 @app.route('/api/upload_pdf', methods=['POST'])
 def upload_pdf():
     """Handle PDF file upload and text extraction"""

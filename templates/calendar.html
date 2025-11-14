@@ -1030,6 +1030,7 @@
                             <button class="action-btn" onclick="showSpecialService()" style="background-color: #9b59b6; color: white;">✨ Special Service</button>
                             <button class="action-btn" onclick="showConcertProgram()" style="background-color: #3498db; color: white;">🎵 Concert Program</button>
                             <button class="action-btn" onclick="showCustomTitleCard()" style="background-color: #e74c3c; color: white;">🎬 Custom Title Card</button>
+                            <button class="action-btn" onclick="showCustomLowerThird()" style="background-color: #f39c12; color: white;">📺 Custom Lower Third</button>
                             <button class="action-btn btn-info" onclick="showSettings()" style="background-color: #6c757d;">⚙️ Settings</button>
                         </div>
                     </div>
@@ -1448,6 +1449,80 @@
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="closeCustomTitleCard()">Cancel</button>
                     <button type="button" class="btn-save" onclick="generateCustomTitleCard()">Generate & Download</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Lower Third Modal -->
+    <div id="customLowerThirdModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <span class="close" onclick="closeCustomLowerThird()">&times;</span>
+                <h2 class="modal-title">📺 Custom Lower Third Generator</h2>
+            </div>
+            
+            <form id="customLowerThirdForm">
+                <div class="form-section">
+                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
+                        Create a custom lower third with your own text. Perfect for announcements, special elements, or editing videos from previous weeks.
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="lowerThirdLabel">Label/Type</label>
+                        <input type="text" id="lowerThirdLabel" name="lowerThirdLabel" placeholder="e.g., Special Announcement, Offertory Anthem" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                        <small style="color: #6c757d; display: block; margin-top: 5px;">
+                            The label that appears on the left side of the lower third.
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lowerThirdContent">Content/Reference</label>
+                        <input type="text" id="lowerThirdContent" name="lowerThirdContent" placeholder="e.g., Your custom message here" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                        <small style="color: #6c757d; display: block; margin-top: 5px;">
+                            The main content that appears on the right side of the lower third.
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lowerThirdSeason">Liturgical Season (Optional)</label>
+                        <select id="lowerThirdSeason" name="lowerThirdSeason" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                            <option value="">None (Default)</option>
+                            <option value="advent">Advent (Royal Blue)</option>
+                            <option value="christmas">Christmas (White & Gold)</option>
+                            <option value="season_after_epiphany">Season after Epiphany (Green)</option>
+                            <option value="lent">Lent (Purple)</option>
+                            <option value="easter">Easter (White & Gold)</option>
+                            <option value="pentecost">Pentecost (Red)</option>
+                            <option value="season_after_pentecost">Season after Pentecost (Green)</option>
+                        </select>
+                        <small style="color: #6c757d; display: block; margin-top: 5px;">
+                            Select a liturgical season to apply its colors. Leave as "None" for default colors.
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="lowerThirdMemorial" name="lowerThirdMemorial" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
+                            <span>Use memorial theme (black background with white text)</span>
+                        </label>
+                    </div>
+                    
+                    <div style="background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 4px; padding: 12px; margin-top: 15px;">
+                        <strong>💡 Tips:</strong><br>
+                        <small>
+                            • The lower third will be 1920x1080 pixels (Full HD)<br>
+                            • At least one field (Label or Content) must be filled in<br>
+                            • Text will be formatted and positioned automatically<br>
+                            • Select a liturgical season to match your service<br>
+                            • Check the memorial option for memorial services
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeCustomLowerThird()">Cancel</button>
+                    <button type="button" class="btn-save" onclick="generateCustomLowerThird()">Generate & Download</button>
                 </div>
             </form>
         </div>
@@ -2540,6 +2615,85 @@
             }
         }
 
+        // Custom Lower Third Functions
+        function showCustomLowerThird() {
+            const modal = document.getElementById('customLowerThirdModal');
+            modal.style.display = 'block';
+            
+            // Clear previous inputs
+            document.getElementById('lowerThirdLabel').value = '';
+            document.getElementById('lowerThirdContent').value = '';
+            document.getElementById('lowerThirdSeason').value = '';
+            document.getElementById('lowerThirdMemorial').checked = false;
+        }
+
+        function closeCustomLowerThird() {
+            const modal = document.getElementById('customLowerThirdModal');
+            modal.style.display = 'none';
+        }
+
+        async function generateCustomLowerThird() {
+            const labelText = document.getElementById('lowerThirdLabel').value.trim();
+            const contentText = document.getElementById('lowerThirdContent').value.trim();
+            const liturgicalSeason = document.getElementById('lowerThirdSeason').value;
+            const isMemorial = document.getElementById('lowerThirdMemorial').checked;
+            
+            if (!labelText && !contentText) {
+                showError('Please enter at least a label or content for your lower third');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/generate_custom_lower_third', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        labelText: labelText,
+                        contentText: contentText,
+                        liturgicalSeason: liturgicalSeason || null,
+                        isMemorial: isMemorial
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    showError(errorData.error || 'Failed to generate lower third');
+                    return;
+                }
+                
+                // Download the file
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                // Get filename from Content-Disposition header if available
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = 'Custom_Lower_Third.png';
+                if (contentDisposition) {
+                    const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, '');
+                    }
+                }
+                
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showSuccess('Custom lower third generated successfully!');
+                closeCustomLowerThird();
+                
+            } catch (error) {
+                console.error('Error generating custom lower third:', error);
+                showError('Failed to generate custom lower third');
+            }
+        }
+
         // Preview Functions
         function showPreview() {
             const dateStr = selectedDate.toISOString().split('T')[0];
@@ -3156,6 +3310,7 @@
             const settingsModal = document.getElementById('settingsModal');
             const previewModal = document.getElementById('previewModal');
             const customTitleCardModal = document.getElementById('customTitleCardModal');
+            const customLowerThirdModal = document.getElementById('customLowerThirdModal');
             const specialServiceModal = document.getElementById('specialServiceModal');
             const evensongServiceModal = document.getElementById('evensongServiceModal');
             const concertProgramModal = document.getElementById('concertProgramModal');
@@ -3168,6 +3323,8 @@
                 closePreview();
             } else if (event.target === customTitleCardModal) {
                 closeCustomTitleCard();
+            } else if (event.target === customLowerThirdModal) {
+                closeCustomLowerThird();
             } else if (event.target === specialServiceModal) {
                 closeSpecialService();
             } else if (event.target === evensongServiceModal) {
