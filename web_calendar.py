@@ -1764,6 +1764,208 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
     
     return img
 
+def create_announcement_slide(announcement_data: dict, width: int = 1920, height: int = 1080) -> Image.Image:
+    """Create an announcement slide with type-specific formatting
+    
+    Args:
+        announcement_data: Dictionary containing:
+            - type: 'event', 'prayer', 'giving', or 'general'
+            - title: Announcement title
+            - fields: Dict with type-specific fields
+            - liturgicalSeason: Optional season for colors
+            - isMemorial: Boolean for memorial theme
+        width: Image width in pixels
+        height: Image height in pixels
+    
+    Returns:
+        PIL Image object
+    """
+    ann_type = announcement_data.get('type', 'general')
+    title = announcement_data.get('title', '')
+    fields = announcement_data.get('fields', {})
+    liturgical_season = announcement_data.get('liturgicalSeason')
+    is_memorial = announcement_data.get('isMemorial', False)
+    
+    if is_memorial:
+        img = Image.new('RGBA', (width, height), color=(0, 0, 0, 255))
+        theme_colors = {
+            'background': (0, 0, 0, 255),
+            'accent': (255, 255, 255, 255),
+            'title': (255, 255, 255, 255),
+            'text': (255, 255, 255, 255)
+        }
+    else:
+        theme_colors = get_theme('liturgical', liturgical_season=liturgical_season)
+        r, g, b, a = theme_colors['background']
+        img = Image.new('RGBA', (width, height), color=(r, g, b, 255))
+    
+    draw = ImageDraw.Draw(img)
+    
+    try:
+        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 80)
+        subtitle_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 50)
+        field_label_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 40)
+        field_text_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 38)
+    except:
+        title_font = ImageFont.load_default()
+        subtitle_font = ImageFont.load_default()
+        field_label_font = ImageFont.load_default()
+        field_text_font = ImageFont.load_default()
+    
+    type_icons = {
+        'event': '📅',
+        'prayer': '🙏',
+        'giving': '💝',
+        'general': '📢'
+    }
+    type_labels = {
+        'event': 'Event',
+        'prayer': 'Prayer Request',
+        'giving': 'Giving',
+        'general': 'Announcement'
+    }
+    
+    icon = type_icons.get(ann_type, '📢')
+    type_label = type_labels.get(ann_type, 'Announcement')
+    
+    card_width = 1400
+    card_height = 800
+    card_x = (width - card_width) // 2
+    card_y = (height - card_height) // 2
+    
+    if is_memorial:
+        card_bg = (40, 40, 40, 230)
+        text_color = (255, 255, 255, 255)
+    else:
+        card_bg = (255, 255, 255, 240)
+        text_color = (0, 0, 0, 255)
+    
+    draw.rectangle([card_x, card_y, card_x + card_width, card_y + card_height], 
+                   fill=card_bg, outline=theme_colors['accent'], width=6)
+    
+    current_y = card_y + 50
+    
+    type_header = f"{icon} {type_label}"
+    type_bbox = draw.textbbox((0, 0), type_header, font=subtitle_font)
+    type_width = type_bbox[2] - type_bbox[0]
+    type_x = (width - type_width) // 2
+    draw.text((type_x, current_y), type_header, fill=theme_colors['accent'], font=subtitle_font)
+    current_y += 80
+    
+    title_lines = []
+    words = title.split()
+    current_line = []
+    max_title_width = card_width - 100
+    
+    for word in words:
+        test_line = ' '.join(current_line + [word])
+        test_bbox = draw.textbbox((0, 0), test_line, font=title_font)
+        if test_bbox[2] - test_bbox[0] > max_title_width and current_line:
+            title_lines.append(' '.join(current_line))
+            current_line = [word]
+        else:
+            current_line.append(word)
+    if current_line:
+        title_lines.append(' '.join(current_line))
+    
+    for line in title_lines:
+        line_bbox = draw.textbbox((0, 0), line, font=title_font)
+        line_width = line_bbox[2] - line_bbox[0]
+        line_x = (width - line_width) // 2
+        draw.text((line_x, current_y), line, fill=text_color, font=title_font)
+        current_y += 90
+    
+    current_y += 20
+    
+    draw.line([(card_x + 100, current_y), (card_x + card_width - 100, current_y)], 
+              fill=theme_colors['accent'], width=3)
+    current_y += 40
+    
+    max_text_width = card_width - 200
+    
+    if ann_type == 'event':
+        if fields.get('date'):
+            label = "Date: "
+            value = fields['date']
+            draw.text((card_x + 100, current_y), label, fill=theme_colors['accent'], font=field_label_font)
+            label_bbox = draw.textbbox((0, 0), label, font=field_label_font)
+            label_width = label_bbox[2] - label_bbox[0]
+            draw.text((card_x + 100 + label_width, current_y), value, fill=text_color, font=field_text_font)
+            current_y += 50
+        
+        if fields.get('time'):
+            label = "Time: "
+            value = fields['time']
+            draw.text((card_x + 100, current_y), label, fill=theme_colors['accent'], font=field_label_font)
+            label_bbox = draw.textbbox((0, 0), label, font=field_label_font)
+            label_width = label_bbox[2] - label_bbox[0]
+            draw.text((card_x + 100 + label_width, current_y), value, fill=text_color, font=field_text_font)
+            current_y += 50
+        
+        if fields.get('location'):
+            label = "Location: "
+            value = fields['location']
+            draw.text((card_x + 100, current_y), label, fill=theme_colors['accent'], font=field_label_font)
+            label_bbox = draw.textbbox((0, 0), label, font=field_label_font)
+            label_width = label_bbox[2] - label_bbox[0]
+            draw.text((card_x + 100 + label_width, current_y), value, fill=text_color, font=field_text_font)
+            current_y += 50
+        
+        if fields.get('description'):
+            current_y += 10
+            desc_lines = textwrap.wrap(fields['description'], width=60)
+            for line in desc_lines[:3]:
+                draw.text((card_x + 100, current_y), line, fill=text_color, font=field_text_font)
+                current_y += 45
+    
+    elif ann_type == 'prayer':
+        if fields.get('intention'):
+            intention_lines = textwrap.wrap(fields['intention'], width=65)
+            for line in intention_lines[:6]:
+                draw.text((card_x + 100, current_y), line, fill=text_color, font=field_text_font)
+                current_y += 45
+    
+    elif ann_type == 'giving':
+        if fields.get('goal'):
+            draw.text((card_x + 100, current_y), fields['goal'], fill=theme_colors['accent'], font=subtitle_font)
+            current_y += 60
+        
+        if fields.get('description'):
+            desc_lines = textwrap.wrap(fields['description'], width=65)
+            for line in desc_lines[:5]:
+                draw.text((card_x + 100, current_y), line, fill=text_color, font=field_text_font)
+                current_y += 45
+    
+    elif ann_type == 'general':
+        if fields.get('subtitle'):
+            subtitle_bbox = draw.textbbox((0, 0), fields['subtitle'], font=field_label_font)
+            subtitle_width = subtitle_bbox[2] - subtitle_bbox[0]
+            subtitle_x = (width - subtitle_width) // 2
+            draw.text((subtitle_x, current_y), fields['subtitle'], fill=theme_colors['accent'], font=field_label_font)
+            current_y += 55
+        
+        if fields.get('description'):
+            desc_lines = textwrap.wrap(fields['description'], width=65)
+            for line in desc_lines[:6]:
+                draw.text((card_x + 100, current_y), line, fill=text_color, font=field_text_font)
+                current_y += 45
+    
+    corner_size = 40
+    corner_color = theme_colors['accent']
+    draw.arc([card_x + 10, card_y + 10, card_x + corner_size, card_y + corner_size], 
+             start=180, end=270, fill=corner_color, width=4)
+    draw.arc([card_x + card_width - corner_size, card_y + 10, 
+              card_x + card_width - 10, card_y + corner_size], 
+             start=270, end=0, fill=corner_color, width=4)
+    draw.arc([card_x + 10, card_y + card_height - corner_size, 
+              card_x + corner_size, card_y + card_height - 10], 
+             start=90, end=180, fill=corner_color, width=4)
+    draw.arc([card_x + card_width - corner_size, card_y + card_height - corner_size, 
+              card_x + card_width - 10, card_y + card_height - 10], 
+             start=0, end=90, fill=corner_color, width=4)
+    
+    return img
+
 def generate_obs_scene_collection(readings: dict, service_details: dict, date_str: str, obs_settings: dict | None = None) -> dict:
     """
     Generate an OBS scene collection JSON structure
@@ -2787,6 +2989,115 @@ def preview_custom_lower_third():
             'success': False,
             'error': str(e),
             'message': 'Failed to generate preview'
+        }), 500
+
+@app.route('/api/preview_announcements', methods=['POST'])
+def preview_announcements():
+    """Generate preview images for all announcements in the batch"""
+    try:
+        data = request.get_json()
+        announcements = data.get('announcements', [])
+        
+        if not announcements:
+            return jsonify({
+                'success': False,
+                'error': 'No announcements provided'
+            }), 400
+        
+        previews = []
+        
+        for idx, announcement in enumerate(announcements, 1):
+            ann_type = announcement.get('type', 'general')
+            title = announcement.get('title', '')
+            
+            ann_img = create_announcement_slide(announcement)
+            
+            img_buffer = io.BytesIO()
+            ann_img.save(img_buffer, format='PNG')
+            img_buffer.seek(0)
+            img_b64 = base64.b64encode(img_buffer.read()).decode('utf-8')
+            
+            type_labels = {
+                'event': 'Event',
+                'prayer': 'Prayer',
+                'giving': 'Giving',
+                'general': 'General'
+            }
+            type_label = type_labels.get(ann_type, 'Announcement')
+            
+            previews.append({
+                'name': f'Announcement {idx}: {type_label} - {title[:30]}{"..." if len(title) > 30 else ""}',
+                'image': f'data:image/png;base64,{img_b64}'
+            })
+        
+        return jsonify({
+            'success': True,
+            'previews': previews
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate announcement previews'
+        }), 500
+
+@app.route('/api/generate_announcements', methods=['POST'])
+def generate_announcements():
+    """Generate and download ZIP file containing all announcement slides"""
+    try:
+        data = request.get_json()
+        announcements = data.get('announcements', [])
+        
+        if not announcements:
+            return jsonify({
+                'success': False,
+                'error': 'No announcements provided'
+            }), 400
+        
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for idx, announcement in enumerate(announcements, 1):
+                ann_type = announcement.get('type', 'general')
+                title = announcement.get('title', '')
+                
+                ann_img = create_announcement_slide(announcement)
+                
+                img_buffer = io.BytesIO()
+                ann_img.save(img_buffer, format='PNG')
+                img_buffer.seek(0)
+                
+                type_labels = {
+                    'event': 'Event',
+                    'prayer': 'Prayer',
+                    'giving': 'Giving',
+                    'general': 'General'
+                }
+                type_label = type_labels.get(ann_type, 'Announcement')
+                
+                safe_title = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in title)
+                safe_title = safe_title[:30].strip() or type_label
+                
+                filename = f"Announcement_{idx}_{type_label}_{safe_title}.png"
+                zip_file.writestr(filename, img_buffer.read())
+        
+        zip_buffer.seek(0)
+        
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        return send_file(
+            zip_buffer,
+            as_attachment=True,
+            download_name=f'Announcements_{timestamp}.zip',
+            mimetype='application/zip'
+        )
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate announcements'
         }), 500
 
 @app.route('/api/upload_pdf', methods=['POST'])
