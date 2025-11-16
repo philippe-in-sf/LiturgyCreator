@@ -5,7 +5,7 @@ Episcopal Church Calendar with Revised Common Lectionary integration
 Version: 1.9 - OBS Scene Generation
 """
 
-from flask import Flask, render_template, jsonify, request, send_file, session, redirect, url_for
+from flask import Flask, render_template, jsonify, request, send_file, send_from_directory, session, redirect, url_for
 import calendar
 from datetime import datetime, timedelta, date
 from typing import Dict, List, Optional, Tuple, Any
@@ -45,6 +45,74 @@ def allowed_file(filename):
     """Check if uploaded file has allowed extension"""
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def load_branding_config() -> Dict[str, Any]:
+    """Load branding configuration from JSON file, returns defaults if file missing/corrupt"""
+    config_path = 'config/branding_config.json'
+    default_config = {
+        "church_name": "Trinity Episcopal Church",
+        "logo_path": None,
+        "custom_colors": {
+            "enabled": False,
+            "primary": "#4169E1",
+            "accent": "#FFD700",
+            "background": "#FFFFFF"
+        },
+        "custom_font": {
+            "enabled": False,
+            "family": "Arial"
+        }
+    }
+    
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+                return config
+        else:
+            os.makedirs(os.path.dirname(config_path), exist_ok=True)
+            with open(config_path, 'w') as f:
+                json.dump(default_config, f, indent=2)
+            return default_config
+    except Exception as e:
+        print(f"Error loading branding config: {e}")
+        return default_config
+
+def save_branding_config(config: Dict[str, Any]) -> bool:
+    """Save branding configuration to JSON file with validation"""
+    config_path = 'config/branding_config.json'
+    
+    try:
+        if 'church_name' in config:
+            if len(config['church_name']) > 100:
+                raise ValueError("Church name must be 100 characters or less")
+        
+        if 'custom_colors' in config and config['custom_colors'].get('enabled'):
+            color_pattern = r'^#[0-9A-Fa-f]{6}$'
+            colors = config['custom_colors']
+            if 'primary' in colors and not re.match(color_pattern, colors['primary']):
+                raise ValueError("Invalid primary color format")
+            if 'accent' in colors and not re.match(color_pattern, colors['accent']):
+                raise ValueError("Invalid accent color format")
+            if 'background' in colors and not re.match(color_pattern, colors['background']):
+                raise ValueError("Invalid background color format")
+        
+        os.makedirs(os.path.dirname(config_path), exist_ok=True)
+        with open(config_path, 'w') as f:
+            json.dump(config, f, indent=2)
+        return True
+    except Exception as e:
+        print(f"Error saving branding config: {e}")
+        raise
+
+def get_branding_logo_path() -> Optional[str]:
+    """Returns absolute path to logo if exists, None otherwise"""
+    config = load_branding_config()
+    logo_path = config.get('logo_path')
+    
+    if logo_path and os.path.exists(logo_path):
+        return os.path.abspath(logo_path)
+    return None
 
 def extract_text_from_pdf(pdf_path: str) -> Dict[str, Any]:
     """Extract text from PDF using pdfplumber and fallback to OCR if needed"""
@@ -1032,6 +1100,205 @@ def export_readings():
             'message': 'Failed to export readings'
         }), 500
 
+@app.route('/api/branding', methods=['GET'])
+def get_branding():
+    """Returns current branding configuration"""
+    try:
+        config = load_branding_config()
+        
+        if config.get('logo_path'):
+            config['logo_url'] = f"/uploads/branding/{os.path.basename(config['logo_path'])}"
+        else:
+            config['logo_url'] = None
+            
+        return jsonify(config)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/branding', methods=['POST'])
+def update_branding():
+    """Updates branding configuration (church name, colors, fonts)"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
+        
+        current_config = load_branding_config()
+        
+        if 'church_name' in data:
+            if len(data['church_name']) > 100:
+                return jsonify({
+                    'success': False,
+                    'error': 'Church name must be 100 characters or less'
+                }), 400
+            current_config['church_name'] = data['church_name']
+        
+        if 'custom_colors' in data:
+            color_pattern = r'^#[0-9A-Fa-f]{6}$'
+            colors = data['custom_colors']
+            
+            if 'enabled' in colors:
+                current_config['custom_colors']['enabled'] = colors['enabled']
+            
+            if colors.get('enabled'):
+                if 'primary' in colors:
+                    if not re.match(color_pattern, colors['primary']):
+                        return jsonify({
+                            'success': False,
+                            'error': 'Invalid primary color format'
+                        }), 400
+                    current_config['custom_colors']['primary'] = colors['primary']
+                
+                if 'accent' in colors:
+                    if not re.match(color_pattern, colors['accent']):
+                        return jsonify({
+                            'success': False,
+                            'error': 'Invalid accent color format'
+                        }), 400
+                    current_config['custom_colors']['accent'] = colors['accent']
+                
+                if 'background' in colors:
+                    if not re.match(color_pattern, colors['background']):
+                        return jsonify({
+                            'success': False,
+                            'error': 'Invalid background color format'
+                        }), 400
+                    current_config['custom_colors']['background'] = colors['background']
+        
+        if 'custom_font' in data:
+            if 'enabled' in data['custom_font']:
+                current_config['custom_font']['enabled'] = data['custom_font']['enabled']
+            if 'family' in data['custom_font']:
+                current_config['custom_font']['family'] = data['custom_font']['family']
+        
+        save_branding_config(current_config)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Branding configuration updated successfully'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/branding/logo', methods=['POST'])
+def upload_logo():
+    """Handles logo file upload"""
+    try:
+        if 'logo' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No file provided'
+            }), 400
+        
+        file = request.files['logo']
+        
+        if file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No file selected'
+            }), 400
+        
+        if not file.content_type in ['image/png', 'image/jpeg', 'image/jpg']:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid file type. Only PNG and JPEG are allowed'
+            }), 400
+        
+        file_content = file.read()
+        file_size = len(file_content)
+        
+        if file_size > 2 * 1024 * 1024:
+            return jsonify({
+                'success': False,
+                'error': 'File size exceeds 2MB limit'
+            }), 400
+        
+        try:
+            img = Image.open(io.BytesIO(file_content))
+            img.verify()
+        except Exception:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid image file'
+            }), 400
+        
+        file_ext = file.filename.rsplit('.', 1)[1].lower()
+        new_filename = f"{uuid.uuid4()}.{file_ext}"
+        upload_path = os.path.join('uploads', 'branding', new_filename)
+        
+        config = load_branding_config()
+        
+        if config.get('logo_path') and os.path.exists(config['logo_path']):
+            try:
+                os.remove(config['logo_path'])
+            except Exception as e:
+                print(f"Warning: Could not delete old logo: {e}")
+        
+        os.makedirs(os.path.dirname(upload_path), exist_ok=True)
+        
+        with open(upload_path, 'wb') as f:
+            f.write(file_content)
+        
+        config['logo_path'] = upload_path
+        save_branding_config(config)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Logo uploaded successfully',
+            'logo_url': f"/uploads/branding/{new_filename}"
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/branding/logo', methods=['DELETE'])
+def delete_logo():
+    """Removes logo"""
+    try:
+        config = load_branding_config()
+        
+        if config.get('logo_path') and os.path.exists(config['logo_path']):
+            try:
+                os.remove(config['logo_path'])
+            except Exception as e:
+                print(f"Warning: Could not delete logo file: {e}")
+        
+        config['logo_path'] = None
+        save_branding_config(config)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Logo removed successfully'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/uploads/branding/<filename>')
+def serve_branding_logo(filename):
+    """Serves logo files"""
+    try:
+        return send_from_directory('uploads/branding', filename)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': 'Logo file not found'
+        }), 404
+
 def get_liturgical_season_colors_by_name(season: str) -> Dict[str, tuple]:
     """Get liturgical season colors by season name directly
     
@@ -1152,7 +1419,65 @@ def get_theme(theme_name: str, date_str: Optional[str] = None, liturgical_season
     else:
         return get_liturgical_season_colors(date_str)
 
-def create_lower_third(reading_type: str, reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None, theme: str = 'liturgical') -> Image.Image:
+def overlay_logo(image: Image.Image, logo_path: Optional[str], position: str = 'top-right', max_width: int = 220) -> Image.Image:
+    """
+    Overlay logo on image
+    
+    Args:
+        image: PIL Image to overlay on
+        logo_path: Path to logo file
+        position: 'top-right', 'top-left', 'bottom-right', 'bottom-left'
+        max_width: Maximum width for logo
+        
+    Returns:
+        Modified PIL Image with logo overlayed
+    """
+    if not logo_path or not os.path.exists(logo_path):
+        return image
+    
+    try:
+        logo = Image.open(logo_path).convert('RGBA')
+        
+        original_width, original_height = logo.size
+        aspect_ratio = original_height / original_width
+        
+        new_width = min(max_width, original_width)
+        new_height = int(new_width * aspect_ratio)
+        
+        logo = logo.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        
+        margin = 30
+        img_width, img_height = image.size
+        
+        if position == 'top-right':
+            x = img_width - new_width - margin
+            y = margin
+        elif position == 'top-left':
+            x = margin
+            y = margin
+        elif position == 'bottom-right':
+            x = img_width - new_width - margin
+            y = img_height - new_height - margin
+        elif position == 'bottom-left':
+            x = margin
+            y = img_height - new_height - margin
+        else:
+            x = img_width - new_width - margin
+            y = margin
+        
+        if image.mode != 'RGBA':
+            image = image.convert('RGBA')
+        
+        temp_image = Image.new('RGBA', image.size, (0, 0, 0, 0))
+        temp_image.paste(image, (0, 0))
+        temp_image.paste(logo, (x, y), logo)
+        
+        return temp_image
+    except Exception as e:
+        print(f"Error overlaying logo: {e}")
+        return image
+
+def create_lower_third(reading_type: str, reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None, theme: str = 'liturgical', branding: Optional[Dict[str, Any]] = None) -> Image.Image:
     """Create a lower third graphic for broadcast use with theme-based colors and banner-style design
     
     Args:
@@ -1164,7 +1489,10 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
         is_funeral: If True, use black background with white text instead of theme colors
         liturgical_season: Optional liturgical season override (e.g., 'advent', 'christmas', 'lent')
         theme: Theme name ('liturgical' or 'concert'), defaults to 'liturgical'
+        branding: Optional branding configuration dictionary
     """
+    if branding is None:
+        branding = load_branding_config()
     # Create image with transparent background (RGBA mode)
     img = Image.new('RGBA', (width, height), color=(0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
@@ -1386,6 +1714,9 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     # Main bottom text
     draw.text((text_indent, bottom_y), bottom_text, fill=(241, 241, 241, 255), font=bottom_font)
     
+    logo_path = branding.get('logo_path') if branding else None
+    img = overlay_logo(img, logo_path, position='bottom-left', max_width=120)
+    
     return img
 
 def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None) -> Image.Image:
@@ -1555,7 +1886,7 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
     
     return img
 
-def create_title_card(liturgical_reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None, theme: str = 'liturgical') -> Image.Image:
+def create_title_card(liturgical_reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None, theme: str = 'liturgical', branding: Optional[Dict[str, Any]] = None) -> Image.Image:
     """Create a full-screen title card with liturgical reference and church name
     
     Args:
@@ -1566,7 +1897,10 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
         is_funeral: If True, use black background with white text instead of theme colors
         liturgical_season: Directly specify liturgical season (advent, christmas, lent, etc.)
         theme: Theme name ('liturgical' or 'concert'), defaults to 'liturgical'
+        branding: Optional branding configuration dictionary
     """
+    if branding is None:
+        branding = load_branding_config()
     # Create image with appropriate background based on service type and theme
     if is_funeral:
         # Funeral: black background
@@ -1746,7 +2080,7 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
         draw.text((date_x, date_y), service_date, fill=liturgical_colors['text'], font=church_font)
     
     # Draw church name BELOW the second separator
-    church_name = "Trinity Episcopal Church, Tulsa, OK"
+    church_name = branding.get('church_name', 'Trinity Episcopal Church')
     church_bbox = draw.textbbox((0, 0), church_name, font=church_font)
     church_width = church_bbox[2] - church_bbox[0]
     church_x = (width - church_width) // 2
@@ -1762,9 +2096,12 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
     # Main text
     draw.text((church_x, church_y), church_name, fill=liturgical_colors['text'], font=church_font)
     
+    logo_path = branding.get('logo_path') if branding else None
+    img = overlay_logo(img, logo_path, position='top-right', max_width=220)
+    
     return img
 
-def create_announcement_slide(announcement_data: dict, width: int = 1920, height: int = 1080) -> Image.Image:
+def create_announcement_slide(announcement_data: dict, width: int = 1920, height: int = 1080, branding: Optional[Dict[str, Any]] = None) -> Image.Image:
     """Create an announcement slide with type-specific formatting
     
     Args:
@@ -1776,10 +2113,14 @@ def create_announcement_slide(announcement_data: dict, width: int = 1920, height
             - isMemorial: Boolean for memorial theme
         width: Image width in pixels
         height: Image height in pixels
+        branding: Optional branding configuration dictionary
     
     Returns:
         PIL Image object
     """
+    if branding is None:
+        branding = load_branding_config()
+    
     ann_type = announcement_data.get('type', 'general')
     title = announcement_data.get('title', '')
     fields = announcement_data.get('fields', {})
@@ -1963,6 +2304,9 @@ def create_announcement_slide(announcement_data: dict, width: int = 1920, height
     draw.arc([card_x + card_width - corner_size, card_y + card_height - corner_size, 
               card_x + card_width - 10, card_y + card_height - 10], 
              start=0, end=90, fill=corner_color, width=4)
+    
+    logo_path = branding.get('logo_path') if branding else None
+    img = overlay_logo(img, logo_path, position='top-right', max_width=220)
     
     return img
 
@@ -2218,6 +2562,8 @@ def generate_obs_scene_collection(readings: dict, service_details: dict, date_st
 def preview_graphics():
     """Generate preview images for title card and lower thirds"""
     try:
+        branding = load_branding_config()
+        
         data = request.get_json()
         date_str = data.get('date')
         service_details = data.get('serviceDetails', {})
@@ -2256,7 +2602,7 @@ def preview_graphics():
         
         # Just use the liturgical name without "Holy Eucharist for" prefix
         title_reference = f"{liturgical_name}\n{formatted_date}"
-        title_card = create_title_card(title_reference, date_str)
+        title_card = create_title_card(title_reference, date_str, branding=branding)
         
         # Convert title card to base64
         title_buffer = io.BytesIO()
@@ -2293,7 +2639,7 @@ def preview_graphics():
             formatted_type = reading_type.replace('_', ' ').title()
             
             # Create lower third image
-            lower_third = create_lower_third(reading_type, reference, date_str)
+            lower_third = create_lower_third(reading_type, reference, date_str, branding=branding)
             
             # Convert to base64
             lt_buffer = io.BytesIO()
@@ -2335,7 +2681,7 @@ def preview_graphics():
             field_value = service_details.get(field_key, '').strip()
             if field_value:  # Only create graphic if field has content
                 # Create lower third image
-                lower_third = create_lower_third(field_label, field_value, date_str)
+                lower_third = create_lower_third(field_label, field_value, date_str, branding=branding)
                 
                 # Convert to base64
                 lt_buffer = io.BytesIO()
@@ -2363,6 +2709,8 @@ def preview_graphics():
 def preview_special_service():
     """Generate preview images for special service graphics"""
     try:
+        branding = load_branding_config()
+        
         data = request.get_json()
         service_title = data.get('title', '')
         service_date = data.get('date', '')
@@ -2383,7 +2731,7 @@ def preview_special_service():
         selected_date = datetime.fromisoformat(service_date)
         formatted_date = selected_date.strftime("%B %d, %Y")
         title_reference = f"{service_title}\n{formatted_date}"
-        title_card = create_title_card(title_reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
+        title_card = create_title_card(title_reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding)
         
         # Convert to base64
         title_buffer = io.BytesIO()
@@ -2409,7 +2757,7 @@ def preview_special_service():
             reference = reading_data.get('reference', '').strip()
             
             if reference:
-                lower_third = create_lower_third(reading_label, reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
+                lower_third = create_lower_third(reading_label, reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding)
                 
                 lt_buffer = io.BytesIO()
                 lower_third.save(lt_buffer, format='PNG')
@@ -2434,7 +2782,7 @@ def preview_special_service():
         for field_key, field_label in hymn_fields.items():
             hymn_value = service_details.get(field_key, '').strip()
             if hymn_value:
-                lower_third = create_lower_third(field_label, hymn_value, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
+                lower_third = create_lower_third(field_label, hymn_value, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding)
                 
                 lt_buffer = io.BytesIO()
                 lower_third.save(lt_buffer, format='PNG')
@@ -2484,6 +2832,8 @@ def export_all():
                 'success': False,
                 'error': 'No date provided'
             }), 400
+        
+        branding = load_branding_config()
         
         # Parse date for folder naming
         selected_date = datetime.fromisoformat(date_str)
@@ -2640,7 +2990,7 @@ def export_all():
             # Just use the liturgical name without "Holy Eucharist for" prefix
             title_reference = f"{liturgical_name}\n{formatted_date}"
             
-            title_card_img = create_title_card(title_reference, date_str)
+            title_card_img = create_title_card(title_reference, date_str, branding=branding)
             title_card_buffer = io.BytesIO()
             title_card_img.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
@@ -2666,7 +3016,7 @@ def export_all():
                 reference = reading_ref_overrides.get(reading_type, '') or reading_data.get('reference', 'No reference')
                 
                 # Generate lower third image with liturgical season colors
-                img = create_lower_third(reading_type, reference, date_str)
+                img = create_lower_third(reading_type, reference, date_str, branding=branding)
                 
                 # Save image to buffer
                 img_buffer = io.BytesIO()
@@ -2705,7 +3055,7 @@ def export_all():
                 field_value = service_details.get(field_key, '').strip()
                 if field_value:  # Only create graphic if field has content
                     # Generate lower third image with liturgical season colors
-                    img = create_lower_third(field_label, field_value, date_str)
+                    img = create_lower_third(field_label, field_value, date_str, branding=branding)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -2759,6 +3109,8 @@ def generate_lower_thirds():
                 'error': 'No date provided'
             }), 400
         
+        branding = load_branding_config()
+        
         # Parse date for folder naming
         selected_date = datetime.fromisoformat(date_str)
         date_folder_name = selected_date.strftime("%Y-%m-%d")
@@ -2793,7 +3145,7 @@ def generate_lower_thirds():
                 reference = reading_data.get('reference', 'No reference')
                 
                 # Generate lower third image with liturgical season colors
-                img = create_lower_third(reading_type, reference, date_str)
+                img = create_lower_third(reading_type, reference, date_str, branding=branding)
                 
                 # Save image to buffer
                 img_buffer = io.BytesIO()
@@ -2820,8 +3172,8 @@ def generate_lower_thirds():
             for field_key, field_label in hymn_fields.items():
                 hymn_value = service_details.get(field_key, '').strip()
                 if hymn_value:  # Only create graphic if field has content
-                    # Generate lower third image with liturgical season colors
-                    img = create_lower_third(field_label, hymn_value, date_str)
+                    # Generate lower third image with liturgical season colors and branding
+                    img = create_lower_third(field_label, hymn_value, date_str, branding=branding)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -2865,8 +3217,10 @@ def generate_custom_title_card():
                 'error': 'No text provided for title card'
             }), 400
         
+        branding = load_branding_config()
+        
         # Generate the title card using the existing function
-        title_card_img = create_title_card(custom_text, liturgical_season=liturgical_season, is_funeral=is_funeral)
+        title_card_img = create_title_card(custom_text, liturgical_season=liturgical_season, is_funeral=is_funeral, branding=branding)
         
         # Convert to PNG and send as file download
         img_buffer = io.BytesIO()
@@ -2909,13 +3263,16 @@ def generate_custom_lower_third():
                 'error': 'At least one field (Label or Content) must be provided'
             }), 400
         
+        branding = load_branding_config()
+        
         # Generate the lower third using the existing function
         # The create_lower_third function takes reading_type and reference as parameters
         lower_third_img = create_lower_third(
             reading_type=label_text or '',
             reference=content_text or '',
             liturgical_season=liturgical_season if liturgical_season else None,
-            is_funeral=is_memorial
+            is_funeral=is_memorial,
+            branding=branding
         )
         
         # Convert to PNG and send as file download
@@ -2947,6 +3304,8 @@ def generate_custom_lower_third():
 def preview_custom_lower_third():
     """Generate preview for custom lower third"""
     try:
+        branding = load_branding_config()
+        
         data = request.get_json()
         label_text = data.get('labelText', '').strip()
         content_text = data.get('contentText', '').strip()
@@ -2965,7 +3324,8 @@ def preview_custom_lower_third():
             reading_type=label_text or '',
             reference=content_text or '',
             liturgical_season=liturgical_season if liturgical_season else None,
-            is_funeral=is_memorial
+            is_funeral=is_memorial,
+            branding=branding
         )
         
         # Convert to base64
@@ -2995,6 +3355,8 @@ def preview_custom_lower_third():
 def preview_announcements():
     """Generate preview images for all announcements in the batch"""
     try:
+        branding = load_branding_config()
+        
         data = request.get_json()
         announcements = data.get('announcements', [])
         
@@ -3010,7 +3372,7 @@ def preview_announcements():
             ann_type = announcement.get('type', 'general')
             title = announcement.get('title', '')
             
-            ann_img = create_announcement_slide(announcement)
+            ann_img = create_announcement_slide(announcement, branding=branding)
             
             img_buffer = io.BytesIO()
             ann_img.save(img_buffer, format='PNG')
@@ -3055,6 +3417,8 @@ def generate_announcements():
                 'error': 'No announcements provided'
             }), 400
         
+        branding = load_branding_config()
+        
         zip_buffer = io.BytesIO()
         
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
@@ -3062,7 +3426,7 @@ def generate_announcements():
                 ann_type = announcement.get('type', 'general')
                 title = announcement.get('title', '')
                 
-                ann_img = create_announcement_slide(announcement)
+                ann_img = create_announcement_slide(announcement, branding=branding)
                 
                 img_buffer = io.BytesIO()
                 ann_img.save(img_buffer, format='PNG')
@@ -3204,6 +3568,8 @@ def list_pdf_uploads():
 def special_service():
     """Generate graphics and text files for special (non-lectionary) services"""
     try:
+        branding = load_branding_config()
+        
         data = request.get_json()
         service_title = data.get('title', '')
         service_date = data.get('date', '')
@@ -3296,7 +3662,7 @@ def special_service():
             # ===== PART 3: Generate title card with service title and date =====
             formatted_date = selected_date.strftime("%B %d, %Y")
             title_reference = f"{service_title}\n{formatted_date}"
-            title_card = create_title_card(title_reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
+            title_card = create_title_card(title_reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding)
             title_card_buffer = io.BytesIO()
             title_card.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
@@ -3309,7 +3675,7 @@ def special_service():
                 
                 if reference:
                     # Generate lower third image (use funeral colors if flagged, otherwise liturgical colors)
-                    img = create_lower_third(reading_label, reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
+                    img = create_lower_third(reading_label, reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -3335,7 +3701,7 @@ def special_service():
                 hymn_value = service_details.get(field_key, '').strip()
                 if hymn_value:
                     # Generate lower third image (use funeral colors if flagged, otherwise liturgical colors)
-                    img = create_lower_third(field_label, hymn_value, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
+                    img = create_lower_third(field_label, hymn_value, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -3380,6 +3746,8 @@ def special_service():
 def evensong_service():
     """Generate service details export for Evensong services"""
     try:
+        branding = load_branding_config()
+        
         data = request.get_json()
         service_date = data.get('date', '')
         evensong_details = data.get('evensong_details', {})
@@ -3451,7 +3819,7 @@ def evensong_service():
             # ===== Generate title card for Evensong service =====
             formatted_date = selected_date.strftime("%B %d, %Y")
             title_reference = f"Evensong\n{formatted_date}"
-            title_card = create_title_card(title_reference, service_date)
+            title_card = create_title_card(title_reference, service_date, branding=branding)
             title_card_buffer = io.BytesIO()
             title_card.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
@@ -3472,7 +3840,7 @@ def evensong_service():
                 field_value = evensong_details.get(field_key, '').strip()
                 if field_value:
                     # Generate lower third image
-                    img = create_lower_third(field_label, field_value, service_date)
+                    img = create_lower_third(field_label, field_value, service_date, branding=branding)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -3513,6 +3881,8 @@ def evensong_service():
 def concert_program():
     """Generate concert program with title card and lower thirds for each piece"""
     try:
+        branding = load_branding_config()
+        
         data = request.get_json()
         performer = data.get('performer', '').strip()
         concert_date = data.get('date', '').strip()
@@ -3554,7 +3924,7 @@ def concert_program():
         
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             title_text = f"{performer}\n{concert_date} at {concert_time}"
-            title_card = create_title_card(title_text, theme='concert')
+            title_card = create_title_card(title_text, theme='concert', branding=branding)
             title_card_buffer = io.BytesIO()
             title_card.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
@@ -3571,7 +3941,7 @@ def concert_program():
                 
                 lower_third = create_lower_third(piece['title'] if piece['title'] else 'Piece', 
                                                 piece['composer'] if piece['composer'] else '', 
-                                                theme='concert')
+                                                theme='concert', branding=branding)
                 
                 img_buffer = io.BytesIO()
                 lower_third.save(img_buffer, format='PNG')
@@ -3602,6 +3972,8 @@ def concert_program():
 def preview_concert_program():
     """Generate preview images for concert program title card and lower thirds"""
     try:
+        branding = load_branding_config()
+        
         data = request.get_json()
         performer = data.get('performer', '').strip()
         concert_date = data.get('date', '').strip()
@@ -3641,7 +4013,7 @@ def preview_concert_program():
         
         # Generate title card preview
         title_text = f"{performer}\n{concert_date} at {concert_time}"
-        title_card = create_title_card(title_text, theme='concert')
+        title_card = create_title_card(title_text, theme='concert', branding=branding)
         
         # Convert title card to base64
         title_buffer = io.BytesIO()
@@ -3666,7 +4038,7 @@ def preview_concert_program():
             
             lower_third = create_lower_third(piece['title'] if piece['title'] else 'Piece', 
                                             piece['composer'] if piece['composer'] else '', 
-                                            theme='concert')
+                                            theme='concert', branding=branding)
             
             # Convert lower third to base64
             img_buffer = io.BytesIO()

@@ -1,0 +1,14 @@
+{
+  "church_name": "Trinity Episcopal Church",
+  "logo_path": null,
+  "custom_colors": {
+    "enabled": false,
+    "primary": "#4169E1",
+    "accent": "#FFD700",
+    "background": "#FFFFFF"
+  },
+  "custom_font": {
+    "enabled": false,
+    "family": "Arial"
+  }
+}

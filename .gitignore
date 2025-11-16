@@ -1,0 +1,9 @@
+uploads/branding/*
+!uploads/branding/.gitkeep
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.env
+.venv
+*.egg-info/
