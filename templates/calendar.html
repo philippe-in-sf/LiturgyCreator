@@ -1032,7 +1032,6 @@
                             <button class="action-btn" onclick="showCustomTitleCard()" style="background-color: #e74c3c; color: white;">🎬 Custom Title Card</button>
                             <button class="action-btn" onclick="showCustomLowerThird()" style="background-color: #f39c12; color: white;">📺 Custom Lower Third</button>
                             <button class="action-btn" onclick="showAnnouncements()" style="background-color: #8e44ad; color: white;">📢 Announcements</button>
-                            <button class="action-btn" onclick="showBrandingSettings()" style="background-color: #17a2b8; color: white;">🎨 Branding</button>
                             <button class="action-btn btn-info" onclick="showSettings()" style="background-color: #6c757d;">⚙️ Settings</button>
                         </div>
                     </div>
@@ -2042,34 +2041,6 @@
         </div>
     </div>
 
-    <!-- Branding Settings Modal -->
-    <div id="brandingModal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <span class="close" onclick="closeBrandingSettings()">&times;</span>
-            <h2>🎨 Church Branding Settings</h2>
-            
-            <!-- Church Name -->
-            <div class="form-group">
-                <label for="brandingChurchName">Church Name</label>
-                <input type="text" id="brandingChurchName" maxlength="100" placeholder="Enter church name" />
-            </div>
-            
-            <!-- Logo Upload -->
-            <div class="form-group">
-                <label for="brandingLogoFile">Church Logo</label>
-                <input type="file" id="brandingLogoFile" accept="image/png,image/jpeg" />
-                <div id="logoPreview" style="margin-top: 10px;"></div>
-                <button type="button" class="btn-cancel" onclick="deleteBrandingLogo()" id="deleteLogoBtn" style="display: none; margin-top: 10px;">Remove Logo</button>
-            </div>
-            
-            <!-- Action Buttons -->
-            <div class="form-actions">
-                <button type="button" class="btn-cancel" onclick="closeBrandingSettings()">Cancel</button>
-                <button type="button" class="btn-save" onclick="saveBrandingSettings()">Save Settings</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         let currentDate = new Date();
         let selectedDate = new Date();
@@ -2693,131 +2664,6 @@
             localStorage.setItem('obsSettings', JSON.stringify(obsSettings));
             showSuccess('OBS settings saved successfully!');
             closeSettings();
-        }
-
-        // Branding Settings Functions
-        async function showBrandingSettings() {
-            const modal = document.getElementById('brandingModal');
-            modal.style.display = 'block';
-            
-            try {
-                const response = await fetch('/api/branding');
-                const branding = await response.json();
-                
-                // Populate church name
-                document.getElementById('brandingChurchName').value = branding.church_name || '';
-                
-                // Show logo preview if exists
-                const logoPreview = document.getElementById('logoPreview');
-                const deleteBtn = document.getElementById('deleteLogoBtn');
-                
-                if (branding.logo_url) {
-                    logoPreview.innerHTML = `<img src="${branding.logo_url}" style="max-width: 200px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;" alt="Current Logo">`;
-                    deleteBtn.style.display = 'inline-block';
-                } else {
-                    logoPreview.innerHTML = '';
-                    deleteBtn.style.display = 'none';
-                }
-            } catch (error) {
-                console.error('Error loading branding settings:', error);
-                showError('Failed to load branding settings');
-            }
-        }
-
-        function closeBrandingSettings() {
-            const modal = document.getElementById('brandingModal');
-            modal.style.display = 'none';
-        }
-
-        async function saveBrandingSettings() {
-            const churchName = document.getElementById('brandingChurchName').value.trim();
-            const logoFile = document.getElementById('brandingLogoFile').files[0];
-            
-            if (!churchName) {
-                showError('Please enter a church name');
-                return;
-            }
-            
-            try {
-                // Upload logo if a new file was selected
-                if (logoFile) {
-                    // Validate file size (2MB max)
-                    if (logoFile.size > 2 * 1024 * 1024) {
-                        showError('Logo file size must be less than 2MB');
-                        return;
-                    }
-                    
-                    // Validate file type
-                    if (!logoFile.type.match(/image\/(png|jpeg)/)) {
-                        showError('Logo must be a PNG or JPEG image');
-                        return;
-                    }
-                    
-                    const formData = new FormData();
-                    formData.append('logo', logoFile);
-                    
-                    const uploadResponse = await fetch('/api/branding/logo', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    if (!uploadResponse.ok) {
-                        const error = await uploadResponse.json();
-                        throw new Error(error.error || 'Failed to upload logo');
-                    }
-                }
-                
-                // Update branding config
-                const response = await fetch('/api/branding', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        church_name: churchName
-                    })
-                });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to save branding settings');
-                }
-                
-                showSuccess('Branding settings saved successfully!');
-                closeBrandingSettings();
-                
-                // Clear file input
-                document.getElementById('brandingLogoFile').value = '';
-            } catch (error) {
-                console.error('Error saving branding settings:', error);
-                showError(error.message || 'Failed to save branding settings');
-            }
-        }
-
-        async function deleteBrandingLogo() {
-            if (!confirm('Are you sure you want to remove the logo?')) {
-                return;
-            }
-            
-            try {
-                const response = await fetch('/api/branding/logo', {
-                    method: 'DELETE'
-                });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to delete logo');
-                }
-                
-                // Update preview
-                document.getElementById('logoPreview').innerHTML = '';
-                document.getElementById('deleteLogoBtn').style.display = 'none';
-                
-                showSuccess('Logo removed successfully!');
-            } catch (error) {
-                console.error('Error deleting logo:', error);
-                showError(error.message || 'Failed to delete logo');
-            }
         }
 
         // Custom Title Card Functions
@@ -3874,7 +3720,6 @@
             const specialServiceModal = document.getElementById('specialServiceModal');
             const evensongServiceModal = document.getElementById('evensongServiceModal');
             const concertProgramModal = document.getElementById('concertProgramModal');
-            const brandingModal = document.getElementById('brandingModal');
             
             if (event.target === serviceModal) {
                 closeServiceDetails();
@@ -3892,8 +3737,6 @@
                 closeSpecialService();
             } else if (event.target === evensongServiceModal) {
                 closeEvensongService();
-            } else if (event.target === brandingModal) {
-                closeBrandingSettings();
             } else if (event.target === concertProgramModal) {
                 closeConcertProgram();
             }
