@@ -941,6 +941,160 @@
         .service-type-option:not(:last-child) {
             border-right: 1px solid #dee2e6;
         }
+        
+        /* Dark Mode Support */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-color: #e9ecef;
+            --card-bg: #ffffff;
+            --card-shadow: rgba(0,0,0,0.1);
+        }
+        
+        body.dark-mode {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --border-color: #404040;
+            --card-bg: #262626;
+            --card-shadow: rgba(0,0,0,0.5);
+        }
+        
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+        
+        body.dark-mode .container {
+            background: var(--card-bg);
+        }
+        
+        body.dark-mode .nav-controls {
+            background: var(--bg-secondary);
+            border-bottom-color: var(--border-color);
+        }
+        
+        body.dark-mode .month-year,
+        body.dark-mode .selected-date,
+        body.dark-mode .reading-title,
+        body.dark-mode .modal-title,
+        body.dark-mode .form-group label {
+            color: var(--text-primary);
+        }
+        
+        body.dark-mode .liturgical-info,
+        body.dark-mode .reading-reference,
+        body.dark-mode .reading-text,
+        body.dark-mode .loading,
+        body.dark-mode .action-section-label {
+            color: var(--text-secondary);
+        }
+        
+        body.dark-mode .calendar-container {
+            background: var(--card-bg);
+        }
+        
+        body.dark-mode .calendar td {
+            border-color: var(--border-color);
+        }
+        
+        body.dark-mode .calendar td:hover {
+            background: var(--bg-secondary);
+        }
+        
+        body.dark-mode .reading-section,
+        body.dark-mode .form-section,
+        body.dark-mode .instructions,
+        body.dark-mode .upload-results,
+        body.dark-mode .result-section {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        body.dark-mode .details-panel {
+            background: var(--card-bg);
+        }
+        
+        body.dark-mode .modal-content {
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+        
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group textarea,
+        body.dark-mode .form-group select {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        
+        body.dark-mode .form-group input:focus,
+        body.dark-mode .form-group textarea:focus,
+        body.dark-mode .form-group select:focus {
+            border-color: #667eea;
+        }
+        
+        body.dark-mode .service-type-toggle {
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+        
+        body.dark-mode .service-type-option {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-right-color: var(--border-color);
+        }
+        
+        body.dark-mode .service-type-option:hover {
+            background: var(--border-color);
+        }
+        
+        body.dark-mode .close {
+            color: var(--text-secondary);
+        }
+        
+        body.dark-mode .close:hover {
+            color: var(--text-primary);
+        }
+        
+        body.dark-mode .modal-header,
+        body.dark-mode .details-header {
+            border-bottom-color: var(--border-color);
+        }
+        
+        body.dark-mode .upload-area {
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+        
+        body.dark-mode .upload-area:hover {
+            border-color: #667eea;
+            background: var(--border-color);
+        }
+        
+        body.dark-mode .error {
+            background: #5a2c2c;
+            color: #ff8888;
+        }
+        
+        .dark-mode-toggle {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-left: auto;
+        }
+        
+        .dark-mode-toggle:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -958,6 +1112,7 @@
             </div>
             <button class="nav-btn" onclick="navigateMonth(1)">Next ▶</button>
             <button class="nav-btn" onclick="goToToday()">Today</button>
+            <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
         </div>
         
         <div class="main-content">
