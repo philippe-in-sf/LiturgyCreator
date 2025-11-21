@@ -748,7 +748,7 @@ def get_readings(date_str):
             'date': date_str,
             'service_type': service_type,
             'liturgical_info': liturgical_info,
-            'celebration': readings_data.get('celebration', 'Unknown'),
+            'celebration': liturgical_info.get('celebration', 'Unknown'),
             'source': readings_data.get('source', 'Unknown'),
             'liturgical_year': readings_data.get('liturgical_year', 'Unknown'),
             'readings': parsed_readings
