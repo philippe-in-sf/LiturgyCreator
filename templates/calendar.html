@@ -1032,6 +1032,8 @@
                             <button class="action-btn" onclick="showCustomTitleCard()" style="background-color: #e74c3c; color: white;">🎬 Custom Title Card</button>
                             <button class="action-btn" onclick="showCustomLowerThird()" style="background-color: #f39c12; color: white;">📺 Custom Lower Third</button>
                             <button class="action-btn" onclick="showAnnouncements()" style="background-color: #8e44ad; color: white;">📢 Announcements</button>
+                            <button class="action-btn" onclick="showServiceOrder()" style="background-color: #16a085; color: white;">📋 Service Order</button>
+                            <button class="action-btn" onclick="showCountdown()" style="background-color: #d35400; color: white;">⏱️ Countdown Timer</button>
                             <button class="action-btn btn-info" onclick="showSettings()" style="background-color: #6c757d;">⚙️ Settings</button>
                         </div>
                     </div>
@@ -1650,6 +1652,166 @@
                     <button type="button" class="btn-cancel" onclick="closeAnnouncements()">Cancel</button>
                     <button type="button" class="btn-info" onclick="previewAnnouncements()" id="previewAnnouncementsBtn" style="background-color: #17a2b8; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; display: none;">👁️ Preview All</button>
                     <button type="button" class="btn-save" onclick="generateAnnouncements()" id="generateAnnouncementsBtn" style="display: none;">Generate & Download</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Service Order Modal -->
+    <div id="serviceOrderModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <span class="close" onclick="closeServiceOrder()">&times;</span>
+                <h2 class="modal-title">📋 Service Order Slides</h2>
+            </div>
+            
+            <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 20px;">
+                Create slides showing the order of service
+            </div>
+            
+            <form id="serviceOrderForm">
+                <div class="form-section">
+                    <h3>Settings</h3>
+                    
+                    <div class="form-group">
+                        <label for="serviceOrderSeason">Liturgical Season</label>
+                        <select id="serviceOrderSeason" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                            <option value="">Current Season</option>
+                            <option value="advent">Advent (Royal Blue)</option>
+                            <option value="christmas">Christmas (White & Gold)</option>
+                            <option value="season_after_epiphany">Season after Epiphany (Green)</option>
+                            <option value="lent">Lent (Purple)</option>
+                            <option value="easter">Easter (White & Gold)</option>
+                            <option value="pentecost">Pentecost (Red)</option>
+                            <option value="season_after_pentecost">Season after Pentecost (Green)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="serviceOrderMemorial" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
+                            <span>Memorial Service (Black & White)</span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="serviceOrderNumbering" checked style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
+                            <span>Show Item Numbers (1, 2, 3...)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Service Order Items</h3>
+                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
+                        Add the items in your service order. You can add up to 15 items.
+                    </p>
+                    
+                    <div id="orderItemsList" style="margin-bottom: 15px;">
+                    </div>
+                    
+                    <button type="button" onclick="addServiceOrderItem()" style="width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                        ➕ Add Item
+                    </button>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeServiceOrder()">Cancel</button>
+                    <button type="button" class="btn-info" onclick="previewServiceOrder()" style="background-color: #17a2b8; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">👁️ Preview All</button>
+                    <button type="button" class="btn-save" onclick="generateServiceOrder()">Generate & Download</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Countdown Timer Modal -->
+    <div id="countdownModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <span class="close" onclick="closeCountdown()">&times;</span>
+                <h2 class="modal-title">⏱️ Countdown Timer</h2>
+            </div>
+            
+            <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 20px;">
+                Create pre-service countdown slides
+            </div>
+            
+            <form id="countdownForm">
+                <div class="form-section">
+                    <h3>Settings</h3>
+                    
+                    <div class="form-group">
+                        <label for="countdownSeason">Liturgical Season</label>
+                        <select id="countdownSeason" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                            <option value="">Current Season</option>
+                            <option value="advent">Advent (Royal Blue)</option>
+                            <option value="christmas">Christmas (White & Gold)</option>
+                            <option value="season_after_epiphany">Season after Epiphany (Green)</option>
+                            <option value="lent">Lent (Purple)</option>
+                            <option value="easter">Easter (White & Gold)</option>
+                            <option value="pentecost">Pentecost (Red)</option>
+                            <option value="season_after_pentecost">Season after Pentecost (Green)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="countdownMemorial" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
+                            <span>Memorial Service (Black & White)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Countdown Times</h3>
+                    
+                    <div class="form-group">
+                        <label>Select Preset Times</label>
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" id="countdown30" value="30" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
+                                <span>30 minutes</span>
+                            </label>
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" id="countdown15" value="15" checked style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
+                                <span>15 minutes</span>
+                            </label>
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" id="countdown10" value="10" checked style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
+                                <span>10 minutes</span>
+                            </label>
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" id="countdown5" value="5" checked style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
+                                <span>5 minutes</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="countdownCustom">Custom Time (minutes)</label>
+                        <input type="number" id="countdownCustom" min="1" max="120" placeholder="e.g., 20" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Optional Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="countdownServiceTime">Service Start Time</label>
+                        <input type="text" id="countdownServiceTime" placeholder="e.g., 10:00 AM" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="countdownWelcome">Welcome Message</label>
+                        <input type="text" id="countdownWelcome" placeholder="e.g., Welcome to Trinity Episcopal Church" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeCountdown()">Cancel</button>
+                    <button type="button" class="btn-info" onclick="previewCountdown()" style="background-color: #17a2b8; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">👁️ Preview All</button>
+                    <button type="button" class="btn-save" onclick="generateCountdown()">Generate & Download</button>
                 </div>
             </form>
         </div>
@@ -3099,6 +3261,315 @@
             }
         }
 
+        // Service Order Functions
+        let serviceOrderItems = [];
+
+        function showServiceOrder() {
+            const modal = document.getElementById('serviceOrderModal');
+            modal.style.display = 'block';
+            
+            serviceOrderItems = ['', '', ''];
+            renderServiceOrderItems();
+        }
+
+        function closeServiceOrder() {
+            const modal = document.getElementById('serviceOrderModal');
+            modal.style.display = 'none';
+            serviceOrderItems = [];
+        }
+
+        function renderServiceOrderItems() {
+            const container = document.getElementById('orderItemsList');
+            let html = '';
+            
+            serviceOrderItems.forEach((item, index) => {
+                const canRemove = serviceOrderItems.length > 3;
+                html += `
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                        <span style="min-width: 30px; font-weight: bold; color: #6c757d;">${index + 1}.</span>
+                        <input type="text" value="${item}" onchange="updateServiceOrderItem(${index}, this.value)" 
+                               placeholder="e.g., Opening Hymn, First Reading, etc."
+                               style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                        ${canRemove ? `<button type="button" onclick="removeServiceOrderItem(${index})" 
+                                              style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
+                                              ❌
+                                       </button>` : ''}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function updateServiceOrderItem(index, value) {
+            serviceOrderItems[index] = value;
+        }
+
+        function addServiceOrderItem() {
+            if (serviceOrderItems.length >= 15) {
+                showError('Maximum of 15 service order items allowed');
+                return;
+            }
+            
+            serviceOrderItems.push('');
+            renderServiceOrderItems();
+        }
+
+        function removeServiceOrderItem(index) {
+            if (serviceOrderItems.length <= 3) {
+                showError('Minimum of 3 items required');
+                return;
+            }
+            
+            serviceOrderItems.splice(index, 1);
+            renderServiceOrderItems();
+        }
+
+        async function previewServiceOrder() {
+            const nonEmptyItems = serviceOrderItems.filter(item => item.trim() !== '');
+            
+            if (nonEmptyItems.length === 0) {
+                showError('Please add at least one service order item');
+                return;
+            }
+            
+            const modal = document.getElementById('previewModal');
+            const loadingDiv = document.getElementById('previewLoading');
+            const imagesDiv = document.getElementById('previewImages');
+            
+            modal.style.display = 'block';
+            loadingDiv.style.display = 'block';
+            imagesDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/preview_service_order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        orderItems: nonEmptyItems,
+                        liturgicalSeason: document.getElementById('serviceOrderSeason').value,
+                        isMemorial: document.getElementById('serviceOrderMemorial').checked,
+                        showNumbering: document.getElementById('serviceOrderNumbering').checked
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayPreviews(data.previews);
+                    loadingDiv.style.display = 'none';
+                    imagesDiv.style.display = 'block';
+                } else {
+                    showError('Failed to load preview: ' + data.error);
+                    closePreview();
+                }
+            } catch (error) {
+                console.error('Preview error:', error);
+                showError('Failed to load preview');
+                closePreview();
+            }
+        }
+
+        async function generateServiceOrder() {
+            const nonEmptyItems = serviceOrderItems.filter(item => item.trim() !== '');
+            
+            if (nonEmptyItems.length === 0) {
+                showError('Please add at least one service order item');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/generate_service_order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        orderItems: nonEmptyItems,
+                        liturgicalSeason: document.getElementById('serviceOrderSeason').value,
+                        isMemorial: document.getElementById('serviceOrderMemorial').checked,
+                        showNumbering: document.getElementById('serviceOrderNumbering').checked
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    showError(errorData.error || 'Failed to generate service order slides');
+                    return;
+                }
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = 'Service_Order.zip';
+                if (contentDisposition) {
+                    const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, '');
+                    }
+                }
+                
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showSuccess('Service order slides generated successfully!');
+                closeServiceOrder();
+                
+            } catch (error) {
+                console.error('Error generating service order:', error);
+                showError('Failed to generate service order slides');
+            }
+        }
+
+        // Countdown Timer Functions
+        function showCountdown() {
+            const modal = document.getElementById('countdownModal');
+            modal.style.display = 'block';
+            
+            document.getElementById('countdownSeason').value = '';
+            document.getElementById('countdownMemorial').checked = false;
+            document.getElementById('countdown30').checked = false;
+            document.getElementById('countdown15').checked = true;
+            document.getElementById('countdown10').checked = true;
+            document.getElementById('countdown5').checked = true;
+            document.getElementById('countdownCustom').value = '';
+            document.getElementById('countdownServiceTime').value = '';
+            document.getElementById('countdownWelcome').value = '';
+        }
+
+        function closeCountdown() {
+            const modal = document.getElementById('countdownModal');
+            modal.style.display = 'none';
+        }
+
+        async function previewCountdown() {
+            const times = [];
+            if (document.getElementById('countdown30').checked) times.push(30);
+            if (document.getElementById('countdown15').checked) times.push(15);
+            if (document.getElementById('countdown10').checked) times.push(10);
+            if (document.getElementById('countdown5').checked) times.push(5);
+            
+            const customTime = parseInt(document.getElementById('countdownCustom').value);
+            
+            if (times.length === 0 && !customTime) {
+                showError('Please select at least one countdown time');
+                return;
+            }
+            
+            const modal = document.getElementById('previewModal');
+            const loadingDiv = document.getElementById('previewLoading');
+            const imagesDiv = document.getElementById('previewImages');
+            
+            modal.style.display = 'block';
+            loadingDiv.style.display = 'block';
+            imagesDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/preview_countdown', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        times: times,
+                        customTime: customTime || null,
+                        liturgicalSeason: document.getElementById('countdownSeason').value,
+                        isMemorial: document.getElementById('countdownMemorial').checked,
+                        welcomeMessage: document.getElementById('countdownWelcome').value,
+                        serviceTime: document.getElementById('countdownServiceTime').value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayPreviews(data.previews);
+                    loadingDiv.style.display = 'none';
+                    imagesDiv.style.display = 'block';
+                } else {
+                    showError('Failed to load preview: ' + data.error);
+                    closePreview();
+                }
+            } catch (error) {
+                console.error('Preview error:', error);
+                showError('Failed to load preview');
+                closePreview();
+            }
+        }
+
+        async function generateCountdown() {
+            const times = [];
+            if (document.getElementById('countdown30').checked) times.push(30);
+            if (document.getElementById('countdown15').checked) times.push(15);
+            if (document.getElementById('countdown10').checked) times.push(10);
+            if (document.getElementById('countdown5').checked) times.push(5);
+            
+            const customTime = parseInt(document.getElementById('countdownCustom').value);
+            
+            if (times.length === 0 && !customTime) {
+                showError('Please select at least one countdown time');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/generate_countdown', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        times: times,
+                        customTime: customTime || null,
+                        liturgicalSeason: document.getElementById('countdownSeason').value,
+                        isMemorial: document.getElementById('countdownMemorial').checked,
+                        welcomeMessage: document.getElementById('countdownWelcome').value,
+                        serviceTime: document.getElementById('countdownServiceTime').value
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    showError(errorData.error || 'Failed to generate countdown slides');
+                    return;
+                }
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = 'Countdown_Timer.zip';
+                if (contentDisposition) {
+                    const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, '');
+                    }
+                }
+                
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showSuccess('Countdown timer slides generated successfully!');
+                closeCountdown();
+                
+            } catch (error) {
+                console.error('Error generating countdown:', error);
+                showError('Failed to generate countdown slides');
+            }
+        }
+
         // Preview Functions
         function showPreview() {
             const dateStr = selectedDate.toISOString().split('T')[0];
@@ -3717,6 +4188,8 @@
             const customTitleCardModal = document.getElementById('customTitleCardModal');
             const customLowerThirdModal = document.getElementById('customLowerThirdModal');
             const announcementModal = document.getElementById('announcementModal');
+            const serviceOrderModal = document.getElementById('serviceOrderModal');
+            const countdownModal = document.getElementById('countdownModal');
             const specialServiceModal = document.getElementById('specialServiceModal');
             const evensongServiceModal = document.getElementById('evensongServiceModal');
             const concertProgramModal = document.getElementById('concertProgramModal');
@@ -3733,6 +4206,10 @@
                 closeCustomLowerThird();
             } else if (event.target === announcementModal) {
                 closeAnnouncements();
+            } else if (event.target === serviceOrderModal) {
+                closeServiceOrder();
+            } else if (event.target === countdownModal) {
+                closeCountdown();
             } else if (event.target === specialServiceModal) {
                 closeSpecialService();
             } else if (event.target === evensongServiceModal) {

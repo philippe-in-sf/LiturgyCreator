@@ -2310,6 +2310,282 @@ def create_announcement_slide(announcement_data: dict, width: int = 1920, height
     
     return img
 
+def create_service_order_slide(order_item: str, liturgical_season: Optional[str] = None, is_memorial: bool = False, show_number: bool = False, item_number: int = 1, width: int = 1920, height: int = 1080, branding: Optional[Dict[str, Any]] = None) -> Image.Image:
+    """
+    Create a service order slide showing one service element
+    
+    Args:
+        order_item: Text for this service element (e.g., "Opening Hymn")
+        liturgical_season: Season for theming
+        is_memorial: Use black/white memorial theme
+        show_number: Include item number on slide
+        item_number: The number to display if show_number is True
+        width: Image width in pixels
+        height: Image height in pixels
+        branding: Optional branding configuration dictionary
+    
+    Returns:
+        PIL Image object
+    """
+    if branding is None:
+        branding = load_branding_config()
+    
+    if is_memorial:
+        img = Image.new('RGBA', (width, height), color=(0, 0, 0, 255))
+        theme_colors = {
+            'background': (0, 0, 0, 255),
+            'accent': (200, 200, 200, 255),
+            'title': (255, 255, 255, 255),
+            'text': (255, 255, 255, 255)
+        }
+    else:
+        theme_colors = get_theme('liturgical', liturgical_season=liturgical_season)
+        r, g, b, a = theme_colors['background']
+        img = Image.new('RGBA', (width, height), color=(r, g, b, 255))
+        
+        overlay = Image.new('RGBA', (width, height), color=(0, 0, 0, 0))
+        draw_overlay = ImageDraw.Draw(overlay)
+        
+        accent_r, accent_g, accent_b, accent_a = theme_colors['accent']
+        gradient_height = height // 3
+        for i in range(gradient_height):
+            alpha = int(100 * (1 - i / gradient_height))
+            draw_overlay.rectangle(
+                [(0, i), (width, i + 1)],
+                fill=(accent_r, accent_g, accent_b, alpha)
+            )
+        
+        img = Image.alpha_composite(img, overlay)
+    
+    draw = ImageDraw.Draw(img)
+    
+    try:
+        main_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 90)
+        number_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 140)
+    except:
+        main_font = ImageFont.load_default()
+        number_font = ImageFont.load_default()
+    
+    if show_number:
+        number_text = str(item_number)
+        number_bbox = draw.textbbox((0, 0), number_text, font=number_font)
+        number_width = number_bbox[2] - number_bbox[0]
+        number_height = number_bbox[3] - number_bbox[1]
+        number_x = 80
+        number_y = 80
+        
+        outline_width = 4
+        for offset_x in range(-outline_width, outline_width + 1):
+            for offset_y in range(-outline_width, outline_width + 1):
+                if offset_x != 0 or offset_y != 0:
+                    draw.text((number_x + offset_x, number_y + offset_y), number_text, fill=(0, 0, 0, 200), font=number_font)
+        
+        draw.text((number_x, number_y), number_text, fill=theme_colors['accent'], font=number_font)
+    
+    words = order_item.split()
+    lines = []
+    current_line = []
+    max_width = width - 200
+    
+    for word in words:
+        test_line = ' '.join(current_line + [word])
+        test_bbox = draw.textbbox((0, 0), test_line, font=main_font)
+        if test_bbox[2] - test_bbox[0] > max_width and current_line:
+            lines.append(' '.join(current_line))
+            current_line = [word]
+        else:
+            current_line.append(word)
+    if current_line:
+        lines.append(' '.join(current_line))
+    
+    total_height = len(lines) * 110
+    start_y = (height - total_height) // 2
+    
+    for i, line in enumerate(lines):
+        line_bbox = draw.textbbox((0, 0), line, font=main_font)
+        line_width = line_bbox[2] - line_bbox[0]
+        line_x = (width - line_width) // 2
+        line_y = start_y + (i * 110)
+        
+        outline_width = 4
+        for offset_x in range(-outline_width, outline_width + 1):
+            for offset_y in range(-outline_width, outline_width + 1):
+                if offset_x != 0 or offset_y != 0:
+                    draw.text((line_x + offset_x, line_y + offset_y), line, fill=(0, 0, 0, 200), font=main_font)
+        
+        draw.text((line_x, line_y), line, fill=theme_colors['title'], font=main_font)
+    
+    if not is_memorial:
+        corner_size = 60
+        corner_color = theme_colors['accent']
+        draw.ellipse([50, 50, 50 + corner_size, 50 + corner_size], outline=corner_color, width=5)
+        draw.ellipse([width - 50 - corner_size, 50, width - 50, 50 + corner_size], outline=corner_color, width=5)
+        draw.ellipse([50, height - 50 - corner_size, 50 + corner_size, height - 50], outline=corner_color, width=5)
+        draw.ellipse([width - 50 - corner_size, height - 50 - corner_size, width - 50, height - 50], outline=corner_color, width=5)
+    
+    logo_path = branding.get('logo_path') if branding else None
+    img = overlay_logo(img, logo_path, position='top-right', max_width=220)
+    
+    return img
+
+def create_countdown_slide(minutes: int, liturgical_season: Optional[str] = None, is_memorial: bool = False, welcome_message: Optional[str] = None, service_time: Optional[str] = None, width: int = 1920, height: int = 1080, branding: Optional[Dict[str, Any]] = None) -> Image.Image:
+    """
+    Create countdown timer slide
+    
+    Args:
+        minutes: Number of minutes to display (e.g., 15)
+        liturgical_season: Season for theming
+        is_memorial: Use black/white memorial theme
+        welcome_message: Optional welcome text
+        service_time: Optional service start time (e.g., "10:00 AM")
+        width: Image width in pixels
+        height: Image height in pixels
+        branding: Optional branding configuration dictionary
+    
+    Returns:
+        PIL Image object
+    """
+    if branding is None:
+        branding = load_branding_config()
+    
+    if is_memorial:
+        img = Image.new('RGBA', (width, height), color=(0, 0, 0, 255))
+        theme_colors = {
+            'background': (0, 0, 0, 255),
+            'accent': (200, 200, 200, 255),
+            'title': (255, 255, 255, 255),
+            'text': (255, 255, 255, 255)
+        }
+    else:
+        theme_colors = get_theme('liturgical', liturgical_season=liturgical_season)
+        r, g, b, a = theme_colors['background']
+        img = Image.new('RGBA', (width, height), color=(r, g, b, 255))
+        
+        overlay = Image.new('RGBA', (width, height), color=(0, 0, 0, 0))
+        draw_overlay = ImageDraw.Draw(overlay)
+        
+        accent_r, accent_g, accent_b, accent_a = theme_colors['accent']
+        gradient_height = height // 2
+        for i in range(gradient_height):
+            alpha = int(120 * (1 - i / gradient_height))
+            draw_overlay.rectangle(
+                [(0, height // 2 - gradient_height // 2 + i), (width, height // 2 - gradient_height // 2 + i + 1)],
+                fill=(accent_r, accent_g, accent_b, alpha)
+            )
+        
+        img = Image.alpha_composite(img, overlay)
+    
+    draw = ImageDraw.Draw(img)
+    
+    try:
+        header_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 60)
+        countdown_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 180)
+        minutes_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 60)
+        info_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 45)
+        welcome_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 40)
+    except:
+        header_font = ImageFont.load_default()
+        countdown_font = ImageFont.load_default()
+        minutes_font = ImageFont.load_default()
+        info_font = ImageFont.load_default()
+        welcome_font = ImageFont.load_default()
+    
+    if not is_memorial:
+        center_x = width // 2
+        center_y = height // 2
+        radius = 250
+        draw.ellipse(
+            [center_x - radius, center_y - radius, center_x + radius, center_y + radius],
+            outline=theme_colors['accent'],
+            width=8
+        )
+        for angle in range(0, 360, 30):
+            import math
+            x1 = center_x + int((radius - 20) * math.cos(math.radians(angle)))
+            y1 = center_y + int((radius - 20) * math.sin(math.radians(angle)))
+            x2 = center_x + int(radius * math.cos(math.radians(angle)))
+            y2 = center_y + int(radius * math.sin(math.radians(angle)))
+            draw.line([(x1, y1), (x2, y2)], fill=theme_colors['accent'], width=4)
+    
+    header_text = "Service Begins In"
+    header_bbox = draw.textbbox((0, 0), header_text, font=header_font)
+    header_width = header_bbox[2] - header_bbox[0]
+    header_x = (width - header_width) // 2
+    header_y = 200
+    
+    outline_width = 3
+    for offset_x in range(-outline_width, outline_width + 1):
+        for offset_y in range(-outline_width, outline_width + 1):
+            if offset_x != 0 or offset_y != 0:
+                draw.text((header_x + offset_x, header_y + offset_y), header_text, fill=(0, 0, 0, 200), font=header_font)
+    
+    draw.text((header_x, header_y), header_text, fill=theme_colors['title'], font=header_font)
+    
+    countdown_text = str(minutes)
+    countdown_bbox = draw.textbbox((0, 0), countdown_text, font=countdown_font)
+    countdown_width = countdown_bbox[2] - countdown_bbox[0]
+    countdown_height = countdown_bbox[3] - countdown_bbox[1]
+    countdown_x = (width - countdown_width) // 2
+    countdown_y = (height - countdown_height) // 2 - 30
+    
+    outline_width = 5
+    for offset_x in range(-outline_width, outline_width + 1):
+        for offset_y in range(-outline_width, outline_width + 1):
+            if offset_x != 0 or offset_y != 0:
+                draw.text((countdown_x + offset_x, countdown_y + offset_y), countdown_text, fill=(0, 0, 0, 200), font=countdown_font)
+    
+    draw.text((countdown_x, countdown_y), countdown_text, fill=theme_colors['title'], font=countdown_font)
+    
+    minutes_text = "Minute" if minutes == 1 else "Minutes"
+    minutes_bbox = draw.textbbox((0, 0), minutes_text, font=minutes_font)
+    minutes_width = minutes_bbox[2] - minutes_bbox[0]
+    minutes_x = (width - minutes_width) // 2
+    minutes_y = countdown_y + countdown_height + 20
+    
+    outline_width = 3
+    for offset_x in range(-outline_width, outline_width + 1):
+        for offset_y in range(-outline_width, outline_width + 1):
+            if offset_x != 0 or offset_y != 0:
+                draw.text((minutes_x + offset_x, minutes_y + offset_y), minutes_text, fill=(0, 0, 0, 200), font=minutes_font)
+    
+    draw.text((minutes_x, minutes_y), minutes_text, fill=theme_colors['title'], font=minutes_font)
+    
+    current_y = minutes_y + 100
+    
+    if service_time:
+        time_text = f"Service starts at {service_time}"
+        time_bbox = draw.textbbox((0, 0), time_text, font=info_font)
+        time_width = time_bbox[2] - time_bbox[0]
+        time_x = (width - time_width) // 2
+        
+        outline_width = 2
+        for offset_x in range(-outline_width, outline_width + 1):
+            for offset_y in range(-outline_width, outline_width + 1):
+                if offset_x != 0 or offset_y != 0:
+                    draw.text((time_x + offset_x, current_y + offset_y), time_text, fill=(0, 0, 0, 200), font=info_font)
+        
+        draw.text((time_x, current_y), time_text, fill=theme_colors['text'], font=info_font)
+        current_y += 60
+    
+    if welcome_message:
+        welcome_bbox = draw.textbbox((0, 0), welcome_message, font=welcome_font)
+        welcome_width = welcome_bbox[2] - welcome_bbox[0]
+        welcome_x = (width - welcome_width) // 2
+        welcome_y = height - 120
+        
+        outline_width = 2
+        for offset_x in range(-outline_width, outline_width + 1):
+            for offset_y in range(-outline_width, outline_width + 1):
+                if offset_x != 0 or offset_y != 0:
+                    draw.text((welcome_x + offset_x, welcome_y + offset_y), welcome_message, fill=(0, 0, 0, 200), font=welcome_font)
+        
+        draw.text((welcome_x, welcome_y), welcome_message, fill=theme_colors['text'], font=welcome_font)
+    
+    logo_path = branding.get('logo_path') if branding else None
+    img = overlay_logo(img, logo_path, position='top-right', max_width=220)
+    
+    return img
+
 def generate_obs_scene_collection(readings: dict, service_details: dict, date_str: str, obs_settings: dict | None = None) -> dict:
     """
     Generate an OBS scene collection JSON structure
@@ -3462,6 +3738,243 @@ def generate_announcements():
             'success': False,
             'error': str(e),
             'message': 'Failed to generate announcements'
+        }), 500
+
+@app.route('/api/preview_service_order', methods=['POST'])
+def preview_service_order():
+    """Generate preview images for all service order items"""
+    try:
+        branding = load_branding_config()
+        
+        data = request.get_json()
+        order_items = data.get('orderItems', [])
+        liturgical_season = data.get('liturgicalSeason')
+        is_memorial = data.get('isMemorial', False)
+        show_numbering = data.get('showNumbering', False)
+        
+        if not order_items:
+            return jsonify({
+                'success': False,
+                'error': 'No service order items provided'
+            }), 400
+        
+        previews = []
+        
+        for idx, item_text in enumerate(order_items, 1):
+            if not item_text.strip():
+                continue
+            
+            order_img = create_service_order_slide(
+                order_item=item_text,
+                liturgical_season=liturgical_season if liturgical_season else None,
+                is_memorial=is_memorial,
+                show_number=show_numbering,
+                item_number=idx,
+                branding=branding
+            )
+            
+            img_buffer = io.BytesIO()
+            order_img.save(img_buffer, format='PNG')
+            img_buffer.seek(0)
+            img_b64 = base64.b64encode(img_buffer.read()).decode('utf-8')
+            
+            previews.append({
+                'name': f'Order {idx}: {item_text[:40]}{"..." if len(item_text) > 40 else ""}',
+                'image': f'data:image/png;base64,{img_b64}'
+            })
+        
+        return jsonify({
+            'success': True,
+            'previews': previews
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate service order previews'
+        }), 500
+
+@app.route('/api/generate_service_order', methods=['POST'])
+def generate_service_order():
+    """Generate and download ZIP file containing all service order slides"""
+    try:
+        data = request.get_json()
+        order_items = data.get('orderItems', [])
+        liturgical_season = data.get('liturgicalSeason')
+        is_memorial = data.get('isMemorial', False)
+        show_numbering = data.get('showNumbering', False)
+        
+        if not order_items:
+            return jsonify({
+                'success': False,
+                'error': 'No service order items provided'
+            }), 400
+        
+        branding = load_branding_config()
+        
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for idx, item_text in enumerate(order_items, 1):
+                if not item_text.strip():
+                    continue
+                
+                order_img = create_service_order_slide(
+                    order_item=item_text,
+                    liturgical_season=liturgical_season if liturgical_season else None,
+                    is_memorial=is_memorial,
+                    show_number=show_numbering,
+                    item_number=idx,
+                    branding=branding
+                )
+                
+                img_buffer = io.BytesIO()
+                order_img.save(img_buffer, format='PNG')
+                img_buffer.seek(0)
+                
+                safe_item = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in item_text)
+                safe_item = safe_item[:40].strip() or f'Item_{idx}'
+                
+                filename = f"Order_{idx:02d}_{safe_item}.png"
+                zip_file.writestr(filename, img_buffer.read())
+        
+        zip_buffer.seek(0)
+        
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        return send_file(
+            zip_buffer,
+            as_attachment=True,
+            download_name=f'Service_Order_{timestamp}.zip',
+            mimetype='application/zip'
+        )
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate service order slides'
+        }), 500
+
+@app.route('/api/preview_countdown', methods=['POST'])
+def preview_countdown():
+    """Generate preview images for all countdown timer slides"""
+    try:
+        branding = load_branding_config()
+        
+        data = request.get_json()
+        times = data.get('times', [])
+        custom_time = data.get('customTime')
+        liturgical_season = data.get('liturgicalSeason')
+        is_memorial = data.get('isMemorial', False)
+        welcome_message = data.get('welcomeMessage', '').strip()
+        service_time = data.get('serviceTime', '').strip()
+        
+        all_times = list(times)
+        if custom_time and custom_time > 0:
+            all_times.append(custom_time)
+        
+        if not all_times:
+            return jsonify({
+                'success': False,
+                'error': 'No countdown times selected'
+            }), 400
+        
+        previews = []
+        
+        for minutes in sorted(all_times, reverse=True):
+            countdown_img = create_countdown_slide(
+                minutes=minutes,
+                liturgical_season=liturgical_season if liturgical_season else None,
+                is_memorial=is_memorial,
+                welcome_message=welcome_message if welcome_message else None,
+                service_time=service_time if service_time else None,
+                branding=branding
+            )
+            
+            img_buffer = io.BytesIO()
+            countdown_img.save(img_buffer, format='PNG')
+            img_buffer.seek(0)
+            img_b64 = base64.b64encode(img_buffer.read()).decode('utf-8')
+            
+            previews.append({
+                'name': f'Countdown: {minutes} minute{"s" if minutes != 1 else ""}',
+                'image': f'data:image/png;base64,{img_b64}'
+            })
+        
+        return jsonify({
+            'success': True,
+            'previews': previews
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate countdown previews'
+        }), 500
+
+@app.route('/api/generate_countdown', methods=['POST'])
+def generate_countdown():
+    """Generate and download ZIP file containing all countdown timer slides"""
+    try:
+        data = request.get_json()
+        times = data.get('times', [])
+        custom_time = data.get('customTime')
+        liturgical_season = data.get('liturgicalSeason')
+        is_memorial = data.get('isMemorial', False)
+        welcome_message = data.get('welcomeMessage', '').strip()
+        service_time = data.get('serviceTime', '').strip()
+        
+        all_times = list(times)
+        if custom_time and custom_time > 0:
+            all_times.append(custom_time)
+        
+        if not all_times:
+            return jsonify({
+                'success': False,
+                'error': 'No countdown times selected'
+            }), 400
+        
+        branding = load_branding_config()
+        
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for minutes in sorted(all_times, reverse=True):
+                countdown_img = create_countdown_slide(
+                    minutes=minutes,
+                    liturgical_season=liturgical_season if liturgical_season else None,
+                    is_memorial=is_memorial,
+                    welcome_message=welcome_message if welcome_message else None,
+                    service_time=service_time if service_time else None,
+                    branding=branding
+                )
+                
+                img_buffer = io.BytesIO()
+                countdown_img.save(img_buffer, format='PNG')
+                img_buffer.seek(0)
+                
+                filename = f"Countdown_{minutes:02d}min.png"
+                zip_file.writestr(filename, img_buffer.read())
+        
+        zip_buffer.seek(0)
+        
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        return send_file(
+            zip_buffer,
+            as_attachment=True,
+            download_name=f'Countdown_Timer_{timestamp}.zip',
+            mimetype='application/zip'
+        )
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate countdown timer slides'
         }), 500
 
 @app.route('/api/upload_pdf', methods=['POST'])
