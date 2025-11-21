@@ -2370,8 +2370,38 @@
             basePath: 'C:\\Users\\YourName\\Documents\\'
         };
 
+        // Dark Mode Functions
+        function toggleDarkMode() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+            
+            // Save preference to localStorage
+            const isDarkMode = body.classList.contains('dark-mode');
+            localStorage.setItem('darkModeEnabled', isDarkMode);
+            
+            // Update button text
+            const toggleBtn = document.querySelector('.dark-mode-toggle');
+            if (toggleBtn) {
+                toggleBtn.textContent = isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode';
+            }
+        }
+
+        function initializeDarkMode() {
+            // Check if dark mode was previously enabled
+            const isDarkModeEnabled = localStorage.getItem('darkModeEnabled') === 'true';
+            
+            if (isDarkModeEnabled) {
+                document.body.classList.add('dark-mode');
+                const toggleBtn = document.querySelector('.dark-mode-toggle');
+                if (toggleBtn) {
+                    toggleBtn.textContent = '☀️ Light Mode';
+                }
+            }
+        }
+
         // Initialize calendar and settings
         document.addEventListener('DOMContentLoaded', function() {
+            initializeDarkMode();
             loadCalendar();
             loadOBSSettings();
             setupPdfUpload();
