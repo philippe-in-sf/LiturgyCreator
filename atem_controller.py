@@ -159,7 +159,14 @@ class ATEMController:
             
             self.switcher = PyATEMMax.ATEMMax()
             self.switcher.connect(self.host)
-            self.switcher.waitForConnection()
+            
+            # Wait for connection with 5 second timeout
+            connection_result = self.switcher.waitForConnection(timeout=5.0)
+            
+            if not connection_result:
+                self.logger.error("ATEM connection timeout - switcher not reachable")
+                self.switcher = None
+                return False
             
             # Cache mix effect constant (use ME 1 which is mixEffect1)
             self.mix_effect = self.switcher.atem.mixEffects.mixEffect1

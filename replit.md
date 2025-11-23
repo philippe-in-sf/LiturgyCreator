@@ -61,6 +61,7 @@ The application features a modular architecture:
 - **Countdown Timer Generator (v2.4.7)**: Pre-service countdown timer slides with customizable time intervals. Supports preset times (30, 15, 10, 5 minutes) and custom time input. Features optional service start time display, welcome message, liturgical season theming, and memorial service theme. Generates 1920x1080 full-screen slides with oversized countdown text (180pt), decorative circular timer motif with tick marks, and liturgical season-specific gradients. Downloads as ZIP file with Countdown_15min.png naming convention.
 - **Dark Mode Support (v2.4.7)**: Full dark mode implementation with CSS variables, toggle button in navigation bar, and localStorage persistence for user preference.
 - **ATEM Video Switcher Integration (v2.4.8)**: Comprehensive Blackmagic ATEM video switcher control via PyATEMMax library. Features include: connection management, program/preview video source switching, cut and auto transitions, audio channel volume control, and switcher status monitoring. Accessible via dedicated ATEM Control panel in the web interface. Supports all ATEM switcher models with network connectivity.
+- **ATEM Connection Timeout Fix (v2.4.9)**: Fixed ATEM connection endpoint hanging indefinitely when switcher is unreachable. Added 5-second connection timeout to ensure graceful failure with proper JSON error response instead of HTML timeout page.
 
 ## Configuration Management
 
