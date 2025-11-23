@@ -5,6 +5,7 @@ obsws-python>=1.8.0
 opencv-python>=4.12.0.88
 pdfplumber>=0.11.7
 pillow>=11.3.0
+pyatemmax>=1.0b9
 pypdf2>=3.0.1
 pytesseract>=0.3.13
 requests>=2.32.4
