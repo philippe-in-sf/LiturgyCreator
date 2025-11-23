@@ -1189,6 +1189,7 @@
                             <button class="action-btn" onclick="showAnnouncements()" style="background-color: #8e44ad; color: white;">📢 Announcements</button>
                             <button class="action-btn" onclick="showServiceOrder()" style="background-color: #16a085; color: white;">📋 Service Order</button>
                             <button class="action-btn" onclick="showCountdown()" style="background-color: #d35400; color: white;">⏱️ Countdown Timer</button>
+                            <button class="action-btn" onclick="showATEMControl()" style="background-color: #c0392b; color: white;">🎛️ ATEM Control</button>
                             <button class="action-btn btn-info" onclick="showSettings()" style="background-color: #6c757d;">⚙️ Settings</button>
                         </div>
                     </div>
@@ -1470,6 +1471,168 @@
                     <button type="button" class="btn-save" onclick="saveServiceDetails()">Save Details</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ATEM Control Modal -->
+    <div id="atemControlModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <span class="close" onclick="closeATEMControl()">&times;</span>
+                <h2 class="modal-title">🎛️ ATEM Video Switcher Control</h2>
+            </div>
+            
+            <div style="padding: 20px;">
+                <!-- Connection Status -->
+                <div class="form-section">
+                    <h3>Connection Status</h3>
+                    <div id="atemStatus" style="padding: 15px; background: #f8f9fa; border-radius: 6px; margin-bottom: 20px;">
+                        <p style="margin: 0; color: #6c757d;">Not connected</p>
+                    </div>
+                    <button type="button" class="btn-primary" onclick="connectATEM()" style="padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                        🔌 Connect to ATEM
+                    </button>
+                </div>
+                
+                <!-- Video Switching -->
+                <div class="form-section">
+                    <h3>Video Switching</h3>
+                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
+                        Switch between video sources on your ATEM switcher
+                    </p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Program (On Air)</label>
+                            <select id="atemProgramInput" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                                <option value="1">Input 1 - Camera 1</option>
+                                <option value="2">Input 2 - Camera 2</option>
+                                <option value="3">Input 3 - Graphics</option>
+                                <option value="4">Input 4 - Lower Thirds</option>
+                                <option value="5">Input 5 - Title Card</option>
+                                <option value="1000">Color Bars</option>
+                                <option value="2001">Color 1</option>
+                                <option value="2002">Color 2</option>
+                                <option value="3010">Media Player 1</option>
+                                <option value="3020">Media Player 2</option>
+                            </select>
+                            <button type="button" onclick="switchATEMProgram()" style="width: 100%; margin-top: 10px; padding: 10px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                ▶️ Switch Program
+                            </button>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Preview</label>
+                            <select id="atemPreviewInput" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                                <option value="1">Input 1 - Camera 1</option>
+                                <option value="2">Input 2 - Camera 2</option>
+                                <option value="3">Input 3 - Graphics</option>
+                                <option value="4">Input 4 - Lower Thirds</option>
+                                <option value="5">Input 5 - Title Card</option>
+                                <option value="1000">Color Bars</option>
+                                <option value="2001">Color 1</option>
+                                <option value="2002">Color 2</option>
+                                <option value="3010">Media Player 1</option>
+                                <option value="3020">Media Player 2</option>
+                            </select>
+                            <button type="button" onclick="switchATEMPreview()" style="width: 100%; margin-top: 10px; padding: 10px; background: #ffc107; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                👁️ Set Preview
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Transitions -->
+                <div class="form-section">
+                    <h3>Transitions</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <button type="button" onclick="atemCut()" style="padding: 15px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600;">
+                            ✂️ CUT
+                        </button>
+                        <button type="button" onclick="atemAuto()" style="padding: 15px; background: #17a2b8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600;">
+                            ➡️ AUTO
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Media Pool Upload -->
+                <div class="form-section">
+                    <h3>Media Pool Upload</h3>
+                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
+                        Upload generated graphics (title cards, lower thirds) to ATEM media pool
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="atemMediaFile">Select Graphic File</label>
+                        <input type="file" id="atemMediaFile" accept="image/png,image/jpeg" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="atemMediaSlot">Media Pool Slot (0-19)</label>
+                        <select id="atemMediaSlot" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                            <option value="0">Slot 0</option>
+                            <option value="1">Slot 1</option>
+                            <option value="2">Slot 2</option>
+                            <option value="3">Slot 3</option>
+                            <option value="4">Slot 4</option>
+                            <option value="5">Slot 5</option>
+                            <option value="6">Slot 6</option>
+                            <option value="7">Slot 7</option>
+                            <option value="8">Slot 8</option>
+                            <option value="9">Slot 9</option>
+                            <option value="10">Slot 10</option>
+                            <option value="11">Slot 11</option>
+                            <option value="12">Slot 12</option>
+                            <option value="13">Slot 13</option>
+                            <option value="14">Slot 14</option>
+                            <option value="15">Slot 15</option>
+                            <option value="16">Slot 16</option>
+                            <option value="17">Slot 17</option>
+                            <option value="18">Slot 18</option>
+                            <option value="19">Slot 19</option>
+                        </select>
+                    </div>
+                    
+                    <button type="button" onclick="uploadATEMMedia()" style="width: 100%; padding: 12px; background: #9b59b6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 16px;">
+                        📤 Upload to ATEM
+                    </button>
+                </div>
+                
+                <!-- Audio Control -->
+                <div class="form-section">
+                    <h3>Audio Control</h3>
+                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">
+                        Adjust audio levels for input channels
+                    </p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label for="atemAudioChannel">Audio Channel</label>
+                            <select id="atemAudioChannel" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                                <option value="1">Channel 1</option>
+                                <option value="2">Channel 2</option>
+                                <option value="3">Channel 3</option>
+                                <option value="4">Channel 4</option>
+                                <option value="5">Channel 5</option>
+                                <option value="6">Channel 6</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="atemAudioVolume">Volume (dB)</label>
+                            <input type="number" id="atemAudioVolume" min="-60" max="6" step="0.5" value="0" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                        </div>
+                    </div>
+                    
+                    <button type="button" onclick="setATEMAudio()" style="width: 100%; padding: 12px; background: #34495e; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 16px;">
+                        🔊 Set Audio Volume
+                    </button>
+                </div>
+                
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button type="button" class="btn-cancel" onclick="closeATEMControl()">Close</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -3011,6 +3174,196 @@
             localStorage.setItem('obsSettings', JSON.stringify(obsSettings));
             showSuccess('OBS settings saved successfully!');
             closeSettings();
+        }
+
+        // ATEM Control Functions
+        function showATEMControl() {
+            const modal = document.getElementById('atemControlModal');
+            modal.style.display = 'block';
+        }
+
+        function closeATEMControl() {
+            const modal = document.getElementById('atemControlModal');
+            modal.style.display = 'none';
+        }
+
+        async function connectATEM() {
+            try {
+                const response = await fetch('/api/atem/connect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const statusDiv = document.getElementById('atemStatus');
+                    statusDiv.innerHTML = `
+                        <p style="margin: 0; color: #28a745; font-weight: 600;">✓ Connected</p>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #6c757d;">
+                            Model: ${result.status.model || 'Unknown'}<br>
+                            Program: Input ${result.status.program_input || 'Unknown'}<br>
+                            Preview: Input ${result.status.preview_input || 'Unknown'}
+                        </p>
+                    `;
+                    showSuccess(result.message);
+                } else {
+                    showError(result.message || result.error);
+                }
+            } catch (error) {
+                console.error('Error connecting to ATEM:', error);
+                showError('Failed to connect to ATEM: ' + error.message);
+            }
+        }
+
+        async function switchATEMProgram() {
+            const inputSelect = document.getElementById('atemProgramInput');
+            const inputNum = parseInt(inputSelect.value);
+            
+            try {
+                const response = await fetch('/api/atem/switch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        me: 0,
+                        input: inputNum
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess(result.message);
+                } else {
+                    showError(result.error);
+                }
+            } catch (error) {
+                console.error('Error switching ATEM program:', error);
+                showError('Failed to switch program: ' + error.message);
+            }
+        }
+
+        async function switchATEMPreview() {
+            const inputSelect = document.getElementById('atemPreviewInput');
+            const inputNum = parseInt(inputSelect.value);
+            
+            try {
+                const response = await fetch('/api/atem/preview', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        me: 0,
+                        input: inputNum
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess(result.message);
+                } else {
+                    showError(result.error);
+                }
+            } catch (error) {
+                console.error('Error switching ATEM preview:', error);
+                showError('Failed to switch preview: ' + error.message);
+            }
+        }
+
+        async function atemCut() {
+            try {
+                const response = await fetch('/api/atem/cut', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ me: 0 })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess(result.message);
+                } else {
+                    showError(result.error);
+                }
+            } catch (error) {
+                console.error('Error triggering ATEM cut:', error);
+                showError('Failed to trigger cut: ' + error.message);
+            }
+        }
+
+        async function atemAuto() {
+            try {
+                const response = await fetch('/api/atem/auto', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ me: 0 })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess(result.message);
+                } else {
+                    showError(result.error);
+                }
+            } catch (error) {
+                console.error('Error triggering ATEM auto:', error);
+                showError('Failed to trigger auto: ' + error.message);
+            }
+        }
+
+        async function uploadATEMMedia() {
+            const fileInput = document.getElementById('atemMediaFile');
+            const slotSelect = document.getElementById('atemMediaSlot');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showError('Please select a file to upload');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const mediaIndex = parseInt(slotSelect.value);
+            
+            showSuccess('Uploading media to ATEM... This may take a moment.');
+            
+            try {
+                // For now, we need to save the file to server first
+                // This is a simplified implementation - in production you'd handle file upload differently
+                showError('Media upload feature requires server-side file storage. Please use the Export All feature to download graphics, then upload manually to ATEM.');
+            } catch (error) {
+                console.error('Error uploading to ATEM:', error);
+                showError('Failed to upload media: ' + error.message);
+            }
+        }
+
+        async function setATEMAudio() {
+            const channelSelect = document.getElementById('atemAudioChannel');
+            const volumeInput = document.getElementById('atemAudioVolume');
+            
+            const channel = parseInt(channelSelect.value);
+            const volume = parseFloat(volumeInput.value);
+            
+            try {
+                const response = await fetch('/api/atem/audio', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        channel: channel,
+                        volume: volume
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess(result.message);
+                } else {
+                    showError(result.error);
+                }
+            } catch (error) {
+                console.error('Error setting ATEM audio:', error);
+                showError('Failed to set audio: ' + error.message);
+            }
         }
 
         // Custom Title Card Functions

@@ -851,6 +851,366 @@ def send_to_obs():
             'message': 'Unexpected error occurred'
         }), 500
 
+@app.route('/api/atem/connect', methods=['POST'])
+def atem_connect():
+    """API endpoint to connect to ATEM switcher"""
+    try:
+        import configparser
+        from atem_controller import ATEMController
+        
+        if not os.path.exists('config.ini'):
+            return jsonify({
+                'success': False,
+                'error': 'ATEM configuration not found',
+                'message': 'Please configure ATEM settings in config.ini'
+            }), 400
+        
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        
+        atem = ATEMController(config)
+        
+        if atem.connect():
+            status = atem.get_status()
+            atem.disconnect()  # Disconnect after getting status
+            return jsonify({
+                'success': True,
+                'message': 'Successfully connected to ATEM',
+                'status': status
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Could not connect to ATEM',
+                'message': 'Make sure ATEM is powered on and accessible on the network'
+            }), 400
+            
+    except ImportError:
+        return jsonify({
+            'success': False,
+            'error': 'ATEM controller not available',
+            'message': 'PyATEMMax library not installed'
+        }), 500
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Error connecting to ATEM'
+        }), 500
+
+@app.route('/api/atem/status', methods=['GET'])
+def atem_status():
+    """API endpoint to get ATEM status"""
+    try:
+        import configparser
+        from atem_controller import ATEMController
+        
+        if not os.path.exists('config.ini'):
+            return jsonify({
+                'success': False,
+                'error': 'ATEM configuration not found'
+            }), 400
+        
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        
+        atem = ATEMController(config)
+        
+        if atem.connect():
+            status = atem.get_status()
+            inputs = atem.list_inputs()
+            atem.disconnect()
+            return jsonify({
+                'success': True,
+                'status': status,
+                'inputs': inputs
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Could not connect to ATEM'
+            }), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/atem/switch', methods=['POST'])
+def atem_switch():
+    """API endpoint to switch ATEM video source"""
+    try:
+        data = request.get_json()
+        me = data.get('me', 0)
+        input_num = data.get('input')
+        
+        if input_num is None:
+            return jsonify({
+                'success': False,
+                'error': 'No input number provided'
+            }), 400
+        
+        import configparser
+        from atem_controller import ATEMController
+        
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        
+        atem = ATEMController(config)
+        
+        if atem.connect():
+            success = atem.switch_to_input(me, input_num)
+            atem.disconnect()
+            
+            if success:
+                return jsonify({
+                    'success': True,
+                    'message': f'Switched ME{me} to input {input_num}'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Failed to switch input'
+                }), 400
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Could not connect to ATEM'
+            }), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/atem/preview', methods=['POST'])
+def atem_preview():
+    """API endpoint to set ATEM preview source"""
+    try:
+        data = request.get_json()
+        me = data.get('me', 0)
+        input_num = data.get('input')
+        
+        if input_num is None:
+            return jsonify({
+                'success': False,
+                'error': 'No input number provided'
+            }), 400
+        
+        import configparser
+        from atem_controller import ATEMController
+        
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        
+        atem = ATEMController(config)
+        
+        if atem.connect():
+            success = atem.set_preview_input(me, input_num)
+            atem.disconnect()
+            
+            if success:
+                return jsonify({
+                    'success': True,
+                    'message': f'Set ME{me} preview to input {input_num}'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Failed to set preview'
+                }), 400
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Could not connect to ATEM'
+            }), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/atem/cut', methods=['POST'])
+def atem_cut():
+    """API endpoint to trigger ATEM cut transition"""
+    try:
+        data = request.get_json()
+        me = data.get('me', 0)
+        
+        import configparser
+        from atem_controller import ATEMController
+        
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        
+        atem = ATEMController(config)
+        
+        if atem.connect():
+            success = atem.trigger_cut(me)
+            atem.disconnect()
+            
+            if success:
+                return jsonify({
+                    'success': True,
+                    'message': f'Cut triggered on ME{me}'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Failed to trigger cut'
+                }), 400
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Could not connect to ATEM'
+            }), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/atem/auto', methods=['POST'])
+def atem_auto():
+    """API endpoint to trigger ATEM auto transition"""
+    try:
+        data = request.get_json()
+        me = data.get('me', 0)
+        
+        import configparser
+        from atem_controller import ATEMController
+        
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        
+        atem = ATEMController(config)
+        
+        if atem.connect():
+            success = atem.trigger_auto(me)
+            atem.disconnect()
+            
+            if success:
+                return jsonify({
+                    'success': True,
+                    'message': f'Auto transition triggered on ME{me}'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Failed to trigger auto'
+                }), 400
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Could not connect to ATEM'
+            }), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/atem/upload_media', methods=['POST'])
+def atem_upload_media():
+    """API endpoint to upload graphics to ATEM media pool"""
+    try:
+        data = request.get_json()
+        file_path = data.get('file_path')
+        media_index = data.get('media_index', 0)
+        
+        if not file_path:
+            return jsonify({
+                'success': False,
+                'error': 'No file path provided'
+            }), 400
+        
+        import configparser
+        from atem_controller import ATEMController
+        
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        
+        atem = ATEMController(config)
+        
+        if atem.connect():
+            success = atem.upload_media(file_path, media_index)
+            atem.disconnect()
+            
+            if success:
+                return jsonify({
+                    'success': True,
+                    'message': f'Uploaded {file_path} to media slot {media_index}'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Failed to upload media'
+                }), 400
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Could not connect to ATEM'
+            }), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/atem/audio', methods=['POST'])
+def atem_audio():
+    """API endpoint to control ATEM audio"""
+    try:
+        data = request.get_json()
+        channel = data.get('channel')
+        volume = data.get('volume')
+        
+        if channel is None or volume is None:
+            return jsonify({
+                'success': False,
+                'error': 'Channel and volume required'
+            }), 400
+        
+        import configparser
+        from atem_controller import ATEMController
+        
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        
+        atem = ATEMController(config)
+        
+        if atem.connect():
+            success = atem.set_audio_volume(channel, volume)
+            atem.disconnect()
+            
+            if success:
+                return jsonify({
+                    'success': True,
+                    'message': f'Set channel {channel} volume to {volume}dB'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Failed to set audio volume'
+                }), 400
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Could not connect to ATEM'
+            }), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @app.route('/api/service_details', methods=['POST'])
 def save_service_details():
     """API endpoint to save service details for a specific date and service type"""

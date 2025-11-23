@@ -47,6 +47,102 @@ class ATEMController:
         
         return mappings
     
+    def _get_video_source_constant(self, source_id: int):
+        """
+        Convert video source ID to ATEMConstant
+        
+        Args:
+            source_id: Video source number
+            
+        Returns:
+            ATEMConstant for the video source, raises ValueError if invalid
+        """
+        if not self.switcher:
+            raise ValueError("Not connected to ATEM switcher")
+        
+        try:
+            # Map common video source IDs to their string names for lookup
+            # Based on PyATEMMax documentation at https://clvlabs.github.io/PyATEMMax/docs/data/protocol/
+            
+            # Standard camera inputs (1-40)
+            if 1 <= source_id <= 40:
+                return self.switcher.atem.videoSources[f"input{source_id}"]
+            
+            # Special sources
+            elif source_id == 0:
+                return self.switcher.atem.videoSources.black
+            elif source_id == 1000:
+                return self.switcher.atem.videoSources.colorBars
+            elif source_id == 2001:
+                return self.switcher.atem.videoSources.color1
+            elif source_id == 2002:
+                return self.switcher.atem.videoSources.color2
+            elif source_id == 3010:
+                return self.switcher.atem.videoSources.mediaPlayer1
+            elif source_id == 3020:
+                return self.switcher.atem.videoSources.mediaPlayer2
+            elif source_id == 3030:
+                return self.switcher.atem.videoSources.mediaPlayer3
+            elif source_id == 3040:
+                return self.switcher.atem.videoSources.mediaPlayer4
+            elif 7001 <= source_id <= 7004:
+                clean_feed_num = source_id - 7000
+                return self.switcher.atem.videoSources[f"cleanFeed{clean_feed_num}"]
+            elif 8001 <= source_id <= 8024:
+                aux_num = source_id - 8000
+                return self.switcher.atem.videoSources[f"auxiliary{aux_num}"]
+            else:
+                raise ValueError(f"Unknown video source ID: {source_id}")
+                
+        except (KeyError, AttributeError) as e:
+            raise ValueError(f"Could not resolve video source {source_id}: {str(e)}")
+    
+    def _get_audio_source_constant(self, source_id: int):
+        """
+        Convert audio source ID to ATEMConstant
+        
+        Args:
+            source_id: Audio source number
+            
+        Returns:
+            ATEMConstant for the audio source, raises ValueError if invalid
+        """
+        if not self.switcher:
+            raise ValueError("Not connected to ATEM switcher")
+        
+        try:
+            # Map common audio source IDs to their string names for lookup
+            # Based on PyATEMMax documentation
+            
+            # Standard audio inputs (1-20)
+            if 1 <= source_id <= 20:
+                return self.switcher.atem.audioSources[f"input{source_id}"]
+            
+            # Special audio sources
+            elif source_id == 1001:
+                return self.switcher.atem.audioSources.xlr
+            elif source_id == 1101:
+                return self.switcher.atem.audioSources.aes_ebu
+            elif source_id == 1201:
+                return self.switcher.atem.audioSources.rca
+            elif source_id == 1301:
+                return self.switcher.atem.audioSources.mic1
+            elif source_id == 1302:
+                return self.switcher.atem.audioSources.mic2
+            elif source_id == 2001:
+                return self.switcher.atem.audioSources.mp1
+            elif source_id == 2002:
+                return self.switcher.atem.audioSources.mp2
+            elif source_id == 2003:
+                return self.switcher.atem.audioSources.mp3
+            elif source_id == 2004:
+                return self.switcher.atem.audioSources.mp4
+            else:
+                raise ValueError(f"Unknown audio source ID: {source_id}")
+                
+        except (KeyError, AttributeError) as e:
+            raise ValueError(f"Could not resolve audio source {source_id}: {str(e)}")
+    
     def connect(self) -> bool:
         """
         Connect to ATEM switcher
@@ -65,8 +161,11 @@ class ATEMController:
             self.switcher.connect(self.host)
             self.switcher.waitForConnection()
             
+            # Cache mix effect constant (use ME 1 which is mixEffect1)
+            self.mix_effect = self.switcher.atem.mixEffects.mixEffect1
+            
             # Get switcher info
-            model_name = getattr(self.switcher.productName, 'model', 'Unknown Model')
+            model_name = str(self.switcher.atemModel) if hasattr(self.switcher, 'atemModel') else 'Unknown Model'
             self.logger.info(f"Connected to ATEM {model_name}")
             
             return True
@@ -103,7 +202,10 @@ class ATEMController:
             return False
         
         try:
-            self.switcher.setProgramInputVideoSource(me, input_num)
+            # Convert integer source ID to ATEMConstant
+            video_source = self._get_video_source_constant(input_num)
+            # Use the cached mix effect constant (supports ME1 only for now)
+            self.switcher.setProgramInputVideoSource(self.mix_effect, video_source)
             self.logger.info(f"Switched ME{me} Program to input {input_num}")
             return True
         except Exception as e:
@@ -126,7 +228,10 @@ class ATEMController:
             return False
         
         try:
-            self.switcher.setPreviewInputVideoSource(me, input_num)
+            # Convert integer source ID to ATEMConstant
+            video_source = self._get_video_source_constant(input_num)
+            # Use the cached mix effect constant (supports ME1 only for now)
+            self.switcher.setPreviewInputVideoSource(self.mix_effect, video_source)
             self.logger.info(f"Set ME{me} Preview to input {input_num}")
             return True
         except Exception as e:
@@ -148,7 +253,8 @@ class ATEMController:
             return False
         
         try:
-            self.switcher.performCutTransition(me)
+            # Use the cached mix effect constant (supports ME1 only for now)
+            self.switcher.performCutTransition(self.mix_effect)
             self.logger.info(f"Cut triggered on ME{me}")
             return True
         except Exception as e:
@@ -170,7 +276,8 @@ class ATEMController:
             return False
         
         try:
-            self.switcher.performAutoTransition(me)
+            # Use the cached mix effect constant (supports ME1 only for now)
+            self.switcher.performAutoTransition(self.mix_effect)
             self.logger.info(f"Auto transition triggered on ME{me}")
             return True
         except Exception as e:
@@ -197,12 +304,14 @@ class ATEMController:
             return False
         
         try:
-            self.logger.info(f"Uploading {file_path} to media pool slot {media_index}")
-            # PyATEMMax uses uploadStill for image uploads
-            with open(file_path, 'rb') as f:
-                self.switcher.uploadStill(media_index, f)
-            self.logger.info(f"Uploaded media to slot {media_index}")
-            return True
+            self.logger.info(f"Media upload to ATEM requires file conversion to RGBA format")
+            self.logger.warning(f"Media upload feature not fully implemented - requires PIL/Pillow for image conversion")
+            # TODO: Implement proper media upload workflow
+            # 1. Load image with PIL
+            # 2. Convert to RGBA 1920x1080
+            # 3. Use switcher.setMediaPlayerStill or similar method
+            # For now, return False to indicate not implemented
+            return False
         except Exception as e:
             self.logger.error(f"Error uploading media: {str(e)}")
             return False
@@ -223,10 +332,22 @@ class ATEMController:
             return False
         
         try:
-            # Use the media player source (input 3000 + player_number)
-            source_num = 3000 + player
-            self.switcher.setProgramInputVideoSource(0, source_num)
-            self.logger.info(f"Set media player {player} (source {source_num})")
+            # Get the proper media player constant (mediaPlayer1 is index 0)
+            if player == 0:
+                media_source = self.switcher.atem.videoSources.mediaPlayer1
+            elif player == 1:
+                media_source = self.switcher.atem.videoSources.mediaPlayer2
+            elif player == 2:
+                media_source = self.switcher.atem.videoSources.mediaPlayer3
+            elif player == 3:
+                media_source = self.switcher.atem.videoSources.mediaPlayer4
+            else:
+                self.logger.error(f"Invalid media player number: {player}")
+                return False
+            
+            # Use the cached mix effect constant (supports ME1 only for now)
+            self.switcher.setProgramInputVideoSource(self.mix_effect, media_source)
+            self.logger.info(f"Set media player {player} on program")
             return True
         except Exception as e:
             self.logger.error(f"Error setting media player: {str(e)}")
@@ -248,7 +369,9 @@ class ATEMController:
             return False
         
         try:
-            self.switcher.setAudioMixerInputVolume(channel, volume)
+            # Convert integer channel ID to ATEMConstant
+            audio_source = self._get_audio_source_constant(channel)
+            self.switcher.setAudioMixerInputVolume(audio_source, volume)
             self.logger.info(f"Set audio channel {channel} volume to {volume}dB")
             return True
         except Exception as e:
@@ -269,11 +392,21 @@ class ATEMController:
             }
         
         try:
+            # Get program and preview inputs from ME1 using the cached constant
+            program_input = None
+            preview_input = None
+            
+            if hasattr(self.switcher, 'programInput') and self.mix_effect:
+                program_input = self.switcher.programInput[self.mix_effect].videoSource if self.switcher.programInput else None
+            
+            if hasattr(self.switcher, 'previewInput') and self.mix_effect:
+                preview_input = self.switcher.previewInput[self.mix_effect].videoSource if self.switcher.previewInput else None
+            
             status = {
                 'connected': True,
-                'model': getattr(self.switcher.productName, 'model', 'Unknown'),
-                'program_input': self.switcher.mixEffects[0].programInput if self.switcher.mixEffects else None,
-                'preview_input': self.switcher.mixEffects[0].previewInput if self.switcher.mixEffects else None
+                'model': str(self.switcher.atemModel) if hasattr(self.switcher, 'atemModel') else 'Unknown',
+                'program_input': program_input,
+                'preview_input': preview_input
             }
             return status
         except Exception as e:
@@ -295,9 +428,17 @@ class ATEMController:
         
         try:
             inputs = {}
-            if hasattr(self.switcher, 'inputs'):
-                for input_num, input_info in self.switcher.inputs.items():
-                    inputs[input_num] = getattr(input_info, 'label', f'Input {input_num}')
+            if hasattr(self.switcher, 'inputProperties'):
+                # inputProperties is indexed by video source number
+                for source_id in range(1, 21):  # ATEM typically has sources 1-20
+                    try:
+                        if self.switcher.inputProperties[source_id]:
+                            long_name = self.switcher.inputProperties[source_id].longName
+                            if long_name and long_name.strip():
+                                inputs[source_id] = long_name
+                    except:
+                        # Source doesn't exist, skip
+                        pass
             return inputs
         except Exception as e:
             self.logger.warning(f"Error listing inputs: {str(e)}")

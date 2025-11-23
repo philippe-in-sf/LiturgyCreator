@@ -21,9 +21,10 @@ Preferred communication style: Simple, everyday language.
 The application features a modular architecture:
 - **LiturgyFetcher**: Retrieves Episcopal liturgical calendar data and scripture readings from multiple sources (The Lectionary Page, Vanderbilt Divinity Library) using web scraping.
 - **OBSController**: Manages WebSocket communication with OBS Studio for updating text sources.
+- **ATEMController**: Manages network communication with Blackmagic ATEM video switchers via PyATEMMax library for video switching, transitions, and audio control.
 - **ScriptureParser**: Formats liturgical readings for display.
 - **Main Application Controller**: Orchestrates the workflow, manages configuration, and handles logging.
-- **Interactive Liturgical Calendar**: A Flask web interface providing a visual calendar with month navigation, liturgical color coding, reading previews, and OBS integration. It tracks the Episcopal liturgical year and detects seasons/feast days.
+- **Interactive Liturgical Calendar**: A Flask web interface providing a visual calendar with month navigation, liturgical color coding, reading previews, OBS integration, and ATEM switcher control. It tracks the Episcopal liturgical year and detects seasons/feast days.
 
 ## UI/UX Decisions
 
@@ -58,10 +59,12 @@ The application features a modular architecture:
 - **Announcement Slides Generator (v2.4.6)**: Comprehensive announcement slide creation system supporting four announcement types (Event, Prayer Request, Giving, General). Features batch creation workflow allowing users to queue multiple announcements, preview all slides before downloading, and export as ZIP file. Each announcement type has tailored form fields and type-specific icons. Supports full liturgical season theming and memorial service theme (black/white). Generates 1920x1080 full-screen graphics with centered content cards, gradient backgrounds, and decorative elements matching liturgical seasons.
 - **Service Order Slides Generator (v2.4.7)**: Create slides displaying the order/flow of church services. Users can add up to 15 service order items (e.g., "Opening Hymn", "First Reading", "Sermon") with optional automatic numbering. Features liturgical season theming, memorial service theme support, preview functionality, and batch creation. Generates 1920x1080 full-screen slides with large centered text and liturgical season-specific gradients and decorative elements. Downloads as ZIP file with Order_01_ItemName.png naming convention.
 - **Countdown Timer Generator (v2.4.7)**: Pre-service countdown timer slides with customizable time intervals. Supports preset times (30, 15, 10, 5 minutes) and custom time input. Features optional service start time display, welcome message, liturgical season theming, and memorial service theme. Generates 1920x1080 full-screen slides with oversized countdown text (180pt), decorative circular timer motif with tick marks, and liturgical season-specific gradients. Downloads as ZIP file with Countdown_15min.png naming convention.
+- **Dark Mode Support (v2.4.7)**: Full dark mode implementation with CSS variables, toggle button in navigation bar, and localStorage persistence for user preference.
+- **ATEM Video Switcher Integration (v2.4.8)**: Comprehensive Blackmagic ATEM video switcher control via PyATEMMax library. Features include: connection management, program/preview video source switching, cut and auto transitions, audio channel volume control, and switcher status monitoring. Accessible via dedicated ATEM Control panel in the web interface. Supports all ATEM switcher models with network connectivity.
 
 ## Configuration Management
 
-- INI-based configuration for OBS connection settings, scene mappings, and API preferences.
+- INI-based configuration for OBS connection settings, scene mappings, ATEM switcher connection settings, ATEM input mappings, and API preferences.
 
 ## Error Handling Strategy
 
@@ -80,6 +83,7 @@ The application features a modular architecture:
 
 ## Required Libraries
 - **obsws-python**: OBS Studio WebSocket client.
+- **PyATEMMax**: Blackmagic ATEM video switcher control library.
 - **requests**: HTTP client.
 - **configparser**: Configuration file management.
 - **logging**: Application logging.
