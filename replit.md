@@ -13,6 +13,7 @@ Preferred communication style: Simple, everyday language.
 - **Version Updates**: When updating version number and deploying, always update both:
   1. Version number in `pyproject.toml` 
   2. Footer version number in `templates/calendar.html`
+- **macOS Application Bundle**: Project includes py2app configuration for creating standalone macOS application. Run `./build_macos_app.sh` to build. See `MACOS_INSTALLATION.md` and `README_BUILD.md` for details.
 
 # System Architecture
 
