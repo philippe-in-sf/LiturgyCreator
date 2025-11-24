@@ -3611,6 +3611,10 @@ def export_all():
                         zip_file.writestr(f"{date_folder_name}/service_details/Presider.txt", formatted_presider)
             
             # ===== PART 2: Generate lower third graphics =====
+            # Check for liturgical season override in service details
+            liturgical_season_override = service_details.get('serviceLiturgicalSeason', '').strip() or None
+            is_funeral_service = (liturgical_season_override == 'memorial')
+            
             # Generate full-screen title card with just the liturgical reference and date
             # Format date nicely (e.g., "October 19, 2025")
             formatted_date = selected_date.strftime("%B %d, %Y")
@@ -3626,7 +3630,7 @@ def export_all():
             # Just use the liturgical name without "Holy Eucharist for" prefix
             title_reference = f"{liturgical_name}\n{formatted_date}"
             
-            title_card_img = create_title_card(title_reference, date_str, branding=branding)
+            title_card_img = create_title_card(title_reference, date_str, is_funeral=is_funeral_service, liturgical_season=liturgical_season_override, branding=branding)
             title_card_buffer = io.BytesIO()
             title_card_img.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
@@ -3651,8 +3655,8 @@ def export_all():
                 # Use override if provided, otherwise use lectionary reference
                 reference = reading_ref_overrides.get(reading_type, '') or reading_data.get('reference', 'No reference')
                 
-                # Generate lower third image with liturgical season colors
-                img = create_lower_third(reading_type, reference, date_str, branding=branding)
+                # Generate lower third image with liturgical season colors (with optional override)
+                img = create_lower_third(reading_type, reference, date_str, is_funeral=is_funeral_service, liturgical_season=liturgical_season_override, branding=branding)
                 
                 # Save image to buffer
                 img_buffer = io.BytesIO()
@@ -3690,8 +3694,8 @@ def export_all():
             for field_key, field_label in service_detail_graphics.items():
                 field_value = service_details.get(field_key, '').strip()
                 if field_value:  # Only create graphic if field has content
-                    # Generate lower third image with liturgical season colors
-                    img = create_lower_third(field_label, field_value, date_str, branding=branding)
+                    # Generate lower third image with liturgical season colors (with optional override)
+                    img = create_lower_third(field_label, field_value, date_str, is_funeral=is_funeral_service, liturgical_season=liturgical_season_override, branding=branding)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -3704,7 +3708,7 @@ def export_all():
                     zip_file.writestr(filepath, img_buffer.read())
             
             # ===== Generate blank lower third template for manual use =====
-            blank_template = create_blank_lower_third(date_str)
+            blank_template = create_blank_lower_third(date_str, is_funeral=is_funeral_service, liturgical_season=liturgical_season_override)
             blank_buffer = io.BytesIO()
             blank_template.save(blank_buffer, format='PNG')
             blank_buffer.seek(0)

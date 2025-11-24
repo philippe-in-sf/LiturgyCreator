@@ -1249,6 +1249,27 @@
             </div>
             
             <form id="serviceDetailsForm">
+                <!-- Liturgical Season Override (applies to all service types) -->
+                <div class="form-section" style="background: #f8f9fa; padding: 15px; margin-bottom: 20px; border-radius: 6px;">
+                    <div class="form-group">
+                        <label for="serviceLiturgicalSeason">Liturgical Season Override</label>
+                        <p style="color: #6c757d; font-size: 0.85rem; margin: 5px 0 10px 0;">
+                            By default, graphics use the liturgical season from the selected date. Use this to override for special occasions.
+                        </p>
+                        <select id="serviceLiturgicalSeason" name="serviceLiturgicalSeason" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                            <option value="">Use Date's Season (Default)</option>
+                            <option value="advent">Advent (Royal Blue)</option>
+                            <option value="christmas">Christmas (White & Gold)</option>
+                            <option value="season_after_epiphany">Season after Epiphany (Green)</option>
+                            <option value="lent">Lent (Purple)</option>
+                            <option value="easter">Easter (White & Gold)</option>
+                            <option value="pentecost">Pentecost (Red)</option>
+                            <option value="season_after_pentecost">Season after Pentecost (Green)</option>
+                            <option value="memorial">Memorial Service (Black & White)</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <!-- Eucharist Service Fields -->
                 <div id="eucharistFields" style="display: none;">
                     <div class="form-section">
@@ -4945,7 +4966,7 @@
     
     <footer style="background-color: #f8f9fa; border-top: 1px solid #dee2e6; padding: 20px; margin-top: 40px; text-align: center; color: #6c757d; font-size: 14px;">
         <div style="margin-bottom: 10px;">
-            <strong>Episcopal Liturgical Calendar Tool v2.4.9</strong>
+            <strong>Episcopal Liturgical Calendar Tool v2.5.0</strong>
         </div>
         <div>
             This tool is provided under a public domain license, without copyright attached. Please courtesy credit Philippe Beaudette/Trinity Episcopal Church, Tulsa, OK.

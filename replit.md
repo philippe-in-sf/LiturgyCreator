@@ -63,6 +63,7 @@ The application features a modular architecture:
 - **Dark Mode Support (v2.4.7)**: Full dark mode implementation with CSS variables, toggle button in navigation bar, and localStorage persistence for user preference.
 - **ATEM Video Switcher Integration (v2.4.8)**: Comprehensive Blackmagic ATEM video switcher control via PyATEMMax library. Features include: connection management, program/preview video source switching, cut and auto transitions, audio channel volume control, and switcher status monitoring. Accessible via dedicated ATEM Control panel in the web interface. Supports all ATEM switcher models with network connectivity.
 - **ATEM Connection Timeout Fix (v2.4.9)**: Fixed ATEM connection endpoint hanging indefinitely when switcher is unreachable. Added 5-second connection timeout to ensure graceful failure with proper JSON error response instead of HTML timeout page.
+- **Service Details Liturgical Season Override (v2.5.0)**: Added liturgical season selector to service details form allowing users to override the automatic season detection. Useful for special occasions like baptisms, weddings, or other services that might use different liturgical colors than the calendar date suggests. Supports all seasons (Advent, Christmas, Epiphany, Lent, Easter, Pentecost) plus Memorial Service theme. All generated graphics (title cards, lower thirds, blank templates) respect this override.
 
 ## Configuration Management
 
