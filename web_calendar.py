@@ -114,6 +114,36 @@ def get_branding_logo_path() -> Optional[str]:
         return os.path.abspath(logo_path)
     return None
 
+def load_stack_sans_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
+    """
+    Load Stack Sans font from local fonts directory with fallback to DejaVu
+    
+    Args:
+        size: Font size in points
+        bold: If True, use Headline variant (for emphasis), otherwise Text variant
+    
+    Returns:
+        ImageFont object (either Stack Sans or fallback)
+    """
+    # Try Stack Sans from local fonts directory first
+    # Stack Sans Text is for body text, Headline is for titles/headings
+    try:
+        font_path = "fonts/StackSans-Headline.ttf" if bold else "fonts/StackSans-Text.ttf"
+        if os.path.exists(font_path):
+            return ImageFont.truetype(font_path, size)
+    except Exception as e:
+        print(f"⚠️ Could not load Stack Sans font: {e}")
+    
+    # Fallback to DejaVu fonts
+    try:
+        if bold:
+            return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", size)
+        else:
+            return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", size)
+    except Exception:
+        print(f"⚠️ Could not load DejaVu font, using default")
+        return ImageFont.load_default()
+
 def extract_text_from_pdf(pdf_path: str) -> Dict[str, Any]:
     """Extract text from PDF using pdfplumber and fallback to OCR if needed"""
     try:
@@ -1870,14 +1900,9 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
         # Use theme system
         liturgical_colors = get_theme(theme, date_str=date_str, liturgical_season=liturgical_season)
     
-    # Try to load fonts, fallback to default if not available
-    try:
-        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 60)
-        ref_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 45)
-    except:
-        # Fallback to default font
-        title_font = ImageFont.load_default()
-        ref_font = ImageFont.load_default()
+    # Load Stack Sans fonts
+    title_font = load_stack_sans_font(60, bold=True)
+    ref_font = load_stack_sans_font(45, bold=False)
     
     # Format reading type (remove underscores, title case)
     formatted_type = reading_type.replace('_', ' ').title()
@@ -2287,25 +2312,11 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
         # Use theme system
         liturgical_colors = get_theme(theme, date_str=date_str, liturgical_season=liturgical_season)
     
-    # Try to load elegant serif fonts for a classic, timeless look
-    try:
-        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 65)
-        church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 70)
-        decorative_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf", 35)
-        print(f"✅ Successfully loaded DejaVu fonts: title=65pt, church=70pt")
-    except Exception as e:
-        print(f"❌ Failed to load DejaVu fonts: {e}")
-        try:
-            title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 65)
-            church_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 70)
-            decorative_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 35)
-            print(f"✅ Successfully loaded DejaVuSans fonts: title=65pt, church=70pt")
-        except Exception as e2:
-            print(f"❌ Failed to load all fonts: {e2}")
-            title_font = ImageFont.load_default()
-            church_font = ImageFont.load_default()
-            decorative_font = ImageFont.load_default()
-            print(f"⚠️ Using default fonts (this will be very small!)")
+    # Load Stack Sans fonts for title card
+    title_font = load_stack_sans_font(65, bold=True)
+    church_font = load_stack_sans_font(70, bold=True)
+    decorative_font = load_stack_sans_font(35, bold=False)
+    print(f"✅ Successfully loaded Stack Sans fonts: title=65pt, church=70pt")
     
     # Draw decorative border with liturgical accent color
     border_width = 30
@@ -2502,16 +2513,11 @@ def create_announcement_slide(announcement_data: dict, width: int = 1920, height
     
     draw = ImageDraw.Draw(img)
     
-    try:
-        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 80)
-        subtitle_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 50)
-        field_label_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 40)
-        field_text_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 38)
-    except:
-        title_font = ImageFont.load_default()
-        subtitle_font = ImageFont.load_default()
-        field_label_font = ImageFont.load_default()
-        field_text_font = ImageFont.load_default()
+    # Load Stack Sans fonts for announcement slides
+    title_font = load_stack_sans_font(80, bold=True)
+    subtitle_font = load_stack_sans_font(50, bold=True)
+    field_label_font = load_stack_sans_font(40, bold=True)
+    field_text_font = load_stack_sans_font(38, bold=False)
     
     type_icons = {
         'event': '📅',
@@ -2719,12 +2725,9 @@ def create_service_order_slide(order_item: str, liturgical_season: Optional[str]
     
     draw = ImageDraw.Draw(img)
     
-    try:
-        main_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 90)
-        number_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 140)
-    except:
-        main_font = ImageFont.load_default()
-        number_font = ImageFont.load_default()
+    # Load Stack Sans fonts for service order slides
+    main_font = load_stack_sans_font(90, bold=True)
+    number_font = load_stack_sans_font(140, bold=True)
     
     if show_number:
         number_text = str(item_number)
@@ -2837,18 +2840,12 @@ def create_countdown_slide(minutes: int, liturgical_season: Optional[str] = None
     
     draw = ImageDraw.Draw(img)
     
-    try:
-        header_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 60)
-        countdown_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 180)
-        minutes_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 60)
-        info_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 45)
-        welcome_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 40)
-    except:
-        header_font = ImageFont.load_default()
-        countdown_font = ImageFont.load_default()
-        minutes_font = ImageFont.load_default()
-        info_font = ImageFont.load_default()
-        welcome_font = ImageFont.load_default()
+    # Load Stack Sans fonts for countdown timer
+    header_font = load_stack_sans_font(60, bold=True)
+    countdown_font = load_stack_sans_font(180, bold=True)
+    minutes_font = load_stack_sans_font(60, bold=True)
+    info_font = load_stack_sans_font(45, bold=False)
+    welcome_font = load_stack_sans_font(40, bold=False)
     
     if not is_memorial:
         center_x = width // 2
