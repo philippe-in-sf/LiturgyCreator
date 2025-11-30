@@ -3897,7 +3897,8 @@ def generate_custom_lower_third():
         data = request.get_json()
         label_text = data.get('labelText', '').strip()
         content_text = data.get('contentText', '').strip()
-        liturgical_season = data.get('liturgicalSeason', '').strip()
+        liturgical_season_raw = data.get('liturgicalSeason')
+        liturgical_season = liturgical_season_raw.strip() if liturgical_season_raw else ''
         is_memorial = data.get('isMemorial', False)
         
         # Validate that at least one field has content
@@ -3953,7 +3954,8 @@ def preview_custom_lower_third():
         data = request.get_json()
         label_text = data.get('labelText', '').strip()
         content_text = data.get('contentText', '').strip()
-        liturgical_season = data.get('liturgicalSeason', '').strip()
+        liturgical_season_raw = data.get('liturgicalSeason')
+        liturgical_season = liturgical_season_raw.strip() if liturgical_season_raw else ''
         is_memorial = data.get('isMemorial', False)
         
         # Validate that at least one field is provided
