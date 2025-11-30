@@ -1708,8 +1708,26 @@ def get_liturgical_season_colors_by_name(season: str) -> Dict[str, tuple]:
     # Color mapping with RGBA tuples (R, G, B, A)
     color_schemes = {
         'advent': {
+            'background': (65, 105, 225, 230),   # Royal Blue with opacity (default)
+            'accent': (65, 105, 225, 255),       # Royal Blue solid
+            'title': (255, 255, 255, 255),       # White
+            'text': (241, 241, 241, 255)         # Light gray
+        },
+        'advent_blue': {
             'background': (65, 105, 225, 230),   # Royal Blue with opacity
             'accent': (65, 105, 225, 255),       # Royal Blue solid
+            'title': (255, 255, 255, 255),       # White
+            'text': (241, 241, 241, 255)         # Light gray
+        },
+        'advent_purple': {
+            'background': (75, 0, 130, 230),     # Deep purple with opacity
+            'accent': (102, 51, 153, 255),       # Purple solid
+            'title': (255, 255, 255, 255),       # White
+            'text': (241, 241, 241, 255)         # Light gray
+        },
+        'advent_pink': {
+            'background': (219, 112, 147, 230),  # Rose/Pink with opacity
+            'accent': (219, 112, 147, 255),      # Rose/Pink solid
             'title': (255, 255, 255, 255),       # White
             'text': (241, 241, 241, 255)         # Light gray
         },
