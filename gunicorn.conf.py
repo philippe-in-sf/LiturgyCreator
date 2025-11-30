@@ -7,8 +7,11 @@ import os
 bind = f"0.0.0.0:{os.environ.get('PORT', 5000)}"
 backlog = 2048
 
+# Enable port reuse for autoscale deployments
+reuse_port = True
+
 # Worker processes
-workers = 1
+workers = 2
 worker_class = "sync"
 worker_connections = 1000
 timeout = 30
