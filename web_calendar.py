@@ -773,12 +773,19 @@ def get_readings(date_str):
         # Parse readings
         parsed_readings = web_calendar.scripture_parser.parse_readings(readings_data)
         
+        # Calculate celebration name (same logic as get_calendar_data)
+        celebration = ""
+        if liturgical_info.get('feast_day'):
+            celebration = liturgical_info['feast_day']
+        elif liturgical_info['is_sunday']:
+            celebration = web_calendar.get_sunday_name(selected_date)
+        
         return jsonify({
             'has_readings': True,
             'date': date_str,
             'service_type': service_type,
             'liturgical_info': liturgical_info,
-            'celebration': liturgical_info.get('celebration', 'Unknown'),
+            'celebration': celebration if celebration else 'Unknown',
             'source': readings_data.get('source', 'Unknown'),
             'liturgical_year': readings_data.get('liturgical_year', 'Unknown'),
             'readings': parsed_readings
