@@ -17,120 +17,173 @@
             box-sizing: border-box;
         }
         
+        :root {
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.25s ease;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+        
         body {
             font-family: 'Stack Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: #f0f2f5;
             min-height: 100vh;
-            padding: 20px;
+            padding: 16px;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1440px;
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
             overflow: hidden;
         }
         
+        /* Compact Header */
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 30px;
-            text-align: center;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             position: relative;
         }
         
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 300;
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
         }
         
         .header .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
+            font-size: 0.75rem;
+            opacity: 0.75;
+            font-weight: 400;
+            display: none;
         }
         
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* Minimal Navigation */
         .nav-controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 30px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
+            padding: 12px 24px;
+            background: var(--bg-secondary, #fafbfc);
+            border-bottom: 1px solid var(--border-color, #e8eaed);
+        }
+        
+        .nav-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .nav-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            background: transparent;
+            color: var(--text-primary, #333);
+            border: 1px solid var(--border-color, #dde1e6);
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
             cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
         }
         
         .nav-btn:hover {
-            background: #5a6fd8;
-            transform: translateY(-2px);
+            background: var(--bg-primary, #fff);
+            border-color: #667eea;
+            color: #667eea;
+        }
+        
+        .nav-btn.nav-btn-icon {
+            padding: 8px 10px;
+            font-size: 14px;
+        }
+        
+        .month-display {
+            text-align: center;
         }
         
         .month-year {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            color: #333;
+            color: var(--text-primary, #1a1a2e);
+            letter-spacing: -0.01em;
         }
         
         .liturgical-info {
-            text-align: center;
-            font-size: 1rem;
-            color: #666;
-            margin-top: 5px;
+            font-size: 0.75rem;
+            color: var(--text-secondary, #6b7280);
+            margin-top: 2px;
         }
         
+        /* Main Content Layout */
         .main-content {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 30px;
-            padding: 30px;
+            grid-template-columns: 1fr 340px;
+            gap: 24px;
+            padding: 24px;
         }
         
         .calendar-container {
-            background: white;
+            background: var(--card-bg, white);
+            border-radius: var(--radius-md);
         }
         
         .calendar {
             width: 100%;
-            border-collapse: collapse;
-            border-radius: 10px;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: var(--radius-md);
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color, #e8eaed);
         }
         
         .calendar th {
             background: #343a40;
             color: white;
-            padding: 15px 8px;
+            padding: 12px 8px;
             text-align: center;
-            font-weight: 600;
-            font-size: 0.9rem;
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
         
         .calendar td {
-            border: 1px solid #e9ecef;
+            border: 1px solid var(--border-color, #e8eaed);
             padding: 0;
-            height: 100px;
+            height: 90px;
             vertical-align: top;
             position: relative;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all var(--transition-fast);
+            background: var(--card-bg, white);
         }
         
         .calendar td:hover {
-            background: #f8f9fa;
-            transform: scale(1.02);
+            background: var(--bg-secondary, #f8f9fa);
+            box-shadow: inset 0 0 0 2px rgba(102, 126, 234, 0.2);
         }
         
         .day-cell {
@@ -148,13 +201,15 @@
         
         .day-number {
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 0.95rem;
+            color: var(--text-primary, #1a1a2e);
         }
         
         .day-info {
-            font-size: 0.7rem;
-            margin-top: 5px;
-            line-height: 1.2;
+            font-size: 0.65rem;
+            margin-top: 4px;
+            line-height: 1.3;
+            color: var(--text-secondary, #6b7280);
         }
         
         .today {
@@ -172,106 +227,172 @@
             font-weight: bold;
         }
         
+        /* Sidebar Panel */
         .details-panel {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            padding: 25px;
+            background: var(--card-bg, white);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color, #e8eaed);
+            padding: 0;
             height: fit-content;
+            overflow: hidden;
         }
         
+        /* Collapsible Sections */
+        .panel-section {
+            border-bottom: 1px solid var(--border-color, #e8eaed);
+        }
+        
+        .panel-section:last-child {
+            border-bottom: none;
+        }
+        
+        .panel-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            cursor: pointer;
+            background: var(--bg-secondary, #fafbfc);
+            transition: background var(--transition-fast);
+            user-select: none;
+        }
+        
+        .panel-section-header:hover {
+            background: var(--bg-secondary, #f0f2f5);
+        }
+        
+        .panel-section-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary, #6b7280);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .panel-section-toggle {
+            font-size: 10px;
+            color: var(--text-secondary, #9ca3af);
+            transition: transform var(--transition-fast);
+        }
+        
+        .panel-section.collapsed .panel-section-toggle {
+            transform: rotate(-90deg);
+        }
+        
+        .panel-section-content {
+            padding: 16px;
+            transition: all var(--transition-normal);
+        }
+        
+        .panel-section.collapsed .panel-section-content {
+            display: none;
+        }
+        
+        /* Date Display in Panel */
         .details-header {
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color, #e8eaed);
+            background: var(--card-bg, white);
         }
         
         .selected-date {
-            font-size: 1.3rem;
+            font-size: 1rem;
             font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
+            color: var(--text-primary, #1a1a2e);
+            margin-bottom: 4px;
         }
         
         .celebration {
-            font-size: 1rem;
+            font-size: 0.85rem;
             color: #667eea;
             font-weight: 500;
         }
         
+        /* Readings Content */
         .readings-content {
-            max-height: 500px;
+            max-height: 280px;
             overflow-y: auto;
-            padding-right: 10px;
+            padding: 12px 16px;
         }
         
         .reading-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: var(--bg-secondary, #f8f9fa);
+            border-radius: var(--radius-sm);
+            border-left: 3px solid #667eea;
         }
         
         .reading-title {
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
+            color: var(--text-primary, #1a1a2e);
+            margin-bottom: 4px;
         }
         
         .reading-reference {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 10px;
+            font-size: 0.8rem;
+            color: var(--text-secondary, #6b7280);
+            margin-bottom: 8px;
             font-style: italic;
         }
         
         .reading-text {
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             line-height: 1.6;
-            color: #444;
+            color: var(--text-secondary, #4b5563);
         }
         
+        /* Action Buttons - Clean Grid Layout */
         .action-buttons-container {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #e9ecef;
+            padding: 0;
         }
         
         .action-section {
-            margin-bottom: 20px;
-        }
-        
-        .action-section:last-child {
-            margin-bottom: 0;
+            margin: 0;
         }
         
         .action-section-label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #6c757d;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            padding-left: 2px;
+            display: none;
         }
         
         .action-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .action-buttons.action-buttons-single {
+            grid-template-columns: 1fr;
         }
         
         .action-btn {
-            flex: 1;
-            min-width: 140px;
-            padding: 10px;
+            padding: 10px 12px;
             border: none;
-            border-radius: 6px;
+            border-radius: var(--radius-sm);
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-width: 0;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            filter: brightness(1.05);
+        }
+        
+        .action-btn:active {
+            transform: translateY(0);
         }
         
         .btn-primary {
@@ -294,20 +415,17 @@
             color: white;
         }
         
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        
         .loading {
             text-align: center;
-            padding: 20px;
-            color: #666;
+            padding: 24px 16px;
+            color: var(--text-secondary, #6b7280);
+            font-size: 0.85rem;
         }
         
         .error {
-            background: #f8d7da;
-            color: #721c24;
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
         }
         
         /* Service Details Modal */
@@ -441,46 +559,42 @@
             margin: 10px 0;
         }
         
+        /* Instructions - Subtle and Compact */
         .instructions {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            margin: 0;
         }
         
         .instructions h4 {
-            margin: 0 0 10px 0;
-            color: #495057;
-            font-size: 0.75rem;
-            font-weight: 600;
+            display: none;
         }
         
         .instructions hr {
-            margin: 10px 0 15px 0;
-            border: none;
-            border-top: 1px solid #dee2e6;
+            display: none;
         }
         
         .instructions p {
             margin: 0;
-            color: #6c757d;
-            font-size: 0.65rem;
-            font-style: italic;
-            line-height: 1.4;
+            color: var(--text-secondary, #9ca3af);
+            font-size: 0.7rem;
+            font-style: normal;
+            line-height: 1.5;
         }
         
         .instructions ol {
             margin: 0;
-            padding-left: 20px;
-            color: #495057;
-            font-size: 0.85rem;
-            font-weight: 500;
-            line-height: 1.8;
+            padding-left: 16px;
+            color: var(--text-secondary, #6b7280);
+            font-size: 0.75rem;
+            font-weight: 400;
+            line-height: 1.7;
         }
         
         .instructions li {
-            margin: 8px 0;
+            margin: 4px 0;
         }
         
         .instructions a {
@@ -644,53 +758,62 @@
         /* Mobile Responsive Styles */
         @media (max-width: 768px) {
             body {
-                padding: 10px;
+                padding: 8px;
             }
             
             /* Header adjustments */
             .header {
-                padding: 20px 15px;
+                padding: 12px 16px;
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .header-left {
+                justify-content: center;
             }
             
             .header h1 {
-                font-size: 1.5rem;
-                margin-bottom: 8px;
+                font-size: 1.1rem;
             }
             
-            .header .subtitle {
-                font-size: 0.9rem;
+            .header-controls {
+                justify-content: center;
             }
             
             /* Navigation controls */
             .nav-controls {
-                flex-wrap: wrap;
+                flex-direction: column;
                 gap: 10px;
-                padding: 15px;
+                padding: 12px 16px;
             }
             
-            .nav-btn {
-                padding: 8px 15px;
-                font-size: 14px;
-                flex: 1;
-                min-width: 100px;
+            .nav-group {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .nav-group:last-child {
+                display: none;
+            }
+            
+            .month-display {
+                order: -1;
+                width: 100%;
             }
             
             .month-year {
-                font-size: 1.2rem;
-                width: 100%;
-                order: -1;
+                font-size: 1rem;
             }
             
             .liturgical-info {
-                font-size: 0.85rem;
-                width: 100%;
+                font-size: 0.7rem;
             }
             
             /* Main content layout */
             .main-content {
                 grid-template-columns: 1fr;
-                gap: 20px;
-                padding: 15px;
+                gap: 16px;
+                padding: 16px;
             }
             
             /* Calendar adjustments */
@@ -704,17 +827,14 @@
             }
             
             .calendar th {
-                padding: 8px 4px;
-                font-size: 0.7rem;
-            }
-            
-            .calendar th {
+                padding: 10px 4px;
+                font-size: 0.65rem;
                 white-space: nowrap;
             }
             
             .calendar td {
-                height: 70px;
-                min-width: 50px;
+                height: 65px;
+                min-width: 48px;
             }
             
             .day-cell {
@@ -722,88 +842,95 @@
             }
             
             .day-number {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             }
             
             .day-info {
-                font-size: 0.6rem;
+                font-size: 0.55rem;
                 margin-top: 2px;
             }
             
             /* Details panel */
             .details-panel {
-                padding: 15px;
+                border-radius: var(--radius-md);
+            }
+            
+            .details-header {
+                padding: 12px 14px;
             }
             
             .selected-date {
-                font-size: 1.1rem;
+                font-size: 0.95rem;
             }
             
             .celebration {
-                font-size: 0.9rem;
+                font-size: 0.8rem;
+            }
+            
+            .panel-section-header {
+                padding: 12px 14px;
+            }
+            
+            .panel-section-content {
+                padding: 12px 14px;
             }
             
             .reading-section {
-                padding: 12px;
-                margin-bottom: 15px;
+                padding: 10px;
+                margin-bottom: 10px;
             }
             
             .reading-title {
-                font-size: 1rem;
-            }
-            
-            .reading-reference {
                 font-size: 0.85rem;
             }
             
-            .reading-text {
-                font-size: 0.9rem;
+            .reading-reference {
+                font-size: 0.75rem;
             }
             
-            /* Action buttons - stack vertically on mobile */
+            .reading-text {
+                font-size: 0.8rem;
+            }
+            
+            /* Action buttons grid on mobile */
             .action-buttons {
-                flex-direction: column;
-                gap: 10px;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
             }
             
             .action-btn {
-                width: 100%;
-                min-width: unset;
-                padding: 12px;
-                font-size: 1rem;
-            }
-            
-            .action-section {
-                margin-bottom: 15px;
+                padding: 10px 8px;
+                font-size: 0.75rem;
             }
             
             /* Modal adjustments for mobile */
             .modal-content {
                 width: 95%;
-                margin: 10% auto;
-                padding: 20px;
-                max-height: 85vh;
+                margin: 5% auto;
+                padding: 16px;
+                max-height: 90vh;
             }
             
             .modal-title {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
             }
             
             .form-section {
-                padding: 15px;
+                padding: 14px;
             }
             
             .form-section h3 {
-                font-size: 1rem;
+                font-size: 0.95rem;
             }
             
             .form-group input {
-                font-size: 16px; /* Prevents zoom on iOS */
-                padding: 12px;
+                font-size: 16px;
+                padding: 10px;
             }
             
             .form-actions {
                 flex-direction: column;
+                gap: 8px;
             }
             
             .btn-save,
@@ -812,39 +939,9 @@
                 padding: 12px;
             }
             
-            /* Instructions adjustments */
-            .instructions {
-                padding: 15px;
-            }
-            
-            .instructions h4 {
-                font-size: 0.7rem;
-            }
-            
-            .instructions ol {
-                font-size: 0.8rem;
-                padding-left: 18px;
-            }
-            
-            .instructions li {
-                margin: 6px 0;
-            }
-            
-            /* PDF Upload adjustments */
-            .pdf-upload-section {
-                padding: 15px;
-            }
-            
-            .upload-header h3 {
-                font-size: 1.1rem;
-            }
-            
-            .upload-header p {
-                font-size: 0.85rem;
-            }
-            
+            /* Upload area adjustments */
             .upload-area {
-                padding: 30px 15px;
+                padding: 24px 12px;
             }
             
             .upload-icon {
@@ -852,100 +949,137 @@
             }
             
             .upload-text p {
-                font-size: 0.9rem;
+                font-size: 0.8rem;
             }
             
             .file-info {
                 grid-template-columns: 1fr;
-                gap: 10px;
+                gap: 8px;
             }
         }
         
-        /* Extra small devices (phones in portrait, less than 480px) */
+        /* Extra small devices */
         @media (max-width: 480px) {
             .header h1 {
-                font-size: 1.3rem;
+                font-size: 1rem;
             }
             
-            .header .subtitle {
-                font-size: 0.8rem;
+            .dark-mode-toggle .toggle-text {
+                display: none;
             }
             
             .calendar th {
-                font-size: 0.65rem;
-                padding: 6px 2px;
+                font-size: 0.6rem;
+                padding: 8px 2px;
             }
             
             .calendar td {
-                height: 60px;
-                min-width: 45px;
+                height: 55px;
+                min-width: 42px;
             }
             
             .day-number {
-                font-size: 0.8rem;
+                font-size: 0.75rem;
             }
             
             .day-info {
-                display: none; /* Hide day info on very small screens */
+                display: none;
             }
             
             .nav-btn {
-                font-size: 13px;
-                padding: 8px 10px;
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-btn {
+                font-size: 0.8rem;
+                padding: 10px 12px;
             }
         }
         
-        /* Service Type Selector Styles */
+        /* Service Type Selector - Compact Toggle */
         .service-type-selector {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
-            margin-bottom: 20px;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            margin: 0;
         }
         
         .service-type-selector h4 {
-            margin: 0 0 10px 0;
-            color: #495057;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            display: none;
         }
         
         .service-type-toggle {
             display: flex;
-            background: white;
-            border-radius: 6px;
+            background: var(--bg-secondary, #f0f2f5);
+            border-radius: var(--radius-sm);
             overflow: hidden;
-            border: 2px solid #dee2e6;
+            border: none;
+            padding: 3px;
         }
         
         .service-type-option {
             flex: 1;
-            padding: 10px 15px;
+            padding: 8px 12px;
             text-align: center;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.8rem;
+            transition: all var(--transition-fast);
             border: none;
-            background: white;
-            color: #495057;
+            background: transparent;
+            color: var(--text-secondary, #6b7280);
+            border-radius: 4px;
         }
         
         .service-type-option:hover {
-            background: #f8f9fa;
+            color: var(--text-primary, #1a1a2e);
         }
         
         .service-type-option.active {
-            background: #667eea;
-            color: white;
+            background: var(--card-bg, white);
+            color: #667eea;
+            box-shadow: var(--shadow-sm);
         }
         
         .service-type-option:not(:last-child) {
-            border-right: 1px solid #dee2e6;
+            border-right: none;
+        }
+        
+        /* Lower Third Style Selector */
+        .lower-third-style-selector {
+            margin-top: 0 !important;
+        }
+        
+        .lower-third-style-selector h4 {
+            display: none;
+        }
+        
+        .lower-third-style-selector select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color, #e8eaed);
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            background: var(--card-bg, white);
+            color: var(--text-primary, #1a1a2e);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .lower-third-style-selector select:hover {
+            border-color: #667eea;
+        }
+        
+        .lower-third-style-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
         /* Dark Mode Support */
@@ -1086,39 +1220,78 @@
         }
         
         .dark-mode-toggle {
-            background: transparent;
+            background: rgba(255,255,255,0.15);
             color: white;
-            border: 2px solid white;
-            padding: 8px 15px;
-            border-radius: 6px;
+            border: none;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            margin-left: auto;
+            font-size: 12px;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         
         .dark-mode-toggle:hover {
-            background: rgba(255,255,255,0.1);
-            transform: translateY(-2px);
+            background: rgba(255,255,255,0.25);
+        }
+        
+        .dark-mode-toggle .toggle-icon {
+            font-size: 14px;
+        }
+        
+        .dark-mode-toggle .toggle-text {
+            font-weight: 500;
+        }
+        
+        /* Scrollbar Styling */
+        .readings-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .readings-content::-webkit-scrollbar-track {
+            background: var(--bg-secondary, #f0f2f5);
+            border-radius: 3px;
+        }
+        
+        .readings-content::-webkit-scrollbar-thumb {
+            background: var(--border-color, #d1d5db);
+            border-radius: 3px;
+        }
+        
+        .readings-content::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Trinity Church Streaming Design</h1>
-            <div class="subtitle">Revised Common Lectionary - Interactive Visualization</div>
+            <div class="header-left">
+                <h1>Trinity Streaming Design</h1>
+            </div>
+            <div class="header-controls">
+                <button class="dark-mode-toggle" onclick="toggleDarkMode()">
+                    <span class="toggle-icon">🌙</span>
+                    <span class="toggle-text">Dark</span>
+                </button>
+            </div>
         </div>
         
         <div class="nav-controls">
-            <button class="nav-btn" onclick="navigateMonth(-1)">◀ Previous</button>
-            <div>
+            <div class="nav-group">
+                <button class="nav-btn nav-btn-icon" onclick="navigateMonth(-1)" title="Previous Month">◀</button>
+                <button class="nav-btn" onclick="goToToday()">Today</button>
+                <button class="nav-btn nav-btn-icon" onclick="navigateMonth(1)" title="Next Month">▶</button>
+            </div>
+            <div class="month-display">
                 <div class="month-year" id="monthYear">Loading...</div>
                 <div class="liturgical-info" id="liturgicalInfo">Loading...</div>
             </div>
-            <button class="nav-btn" onclick="navigateMonth(1)">Next ▶</button>
-            <button class="nav-btn" onclick="goToToday()">Today</button>
-            <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+            <div class="nav-group" style="visibility: hidden;">
+                <button class="nav-btn">Placeholder</button>
+            </div>
         </div>
         
         <div class="main-content">
@@ -1142,104 +1315,143 @@
             </div>
             
             <div class="details-panel">
-                <div class="instructions">
-                    <h4>INSTRUCTIONS</h4>
-                    <hr>
-                    <ol>
-                        <li>Click on Service Details and fill out the worksheet</li>
-                        <li>Click on the date of the service and then "Load Readings"</li>
-                        <li>Click "Export All" to download readings + lower thirds graphics</li>
-                        <li>Refer to in-house documentation for the OBS editing steps</li>
-                    </ol>
-                </div>
-                
-                <div class="service-type-selector">
-                    <h4>Service Type</h4>
-                    <div class="service-type-toggle">
-                        <button class="service-type-option active" id="serviceTypeEucharist" onclick="selectServiceType('eucharist')">
-                            Eucharist
-                        </button>
-                        <button class="service-type-option" id="serviceTypeEvensong" onclick="selectServiceType('evensong')">
-                            Evensong
-                        </button>
-                    </div>
-                </div>
-                
+                <!-- Selected Date Section -->
                 <div class="details-header">
                     <div class="selected-date" id="selectedDate">Select a date</div>
                     <div class="celebration" id="celebration"></div>
                 </div>
                 
-                <div class="readings-content" id="readingsContent">
-                    <div class="loading">Click on a date to view liturgical information</div>
-                </div>
-                
-                <div class="action-buttons-container">
-                    <!-- Basic Section -->
-                    <div class="action-section">
-                        <div class="action-section-label">Basic</div>
+                <!-- Quick Actions -->
+                <div class="panel-section">
+                    <div class="panel-section-header" onclick="togglePanelSection(this)">
+                        <span class="panel-section-title">📅 Quick Actions</span>
+                        <span class="panel-section-toggle">▼</span>
+                    </div>
+                    <div class="panel-section-content">
                         <div class="action-buttons">
                             <button class="action-btn btn-primary" onclick="loadReadings()">Load Readings</button>
                             <button class="action-btn btn-secondary" onclick="showServiceDetails()">Service Details</button>
                         </div>
                     </div>
-                    
-                    <!-- Advanced Section -->
-                    <div class="action-section">
-                        <div class="action-section-label">Advanced</div>
-                        <div class="action-buttons">
-                            <button class="action-btn" onclick="showSpecialService()" style="background-color: #9b59b6; color: white;">✨ Special Service</button>
-                            <button class="action-btn" onclick="showConcertProgram()" style="background-color: #3498db; color: white;">🎵 Concert Program</button>
-                            <button class="action-btn" onclick="showCustomTitleCard()" style="background-color: #e74c3c; color: white;">🎬 Custom Title Card</button>
-                            <button class="action-btn" onclick="showCustomLowerThird()" style="background-color: #f39c12; color: white;">📺 Custom Lower Third</button>
-                            <button class="action-btn" onclick="showAnnouncements()" style="background-color: #8e44ad; color: white;">📢 Announcements</button>
-                            <button class="action-btn" onclick="showServiceOrder()" style="background-color: #16a085; color: white;">📋 Service Order</button>
-                            <button class="action-btn" onclick="showCountdown()" style="background-color: #d35400; color: white;">⏱️ Countdown Timer</button>
-                            <button class="action-btn" onclick="showATEMControl()" style="background-color: #c0392b; color: white;">🎛️ ATEM Control</button>
-                            <button class="action-btn btn-info" onclick="showSettings()" style="background-color: #6c757d;">⚙️ Settings</button>
+                </div>
+                
+                <!-- Service Options -->
+                <div class="panel-section">
+                    <div class="panel-section-header" onclick="togglePanelSection(this)">
+                        <span class="panel-section-title">⚙️ Service Options</span>
+                        <span class="panel-section-toggle">▼</span>
+                    </div>
+                    <div class="panel-section-content">
+                        <div class="service-type-selector">
+                            <div class="service-type-toggle">
+                                <button class="service-type-option active" id="serviceTypeEucharist" onclick="selectServiceType('eucharist')">Eucharist</button>
+                                <button class="service-type-option" id="serviceTypeEvensong" onclick="selectServiceType('evensong')">Evensong</button>
+                            </div>
+                        </div>
+                        <div class="lower-third-style-selector" style="margin-top: 12px;">
+                            <select id="lowerThirdStyleSelect" onchange="selectLowerThirdStyle(this.value)">
+                                <option value="classic">Classic (Angled Layers)</option>
+                                <option value="minimal">Minimal (Clean Bar)</option>
+                                <option value="modern_glass">Modern Glass (Frosted)</option>
+                                <option value="bold_banner">Bold Banner (Solid)</option>
+                                <option value="elegant">Elegant (Refined Lines)</option>
+                            </select>
                         </div>
                     </div>
-                    
-                    <!-- Export Section -->
-                    <div class="action-section">
-                        <div class="action-section-label">Export</div>
+                </div>
+                
+                <!-- Readings Preview -->
+                <div class="panel-section">
+                    <div class="panel-section-header" onclick="togglePanelSection(this)">
+                        <span class="panel-section-title">📖 Readings</span>
+                        <span class="panel-section-toggle">▼</span>
+                    </div>
+                    <div class="panel-section-content" style="padding: 0;">
+                        <div class="readings-content" id="readingsContent">
+                            <div class="loading">Click on a date to view liturgical information</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Advanced Tools (Collapsed by default) -->
+                <div class="panel-section collapsed">
+                    <div class="panel-section-header" onclick="togglePanelSection(this)">
+                        <span class="panel-section-title">🛠️ Advanced Tools</span>
+                        <span class="panel-section-toggle">▼</span>
+                    </div>
+                    <div class="panel-section-content">
                         <div class="action-buttons">
-                            <button class="action-btn btn-warning" onclick="showPreview()" style="background-color: #ffc107; color: #000;">👁️ Preview</button>
-                            <button class="action-btn btn-success" onclick="exportAll()" style="background-color: #28a745;">Export All</button>
+                            <button class="action-btn" onclick="showSpecialService()" style="background-color: #9b59b6; color: white;">✨ Special</button>
+                            <button class="action-btn" onclick="showConcertProgram()" style="background-color: #3498db; color: white;">🎵 Concert</button>
+                            <button class="action-btn" onclick="showCustomTitleCard()" style="background-color: #e74c3c; color: white;">🎬 Title Card</button>
+                            <button class="action-btn" onclick="showCustomLowerThird()" style="background-color: #f39c12; color: white;">📺 Lower Third</button>
+                            <button class="action-btn" onclick="showAnnouncements()" style="background-color: #8e44ad; color: white;">📢 Announce</button>
+                            <button class="action-btn" onclick="showServiceOrder()" style="background-color: #16a085; color: white;">📋 Order</button>
+                            <button class="action-btn" onclick="showCountdown()" style="background-color: #d35400; color: white;">⏱️ Countdown</button>
+                            <button class="action-btn" onclick="showATEMControl()" style="background-color: #c0392b; color: white;">🎛️ ATEM</button>
+                            <button class="action-btn" onclick="showSettings()" style="background-color: #6c757d; color: white;">⚙️ Settings</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Export -->
+                <div class="panel-section">
+                    <div class="panel-section-header" onclick="togglePanelSection(this)">
+                        <span class="panel-section-title">📤 Export</span>
+                        <span class="panel-section-toggle">▼</span>
+                    </div>
+                    <div class="panel-section-content">
+                        <div class="action-buttons">
+                            <button class="action-btn" onclick="showPreview()" style="background-color: #ffc107; color: #000;">👁️ Preview</button>
+                            <button class="action-btn btn-success" onclick="exportAll()">📦 Export All</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Guide (Collapsed by default) -->
+                <div class="panel-section collapsed">
+                    <div class="panel-section-header" onclick="togglePanelSection(this)">
+                        <span class="panel-section-title">❓ Quick Guide</span>
+                        <span class="panel-section-toggle">▼</span>
+                    </div>
+                    <div class="panel-section-content">
+                        <div class="instructions">
+                            <ol>
+                                <li>Fill out Service Details</li>
+                                <li>Select date, then Load Readings</li>
+                                <li>Export All to download graphics</li>
+                                <li>See docs for OBS editing steps</li>
+                            </ol>
                         </div>
                     </div>
                 </div>
 
                 <!-- PDF Upload Section -->
-                <div id="pdfUploadSection" class="pdf-upload-section" style="display: none;">
-                    <div class="upload-header">
-                        <h3>Upload PDF Document <span style="color: #ff6b35; font-size: 0.8em;">(BETA)</span></h3>
-                        <p>Upload a PDF containing liturgical readings to extract text and analyze content</p>
-                        <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; padding: 8px; margin-top: 10px; font-size: 0.8rem; color: #856404;">
-                            <strong>⚠️ Beta Feature:</strong> PDF upload is experimental and may provide unexpected results. Text extraction quality varies depending on the PDF format and source.
-                        </div>
+                <div id="pdfUploadSection" class="pdf-upload-section panel-section" style="display: none;">
+                    <div class="panel-section-header" onclick="togglePanelSection(this)">
+                        <span class="panel-section-title">📄 PDF Upload <span style="color: #ff6b35; font-size: 0.7em;">(BETA)</span></span>
+                        <span class="panel-section-toggle">▼</span>
                     </div>
-                    
-                    <div class="upload-area" id="uploadArea">
-                        <div class="upload-content">
-                            <div class="upload-icon">📄</div>
-                            <div class="upload-text">
-                                <p><strong>Click to upload</strong> or drag and drop your PDF here</p>
-                                <p class="upload-info">Maximum file size: 16MB</p>
+                    <div class="panel-section-content">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-content">
+                                <div class="upload-icon">📄</div>
+                                <div class="upload-text">
+                                    <p><strong>Click to upload</strong> or drag PDF here</p>
+                                    <p class="upload-info">Max: 16MB</p>
+                                </div>
                             </div>
+                            <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;">
                         </div>
-                        <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;">
-                    </div>
-                    
-                    <div id="uploadProgress" class="upload-progress" style="display: none;">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progressFill"></div>
+                        
+                        <div id="uploadProgress" class="upload-progress" style="display: none;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="progress-text">Processing PDF...</div>
                         </div>
-                        <div class="progress-text">Processing PDF...</div>
-                    </div>
-                    
-                    <div id="uploadResults" class="upload-results" style="display: none;">
-                        <!-- Results will be populated by JavaScript -->
+                        
+                        <div id="uploadResults" class="upload-results" style="display: none;"></div>
                     </div>
                 </div>
             </div>
@@ -2569,10 +2781,34 @@
         let selectedReadings = {};
         let serviceDetails = {};
         let selectedServiceType = 'eucharist';
+        let selectedLowerThirdStyle = 'classic';
         let obsSettings = {
             operatingSystem: 'windows',
             basePath: 'C:\\Users\\YourName\\Documents\\'
         };
+
+        // Lower Third Style Functions
+        function selectLowerThirdStyle(style) {
+            selectedLowerThirdStyle = style;
+            localStorage.setItem('lowerThirdStyle', style);
+        }
+
+        function initializeLowerThirdStyle() {
+            const savedStyle = localStorage.getItem('lowerThirdStyle');
+            if (savedStyle) {
+                selectedLowerThirdStyle = savedStyle;
+                const styleSelect = document.getElementById('lowerThirdStyleSelect');
+                if (styleSelect) {
+                    styleSelect.value = savedStyle;
+                }
+            }
+        }
+
+        // Panel Section Toggle Function
+        function togglePanelSection(header) {
+            const section = header.parentElement;
+            section.classList.toggle('collapsed');
+        }
 
         // Dark Mode Functions
         function toggleDarkMode() {
@@ -2583,10 +2819,13 @@
             const isDarkMode = body.classList.contains('dark-mode');
             localStorage.setItem('darkModeEnabled', isDarkMode);
             
-            // Update button text
+            // Update button icon and text
             const toggleBtn = document.querySelector('.dark-mode-toggle');
             if (toggleBtn) {
-                toggleBtn.textContent = isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode';
+                const icon = toggleBtn.querySelector('.toggle-icon');
+                const text = toggleBtn.querySelector('.toggle-text');
+                if (icon) icon.textContent = isDarkMode ? '☀️' : '🌙';
+                if (text) text.textContent = isDarkMode ? 'Light' : 'Dark';
             }
         }
 
@@ -2598,7 +2837,10 @@
                 document.body.classList.add('dark-mode');
                 const toggleBtn = document.querySelector('.dark-mode-toggle');
                 if (toggleBtn) {
-                    toggleBtn.textContent = '☀️ Light Mode';
+                    const icon = toggleBtn.querySelector('.toggle-icon');
+                    const text = toggleBtn.querySelector('.toggle-text');
+                    if (icon) icon.textContent = '☀️';
+                    if (text) text.textContent = 'Light';
                 }
             }
         }
@@ -2606,6 +2848,7 @@
         // Initialize calendar and settings
         document.addEventListener('DOMContentLoaded', function() {
             initializeDarkMode();
+            initializeLowerThirdStyle();
             loadCalendar();
             loadOBSSettings();
             setupPdfUpload();
@@ -2868,7 +3111,8 @@
                     date: dateStr,
                     serviceDetails: currentServiceDetails,
                     serviceType: selectedServiceType,
-                    obsSettings: obsSettings
+                    obsSettings: obsSettings,
+                    style: selectedLowerThirdStyle
                 })
             })
             .then(response => {
@@ -2968,7 +3212,8 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ 
-                    date: dateStr
+                    date: dateStr,
+                    style: selectedLowerThirdStyle
                 })
             })
             .then(response => {
@@ -3521,7 +3766,8 @@
                         labelText: labelText,
                         contentText: contentText,
                         liturgicalSeason: liturgicalSeason || null,
-                        isMemorial: isMemorial
+                        isMemorial: isMemorial,
+                        style: selectedLowerThirdStyle
                     })
                 });
                 
@@ -3593,7 +3839,8 @@
                         labelText: labelText,
                         contentText: contentText,
                         liturgicalSeason: liturgicalSeason,
-                        isMemorial: isMemorial
+                        isMemorial: isMemorial,
+                        style: selectedLowerThirdStyle
                     })
                 });
                 
@@ -4178,7 +4425,8 @@
                 body: JSON.stringify({ 
                     date: dateStr,
                     serviceType: selectedServiceType,
-                    serviceDetails: details
+                    serviceDetails: details,
+                    style: selectedLowerThirdStyle
                 })
             })
             .then(response => response.json())
@@ -4314,7 +4562,8 @@
                     readings: readings,
                     service_details: specialServiceDetails,
                     liturgical_season: liturgicalSeason,
-                    is_funeral: isFuneral
+                    is_funeral: isFuneral,
+                    style: selectedLowerThirdStyle
                 })
             })
             .then(response => response.blob())
@@ -4409,7 +4658,8 @@
                     readings: readings,
                     service_details: specialServiceDetails,
                     liturgical_season: liturgicalSeason,
-                    is_funeral: isFuneral
+                    is_funeral: isFuneral,
+                    style: selectedLowerThirdStyle
                 })
             })
             .then(response => response.json())
@@ -4497,7 +4747,8 @@
                 },
                 body: JSON.stringify({
                     date: serviceDate,
-                    evensong_details: evensongDetails
+                    evensong_details: evensongDetails,
+                    style: selectedLowerThirdStyle
                 })
             })
             .then(response => {
@@ -4661,7 +4912,8 @@
                     performer: performer,
                     date: concertDate,
                     time: concertTime,
-                    pieces: pieces
+                    pieces: pieces,
+                    style: selectedLowerThirdStyle
                 })
             })
             .then(response => response.json())
@@ -4731,7 +4983,8 @@
                     performer: performer,
                     date: concertDate,
                     time: concertTime,
-                    pieces: pieces
+                    pieces: pieces,
+                    style: selectedLowerThirdStyle
                 })
             })
             .then(response => {
@@ -4986,7 +5239,7 @@
     
     <footer style="background-color: #f8f9fa; border-top: 1px solid #dee2e6; padding: 20px; margin-top: 40px; text-align: center; color: #6c757d; font-size: 14px;">
         <div style="margin-bottom: 10px;">
-            <strong>Episcopal Liturgical Calendar Tool v2.5.0</strong>
+            <strong>Episcopal Liturgical Calendar Tool v2.6.0</strong>
         </div>
         <div>
             This tool is provided under a public domain license, without copyright attached. Please courtesy credit Philippe Beaudette/Trinity Episcopal Church, Tulsa, OK.

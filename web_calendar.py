@@ -1892,7 +1892,7 @@ def overlay_logo(image: Image.Image, logo_path: Optional[str], position: str = '
         print(f"Error overlaying logo: {e}")
         return image
 
-def create_lower_third(reading_type: str, reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None, theme: str = 'liturgical', branding: Optional[Dict[str, Any]] = None) -> Image.Image:
+def create_lower_third(reading_type: str, reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None, theme: str = 'liturgical', branding: Optional[Dict[str, Any]] = None, style: str = 'classic') -> Image.Image:
     """Create a lower third graphic for broadcast use with theme-based colors and banner-style design
     
     Args:
@@ -1905,6 +1905,7 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
         liturgical_season: Optional liturgical season override (e.g., 'advent', 'christmas', 'lent')
         theme: Theme name ('liturgical' or 'concert'), defaults to 'liturgical'
         branding: Optional branding configuration dictionary
+        style: Visual style name ('classic', 'minimal', 'modern_glass', 'bold_banner', 'elegant')
     """
     if branding is None:
         branding = load_branding_config()
@@ -1968,134 +1969,10 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     lower_third_start = int(height * 5 / 6)
     background_end = height  # Go all the way to the bottom of the image
     
-    # === ABSTRACT BROADCAST-STYLE BANNER WITH VARIED SHADES AND GRADIENTS ===
-    
-    # Extract base color components from liturgical colors
-    bg_r, bg_g, bg_b, bg_a = liturgical_colors['background']
-    accent_r, accent_g, accent_b, accent_a = liturgical_colors['accent']
-    
-    # Create multiple shades for abstract layering (darkest to lightest)
-    very_dark_r = int(bg_r * 0.4)
-    very_dark_g = int(bg_g * 0.4)
-    very_dark_b = int(bg_b * 0.4)
-    
-    dark_r = int(bg_r * 0.65)
-    dark_g = int(bg_g * 0.65)
-    dark_b = int(bg_b * 0.65)
-    
-    mid_r = int(bg_r * 0.85)
-    mid_g = int(bg_g * 0.85)
-    mid_b = int(bg_b * 0.85)
-    
-    light_r = min(255, int(bg_r * 1.1))
-    light_g = min(255, int(bg_g * 1.1))
-    light_b = min(255, int(bg_b * 1.1))
-    
-    very_light_r = min(255, int(bg_r * 1.25))
-    very_light_g = min(255, int(bg_g * 1.25))
-    very_light_b = min(255, int(bg_b * 1.25))
-    
-    # LAYER 1: Gradient background (left to right, dark to light)
-    gradient_steps = 120
-    for i in range(gradient_steps):
-        x_pos = int((width * i) / gradient_steps)
-        next_x = int((width * (i + 1)) / gradient_steps)
-        
-        # Interpolate from dark on left to mid-tone on right
-        factor = i / gradient_steps
-        r = int(dark_r + (mid_r - dark_r) * factor)
-        g = int(dark_g + (mid_g - dark_g) * factor)
-        b = int(dark_b + (mid_b - dark_b) * factor)
-        
-        draw.rectangle(
-            [x_pos, lower_third_start, next_x, background_end],
-            fill=(r, g, b, 255)
-        )
-    
-    # LAYER 2: Abstract angled panel on left (lighter shade)
-    left_panel_width = 380
-    angle_cut = 45
-    draw.polygon([
-        (0, lower_third_start),
-        (left_panel_width, lower_third_start),
-        (left_panel_width - angle_cut, background_end),
-        (0, background_end)
-    ], fill=(light_r, light_g, light_b, 220))
-    
-    # LAYER 3: Narrow angled accent stripe (very light shade)
-    accent_width_1 = 180
-    draw.polygon([
-        (0, lower_third_start),
-        (accent_width_1, lower_third_start),
-        (accent_width_1 - 35, background_end),
-        (0, background_end)
-    ], fill=(very_light_r, very_light_g, very_light_b, 180))
-    
-    # LAYER 4: Bold accent stripe on far left (bright accent color)
-    accent_width_2 = 120
-    draw.polygon([
-        (0, lower_third_start),
-        (accent_width_2, lower_third_start),
-        (accent_width_2 - 28, background_end),
-        (0, background_end)
-    ], fill=(accent_r, accent_g, accent_b, 255))
-    
-    # LAYER 5: Abstract angled panel on right (very dark for contrast)
-    right_panel_start = width - 280
-    right_angle_cut = 38
-    draw.polygon([
-        (right_panel_start, lower_third_start),
-        (width, lower_third_start),
-        (width, background_end),
-        (right_panel_start + right_angle_cut, background_end)
-    ], fill=(very_dark_r, very_dark_g, very_dark_b, 200))
-    
-    # LAYER 6: Secondary right panel (mid-dark for layering)
-    right_panel_2 = width - 160
-    draw.polygon([
-        (right_panel_2, lower_third_start + 8),
-        (width, lower_third_start),
-        (width, background_end),
-        (right_panel_2 + 20, background_end - 8)
-    ], fill=(dark_r, dark_g, dark_b, 160))
-    
-    # LAYER 7: Top accent stripe (angled, full width, bright)
-    stripe_width = 7
-    top_slope = 5
-    draw.polygon([
-        (0, lower_third_start),
-        (width, lower_third_start + top_slope),
-        (width, lower_third_start + top_slope + stripe_width),
-        (0, lower_third_start + stripe_width)
-    ], fill=(accent_r, accent_g, accent_b, 255))
-    
-    # LAYER 8: Bottom accent stripe (angled, full width)
-    bottom_slope = 5
-    draw.polygon([
-        (0, background_end - stripe_width),
-        (width, background_end - bottom_slope - stripe_width),
-        (width, background_end - bottom_slope),
-        (0, background_end)
-    ], fill=(accent_r, accent_g, accent_b, 240))
-    
-    # LAYER 9: Abstract diagonal stripes for visual interest (semi-transparent)
-    diagonal_1_start = 500
-    diagonal_1_width = 80
-    draw.polygon([
-        (diagonal_1_start, lower_third_start),
-        (diagonal_1_start + diagonal_1_width, lower_third_start),
-        (diagonal_1_start + diagonal_1_width - 50, background_end),
-        (diagonal_1_start - 50, background_end)
-    ], fill=(very_light_r, very_light_g, very_light_b, 100))
-    
-    diagonal_2_start = 900
-    diagonal_2_width = 100
-    draw.polygon([
-        (diagonal_2_start, lower_third_start),
-        (diagonal_2_start + diagonal_2_width, lower_third_start),
-        (diagonal_2_start + diagonal_2_width - 60, background_end),
-        (diagonal_2_start - 60, background_end)
-    ], fill=(light_r, light_g, light_b, 90))
+    # === RENDER BACKGROUND STYLE ===
+    # Get the appropriate style renderer from registry (default to classic if not found)
+    style_renderer = LOWER_THIRD_STYLE_REGISTRY.get(style.lower(), _render_lower_third_classic)
+    style_renderer(draw, width, height, lower_third_start, background_end, liturgical_colors)
     
     # Text starts at approximately 1/5 of the page from the left (about 384px on 1920px width)
     text_indent = int(width / 5)
@@ -2129,7 +2006,7 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     
     return img
 
-def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None) -> Image.Image:
+def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None, style: str = 'classic') -> Image.Image:
     """Create a blank lower third template for manual use with liturgical season colors
     
     This generates a lower third with all the design elements but no text,
@@ -2141,6 +2018,7 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
         height: Image height in pixels
         is_funeral: If True, use black background instead of liturgical colors
         liturgical_season: Optional liturgical season override (e.g., 'advent', 'christmas', 'lent')
+        style: Visual style name ('classic', 'minimal', 'modern_glass', 'bold_banner', 'elegant')
     """
     # Create image with transparent background (RGBA mode)
     img = Image.new('RGBA', (width, height), color=(0, 0, 0, 0))
@@ -2166,11 +2044,29 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
     lower_third_start = int(height * 5 / 6)
     background_end = height
     
-    # Extract base color components from liturgical colors
+    # === RENDER BACKGROUND STYLE ===
+    # Get the appropriate blank style renderer from registry (default to classic if not found)
+    style_renderer = BLANK_LOWER_THIRD_STYLE_REGISTRY.get(style.lower(), _render_blank_lower_third_classic)
+    style_renderer(draw, width, height, lower_third_start, background_end, liturgical_colors)
+    
+    # No text drawn - this is a blank template
+    
+    return img
+
+
+# =============================================================================
+# LOWER THIRD STYLE RENDERER FUNCTIONS
+# =============================================================================
+# Each renderer draws directly on the draw object and returns nothing.
+# Parameters: draw, width, height, lower_third_start, background_end, liturgical_colors
+
+def _render_lower_third_classic(draw: ImageDraw.Draw, width: int, height: int, 
+                                 lower_third_start: int, background_end: int, 
+                                 liturgical_colors: Dict[str, Tuple[int, int, int, int]]) -> None:
+    """Classic style - angled layers, gradients, diagonal stripes (original design)"""
     bg_r, bg_g, bg_b, bg_a = liturgical_colors['background']
     accent_r, accent_g, accent_b, accent_a = liturgical_colors['accent']
     
-    # Create multiple shades for abstract layering
     very_dark_r = int(bg_r * 0.4)
     very_dark_g = int(bg_g * 0.4)
     very_dark_b = int(bg_b * 0.4)
@@ -2185,13 +2081,12 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
     
     light_r = min(255, int(bg_r * 1.1))
     light_g = min(255, int(bg_g * 1.1))
-    light_b = min(255, int(bg_g * 1.1))
+    light_b = min(255, int(bg_b * 1.1))
     
     very_light_r = min(255, int(bg_r * 1.25))
     very_light_g = min(255, int(bg_g * 1.25))
     very_light_b = min(255, int(bg_b * 1.25))
     
-    # LAYER 1: Gradient background (left to right, dark to light)
     gradient_steps = 120
     for i in range(gradient_steps):
         x_pos = int((width * i) / gradient_steps)
@@ -2207,7 +2102,6 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
             fill=(r, g, b, 255)
         )
     
-    # LAYER 2: Abstract angled panel on left
     left_panel_width = 380
     angle_cut = 45
     draw.polygon([
@@ -2217,7 +2111,6 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
         (0, background_end)
     ], fill=(light_r, light_g, light_b, 220))
     
-    # LAYER 3: Narrow angled accent stripe
     accent_width_1 = 180
     draw.polygon([
         (0, lower_third_start),
@@ -2226,7 +2119,6 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
         (0, background_end)
     ], fill=(very_light_r, very_light_g, very_light_b, 180))
     
-    # LAYER 4: Bold accent stripe on far left
     accent_width_2 = 120
     draw.polygon([
         (0, lower_third_start),
@@ -2235,7 +2127,6 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
         (0, background_end)
     ], fill=(accent_r, accent_g, accent_b, 255))
     
-    # LAYER 5: Abstract angled panel on right
     right_panel_start = width - 280
     right_angle_cut = 38
     draw.polygon([
@@ -2245,7 +2136,6 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
         (right_panel_start + right_angle_cut, background_end)
     ], fill=(very_dark_r, very_dark_g, very_dark_b, 200))
     
-    # LAYER 6: Secondary right panel
     right_panel_2 = width - 160
     draw.polygon([
         (right_panel_2, lower_third_start + 8),
@@ -2254,7 +2144,6 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
         (right_panel_2 + 20, background_end - 8)
     ], fill=(dark_r, dark_g, dark_b, 160))
     
-    # LAYER 7: Top accent stripe
     stripe_width = 7
     top_slope = 5
     draw.polygon([
@@ -2264,7 +2153,6 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
         (0, lower_third_start + stripe_width)
     ], fill=(accent_r, accent_g, accent_b, 255))
     
-    # LAYER 8: Bottom accent stripe
     bottom_slope = 5
     draw.polygon([
         (0, background_end - stripe_width),
@@ -2273,7 +2161,6 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
         (0, background_end)
     ], fill=(accent_r, accent_g, accent_b, 240))
     
-    # LAYER 9: Abstract diagonal stripes
     diagonal_1_start = 500
     diagonal_1_width = 80
     draw.polygon([
@@ -2291,10 +2178,215 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
         (diagonal_2_start + diagonal_2_width - 60, background_end),
         (diagonal_2_start - 60, background_end)
     ], fill=(light_r, light_g, light_b, 90))
+
+
+def _render_lower_third_minimal(draw: ImageDraw.Draw, width: int, height: int, 
+                                 lower_third_start: int, background_end: int, 
+                                 liturgical_colors: Dict[str, Tuple[int, int, int, int]]) -> None:
+    """Minimal style - clean single horizontal bar with thin accent line at top"""
+    bg_r, bg_g, bg_b, bg_a = liturgical_colors['background']
+    accent_r, accent_g, accent_b, accent_a = liturgical_colors['accent']
     
-    # No text drawn - this is a blank template
+    bar_alpha = 200
+    draw.rectangle(
+        [0, lower_third_start, width, background_end],
+        fill=(bg_r, bg_g, bg_b, bar_alpha)
+    )
     
-    return img
+    accent_line_height = 3
+    draw.rectangle(
+        [0, lower_third_start, width, lower_third_start + accent_line_height],
+        fill=(accent_r, accent_g, accent_b, 255)
+    )
+
+
+def _render_lower_third_modern_glass(draw: ImageDraw.Draw, width: int, height: int, 
+                                      lower_third_start: int, background_end: int, 
+                                      liturgical_colors: Dict[str, Tuple[int, int, int, int]]) -> None:
+    """Modern Glass style - frosted glass/glassmorphism effect with soft rounded edges simulation"""
+    bg_r, bg_g, bg_b, bg_a = liturgical_colors['background']
+    accent_r, accent_g, accent_b, accent_a = liturgical_colors['accent']
+    
+    glass_alpha = 217
+    glass_r = min(255, int(bg_r * 0.9 + 25))
+    glass_g = min(255, int(bg_g * 0.9 + 25))
+    glass_b = min(255, int(bg_b * 0.9 + 25))
+    
+    corner_radius = 12
+    margin = 20
+    
+    glass_left = margin
+    glass_right = width - margin
+    glass_top = lower_third_start + 5
+    glass_bottom = background_end - 10
+    
+    draw.rectangle(
+        [glass_left + corner_radius, glass_top, glass_right - corner_radius, glass_bottom],
+        fill=(glass_r, glass_g, glass_b, glass_alpha)
+    )
+    draw.rectangle(
+        [glass_left, glass_top + corner_radius, glass_right, glass_bottom - corner_radius],
+        fill=(glass_r, glass_g, glass_b, glass_alpha)
+    )
+    
+    draw.ellipse([glass_left, glass_top, glass_left + corner_radius * 2, glass_top + corner_radius * 2],
+                 fill=(glass_r, glass_g, glass_b, glass_alpha))
+    draw.ellipse([glass_right - corner_radius * 2, glass_top, glass_right, glass_top + corner_radius * 2],
+                 fill=(glass_r, glass_g, glass_b, glass_alpha))
+    draw.ellipse([glass_left, glass_bottom - corner_radius * 2, glass_left + corner_radius * 2, glass_bottom],
+                 fill=(glass_r, glass_g, glass_b, glass_alpha))
+    draw.ellipse([glass_right - corner_radius * 2, glass_bottom - corner_radius * 2, glass_right, glass_bottom],
+                 fill=(glass_r, glass_g, glass_b, glass_alpha))
+    
+    frost_steps = 8
+    for i in range(frost_steps):
+        frost_alpha = int(30 - (i * 3))
+        frost_offset = i * 2
+        if frost_alpha > 0:
+            draw.rectangle(
+                [glass_left + frost_offset, glass_top + frost_offset, 
+                 glass_right - frost_offset, glass_top + 20],
+                fill=(255, 255, 255, frost_alpha)
+            )
+    
+    border_alpha = 150
+    lighter_r = min(255, glass_r + 40)
+    lighter_g = min(255, glass_g + 40)
+    lighter_b = min(255, glass_b + 40)
+    
+    draw.rectangle(
+        [glass_left + corner_radius, glass_top, glass_right - corner_radius, glass_top + 2],
+        fill=(lighter_r, lighter_g, lighter_b, border_alpha)
+    )
+    draw.rectangle(
+        [glass_left + corner_radius, glass_bottom - 2, glass_right - corner_radius, glass_bottom],
+        fill=(accent_r, accent_g, accent_b, 180)
+    )
+
+
+def _render_lower_third_bold_banner(draw: ImageDraw.Draw, width: int, height: int, 
+                                     lower_third_start: int, background_end: int, 
+                                     liturgical_colors: Dict[str, Tuple[int, int, int, int]]) -> None:
+    """Bold Banner style - full-width solid color block, strong typography, no angles"""
+    bg_r, bg_g, bg_b, bg_a = liturgical_colors['background']
+    accent_r, accent_g, accent_b, accent_a = liturgical_colors['accent']
+    
+    draw.rectangle(
+        [0, lower_third_start, width, background_end],
+        fill=(bg_r, bg_g, bg_b, 255)
+    )
+    
+    accent_stripe_height = 5
+    draw.rectangle(
+        [0, lower_third_start, width, lower_third_start + accent_stripe_height],
+        fill=(accent_r, accent_g, accent_b, 255)
+    )
+
+
+def _render_lower_third_elegant(draw: ImageDraw.Draw, width: int, height: int, 
+                                 lower_third_start: int, background_end: int, 
+                                 liturgical_colors: Dict[str, Tuple[int, int, int, int]]) -> None:
+    """Elegant style - thin accent lines top and bottom, subtle vertical gradient, refined look"""
+    bg_r, bg_g, bg_b, bg_a = liturgical_colors['background']
+    accent_r, accent_g, accent_b, accent_a = liturgical_colors['accent']
+    
+    bar_height = background_end - lower_third_start
+    gradient_steps = bar_height
+    
+    lighter_r = min(255, int(bg_r * 1.15))
+    lighter_g = min(255, int(bg_g * 1.15))
+    lighter_b = min(255, int(bg_b * 1.15))
+    
+    darker_r = int(bg_r * 0.85)
+    darker_g = int(bg_g * 0.85)
+    darker_b = int(bg_b * 0.85)
+    
+    for i in range(gradient_steps):
+        y_pos = lower_third_start + i
+        
+        if i < gradient_steps // 2:
+            factor = i / (gradient_steps // 2)
+            r = int(lighter_r + (bg_r - lighter_r) * factor)
+            g = int(lighter_g + (bg_g - lighter_g) * factor)
+            b = int(lighter_b + (bg_b - lighter_b) * factor)
+        else:
+            factor = (i - gradient_steps // 2) / (gradient_steps // 2)
+            r = int(bg_r + (darker_r - bg_r) * factor)
+            g = int(bg_g + (darker_g - bg_g) * factor)
+            b = int(bg_b + (darker_b - bg_b) * factor)
+        
+        draw.line([(0, y_pos), (width, y_pos)], fill=(r, g, b, 230))
+    
+    line_height = 2
+    draw.rectangle(
+        [0, lower_third_start, width, lower_third_start + line_height],
+        fill=(accent_r, accent_g, accent_b, 255)
+    )
+    draw.rectangle(
+        [0, background_end - line_height, width, background_end],
+        fill=(accent_r, accent_g, accent_b, 255)
+    )
+
+
+# =============================================================================
+# BLANK LOWER THIRD STYLE RENDERER FUNCTIONS
+# =============================================================================
+
+def _render_blank_lower_third_classic(draw: ImageDraw.Draw, width: int, height: int, 
+                                       lower_third_start: int, background_end: int, 
+                                       liturgical_colors: Dict[str, Tuple[int, int, int, int]]) -> None:
+    """Classic style blank template - same visual design as classic but without text"""
+    _render_lower_third_classic(draw, width, height, lower_third_start, background_end, liturgical_colors)
+
+
+def _render_blank_lower_third_minimal(draw: ImageDraw.Draw, width: int, height: int, 
+                                       lower_third_start: int, background_end: int, 
+                                       liturgical_colors: Dict[str, Tuple[int, int, int, int]]) -> None:
+    """Minimal style blank template"""
+    _render_lower_third_minimal(draw, width, height, lower_third_start, background_end, liturgical_colors)
+
+
+def _render_blank_lower_third_modern_glass(draw: ImageDraw.Draw, width: int, height: int, 
+                                            lower_third_start: int, background_end: int, 
+                                            liturgical_colors: Dict[str, Tuple[int, int, int, int]]) -> None:
+    """Modern Glass style blank template"""
+    _render_lower_third_modern_glass(draw, width, height, lower_third_start, background_end, liturgical_colors)
+
+
+def _render_blank_lower_third_bold_banner(draw: ImageDraw.Draw, width: int, height: int, 
+                                           lower_third_start: int, background_end: int, 
+                                           liturgical_colors: Dict[str, Tuple[int, int, int, int]]) -> None:
+    """Bold Banner style blank template"""
+    _render_lower_third_bold_banner(draw, width, height, lower_third_start, background_end, liturgical_colors)
+
+
+def _render_blank_lower_third_elegant(draw: ImageDraw.Draw, width: int, height: int, 
+                                       lower_third_start: int, background_end: int, 
+                                       liturgical_colors: Dict[str, Tuple[int, int, int, int]]) -> None:
+    """Elegant style blank template"""
+    _render_lower_third_elegant(draw, width, height, lower_third_start, background_end, liturgical_colors)
+
+
+# =============================================================================
+# STYLE REGISTRIES
+# =============================================================================
+
+LOWER_THIRD_STYLE_REGISTRY: Dict[str, callable] = {
+    'classic': _render_lower_third_classic,
+    'minimal': _render_lower_third_minimal,
+    'modern_glass': _render_lower_third_modern_glass,
+    'bold_banner': _render_lower_third_bold_banner,
+    'elegant': _render_lower_third_elegant,
+}
+
+BLANK_LOWER_THIRD_STYLE_REGISTRY: Dict[str, callable] = {
+    'classic': _render_blank_lower_third_classic,
+    'minimal': _render_blank_lower_third_minimal,
+    'modern_glass': _render_blank_lower_third_modern_glass,
+    'bold_banner': _render_blank_lower_third_bold_banner,
+    'elegant': _render_blank_lower_third_elegant,
+}
+
 
 def create_title_card(liturgical_reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None, theme: str = 'liturgical', branding: Optional[Dict[str, Any]] = None) -> Image.Image:
     """Create a full-screen title card with liturgical reference and church name
@@ -3226,6 +3318,7 @@ def preview_graphics():
         date_str = data.get('date')
         service_details = data.get('serviceDetails', {})
         service_type = data.get('serviceType', 'eucharist')  # Get service type
+        style = data.get('style', 'classic')  # Get style for lower thirds
         
         if not date_str:
             return jsonify({
@@ -3297,7 +3390,7 @@ def preview_graphics():
             formatted_type = reading_type.replace('_', ' ').title()
             
             # Create lower third image
-            lower_third = create_lower_third(reading_type, reference, date_str, branding=branding)
+            lower_third = create_lower_third(reading_type, reference, date_str, branding=branding, style=style)
             
             # Convert to base64
             lt_buffer = io.BytesIO()
@@ -3339,7 +3432,7 @@ def preview_graphics():
             field_value = service_details.get(field_key, '').strip()
             if field_value:  # Only create graphic if field has content
                 # Create lower third image
-                lower_third = create_lower_third(field_label, field_value, date_str, branding=branding)
+                lower_third = create_lower_third(field_label, field_value, date_str, branding=branding, style=style)
                 
                 # Convert to base64
                 lt_buffer = io.BytesIO()
@@ -3376,6 +3469,7 @@ def preview_special_service():
         service_details = data.get('service_details', {})
         liturgical_season = data.get('liturgical_season', '')
         is_funeral = data.get('is_funeral', False)
+        style = data.get('style', 'classic')  # Get style for lower thirds
         
         if not service_title or not service_date:
             return jsonify({
@@ -3415,7 +3509,7 @@ def preview_special_service():
             reference = reading_data.get('reference', '').strip()
             
             if reference:
-                lower_third = create_lower_third(reading_label, reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding)
+                lower_third = create_lower_third(reading_label, reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding, style=style)
                 
                 lt_buffer = io.BytesIO()
                 lower_third.save(lt_buffer, format='PNG')
@@ -3440,7 +3534,7 @@ def preview_special_service():
         for field_key, field_label in hymn_fields.items():
             hymn_value = service_details.get(field_key, '').strip()
             if hymn_value:
-                lower_third = create_lower_third(field_label, hymn_value, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding)
+                lower_third = create_lower_third(field_label, hymn_value, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding, style=style)
                 
                 lt_buffer = io.BytesIO()
                 lower_third.save(lt_buffer, format='PNG')
@@ -3453,7 +3547,7 @@ def preview_special_service():
                 })
         
         # Generate blank template preview
-        blank_template = create_blank_lower_third(service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
+        blank_template = create_blank_lower_third(service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, style=style)
         blank_buffer = io.BytesIO()
         blank_template.save(blank_buffer, format='PNG')
         blank_buffer.seek(0)
@@ -3484,6 +3578,7 @@ def export_all():
         service_details = data.get('serviceDetails', {})
         service_type = data.get('serviceType', 'eucharist')  # Get service type
         obs_settings = data.get('obsSettings', {})
+        style = data.get('style', 'classic')  # Get style for lower thirds
         
         if not date_str:
             return jsonify({
@@ -3678,7 +3773,7 @@ def export_all():
                 reference = reading_ref_overrides.get(reading_type, '') or reading_data.get('reference', 'No reference')
                 
                 # Generate lower third image with liturgical season colors (with optional override)
-                img = create_lower_third(reading_type, reference, date_str, is_funeral=is_funeral_service, liturgical_season=liturgical_season_override, branding=branding)
+                img = create_lower_third(reading_type, reference, date_str, is_funeral=is_funeral_service, liturgical_season=liturgical_season_override, branding=branding, style=style)
                 
                 # Save image to buffer
                 img_buffer = io.BytesIO()
@@ -3717,7 +3812,7 @@ def export_all():
                 field_value = service_details.get(field_key, '').strip()
                 if field_value:  # Only create graphic if field has content
                     # Generate lower third image with liturgical season colors (with optional override)
-                    img = create_lower_third(field_label, field_value, date_str, is_funeral=is_funeral_service, liturgical_season=liturgical_season_override, branding=branding)
+                    img = create_lower_third(field_label, field_value, date_str, is_funeral=is_funeral_service, liturgical_season=liturgical_season_override, branding=branding, style=style)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -3730,7 +3825,7 @@ def export_all():
                     zip_file.writestr(filepath, img_buffer.read())
             
             # ===== Generate blank lower third template for manual use =====
-            blank_template = create_blank_lower_third(date_str, is_funeral=is_funeral_service, liturgical_season=liturgical_season_override)
+            blank_template = create_blank_lower_third(date_str, is_funeral=is_funeral_service, liturgical_season=liturgical_season_override, style=style)
             blank_buffer = io.BytesIO()
             blank_template.save(blank_buffer, format='PNG')
             blank_buffer.seek(0)
@@ -3764,6 +3859,7 @@ def generate_lower_thirds():
     try:
         data = request.get_json()
         date_str = data.get('date')
+        style = data.get('style', 'classic')  # Get style for lower thirds
         
         if not date_str:
             return jsonify({
@@ -3807,7 +3903,7 @@ def generate_lower_thirds():
                 reference = reading_data.get('reference', 'No reference')
                 
                 # Generate lower third image with liturgical season colors
-                img = create_lower_third(reading_type, reference, date_str, branding=branding)
+                img = create_lower_third(reading_type, reference, date_str, branding=branding, style=style)
                 
                 # Save image to buffer
                 img_buffer = io.BytesIO()
@@ -3835,7 +3931,7 @@ def generate_lower_thirds():
                 hymn_value = service_details.get(field_key, '').strip()
                 if hymn_value:  # Only create graphic if field has content
                     # Generate lower third image with liturgical season colors and branding
-                    img = create_lower_third(field_label, hymn_value, date_str, branding=branding)
+                    img = create_lower_third(field_label, hymn_value, date_str, branding=branding, style=style)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -3918,6 +4014,7 @@ def generate_custom_lower_third():
         liturgical_season_raw = data.get('liturgicalSeason')
         liturgical_season = liturgical_season_raw.strip() if liturgical_season_raw else ''
         is_memorial = data.get('isMemorial', False)
+        style = data.get('style', 'classic')
         
         # Validate that at least one field has content
         if not label_text and not content_text:
@@ -3935,7 +4032,8 @@ def generate_custom_lower_third():
             reference=content_text or '',
             liturgical_season=liturgical_season if liturgical_season else None,
             is_funeral=is_memorial,
-            branding=branding
+            branding=branding,
+            style=style
         )
         
         # Convert to PNG and send as file download
@@ -3975,6 +4073,7 @@ def preview_custom_lower_third():
         liturgical_season_raw = data.get('liturgicalSeason')
         liturgical_season = liturgical_season_raw.strip() if liturgical_season_raw else ''
         is_memorial = data.get('isMemorial', False)
+        style = data.get('style', 'classic')
         
         # Validate that at least one field is provided
         if not label_text and not content_text:
@@ -3989,7 +4088,8 @@ def preview_custom_lower_third():
             reference=content_text or '',
             liturgical_season=liturgical_season if liturgical_season else None,
             is_funeral=is_memorial,
-            branding=branding
+            branding=branding,
+            style=style
         )
         
         # Convert to base64
@@ -4478,6 +4578,7 @@ def special_service():
         service_details = data.get('service_details', {})
         liturgical_season = data.get('liturgical_season', '')
         is_funeral = data.get('is_funeral', False)
+        style = data.get('style', 'classic')  # Get style for lower thirds
         
         if not service_title:
             return jsonify({
@@ -4576,7 +4677,7 @@ def special_service():
                 
                 if reference:
                     # Generate lower third image (use funeral colors if flagged, otherwise liturgical colors)
-                    img = create_lower_third(reading_label, reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding)
+                    img = create_lower_third(reading_label, reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding, style=style)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -4602,7 +4703,7 @@ def special_service():
                 hymn_value = service_details.get(field_key, '').strip()
                 if hymn_value:
                     # Generate lower third image (use funeral colors if flagged, otherwise liturgical colors)
-                    img = create_lower_third(field_label, hymn_value, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding)
+                    img = create_lower_third(field_label, hymn_value, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding, style=style)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -4615,7 +4716,7 @@ def special_service():
                     zip_file.writestr(filepath, img_buffer.read())
             
             # ===== PART 6: Generate blank lower third template for manual use =====
-            blank_template = create_blank_lower_third(service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None)
+            blank_template = create_blank_lower_third(service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, style=style)
             blank_buffer = io.BytesIO()
             blank_template.save(blank_buffer, format='PNG')
             blank_buffer.seek(0)
@@ -4652,6 +4753,7 @@ def evensong_service():
         data = request.get_json()
         service_date = data.get('date', '')
         evensong_details = data.get('evensong_details', {})
+        style = data.get('style', 'classic')  # Get style for lower thirds
         
         if not service_date:
             return jsonify({
@@ -4741,7 +4843,7 @@ def evensong_service():
                 field_value = evensong_details.get(field_key, '').strip()
                 if field_value:
                     # Generate lower third image
-                    img = create_lower_third(field_label, field_value, service_date, branding=branding)
+                    img = create_lower_third(field_label, field_value, service_date, branding=branding, style=style)
                     
                     # Save image to buffer
                     img_buffer = io.BytesIO()
@@ -4754,7 +4856,7 @@ def evensong_service():
                     zip_file.writestr(filepath, img_buffer.read())
             
             # ===== Generate blank lower third template for manual use =====
-            blank_template = create_blank_lower_third(service_date)
+            blank_template = create_blank_lower_third(service_date, style=style)
             blank_buffer = io.BytesIO()
             blank_template.save(blank_buffer, format='PNG')
             blank_buffer.seek(0)
@@ -4789,6 +4891,7 @@ def concert_program():
         concert_date = data.get('date', '').strip()
         concert_time = data.get('time', '').strip()
         pieces = data.get('pieces', [])
+        style = data.get('style', 'classic')  # Get style for lower thirds
         
         if not performer:
             return jsonify({
@@ -4842,7 +4945,7 @@ def concert_program():
                 
                 lower_third = create_lower_third(piece['title'] if piece['title'] else 'Piece', 
                                                 piece['composer'] if piece['composer'] else '', 
-                                                theme='concert', branding=branding)
+                                                theme='concert', branding=branding, style=style)
                 
                 img_buffer = io.BytesIO()
                 lower_third.save(img_buffer, format='PNG')
@@ -4880,6 +4983,7 @@ def preview_concert_program():
         concert_date = data.get('date', '').strip()
         concert_time = data.get('time', '').strip()
         pieces = data.get('pieces', [])
+        style = data.get('style', 'classic')  # Get style for lower thirds
         
         if not performer:
             return jsonify({
@@ -4939,7 +5043,7 @@ def preview_concert_program():
             
             lower_third = create_lower_third(piece['title'] if piece['title'] else 'Piece', 
                                             piece['composer'] if piece['composer'] else '', 
-                                            theme='concert', branding=branding)
+                                            theme='concert', branding=branding, style=style)
             
             # Convert lower third to base64
             img_buffer = io.BytesIO()
