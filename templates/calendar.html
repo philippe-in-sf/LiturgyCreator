@@ -2853,13 +2853,23 @@
         // Dark Mode Functions
         function toggleDarkMode() {
             const body = document.body;
-            body.classList.toggle('dark-mode');
+            const currentlyDark = body.classList.contains('dark-mode');
             
-            // Save preference to localStorage
+            // Explicitly add or remove the class (more reliable than toggle)
+            if (currentlyDark) {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('darkModeEnabled', 'false');
+            } else {
+                body.classList.add('dark-mode');
+                localStorage.setItem('darkModeEnabled', 'true');
+            }
+            
+            // Update button icon and text based on new state
             const isDarkMode = body.classList.contains('dark-mode');
-            localStorage.setItem('darkModeEnabled', isDarkMode);
-            
-            // Update button icon and text
+            updateDarkModeButton(isDarkMode);
+        }
+        
+        function updateDarkModeButton(isDarkMode) {
             const toggleBtn = document.querySelector('.dark-mode-toggle');
             if (toggleBtn) {
                 const icon = toggleBtn.querySelector('.toggle-icon');
@@ -2871,18 +2881,16 @@
 
         function initializeDarkMode() {
             // Check if dark mode was previously enabled
-            const isDarkModeEnabled = localStorage.getItem('darkModeEnabled') === 'true';
+            const storedValue = localStorage.getItem('darkModeEnabled');
+            const isDarkModeEnabled = storedValue === 'true';
             
             if (isDarkModeEnabled) {
                 document.body.classList.add('dark-mode');
-                const toggleBtn = document.querySelector('.dark-mode-toggle');
-                if (toggleBtn) {
-                    const icon = toggleBtn.querySelector('.toggle-icon');
-                    const text = toggleBtn.querySelector('.toggle-text');
-                    if (icon) icon.textContent = '☀️';
-                    if (text) text.textContent = 'Light';
-                }
+            } else {
+                document.body.classList.remove('dark-mode');
             }
+            
+            updateDarkModeButton(isDarkModeEnabled);
         }
 
         // Initialize calendar and settings
