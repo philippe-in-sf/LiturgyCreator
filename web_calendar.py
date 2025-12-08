@@ -1801,7 +1801,12 @@ def get_liturgical_season_colors(date_str: Optional[str] = None) -> Dict[str, tu
     elif month in [4, 5, 6] and (month > 4 or day >= 15):
         season = 'easter'
     elif (month == 11 and day >= 27) or (month == 12 and day < 25):
-        season = 'advent'
+        # Check for Gaudete Sunday (3rd Sunday of Advent) - use pink/rose
+        calendar_instance = WebLiturgicalCalendar()
+        if calendar_instance.is_gaudete_sunday(date_obj.date()):
+            season = 'gaudete'
+        else:
+            season = 'advent'
     else:
         season = 'season_after_pentecost'
     
