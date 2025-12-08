@@ -4725,10 +4725,8 @@ def special_service():
         # Prepare the ZIP file for download
         zip_buffer.seek(0)
         
-        # Generate safe filename from service title
-        safe_title = "".join(c for c in service_title if c.isalnum() or c in (' ', '-', '_')).strip()
-        safe_title = safe_title.replace(' ', '_')[:50]  # Limit length
-        download_name = f"special_service_{safe_title}_{service_date.replace('-', '')}.zip"
+        # Use consistent "Worship.zip" filename for all service exports
+        download_name = "Worship.zip"
         
         return send_file(
             io.BytesIO(zip_buffer.read()),
