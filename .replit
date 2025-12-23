@@ -57,10 +57,6 @@ externalPort = 3000
 localPort = 8002
 externalPort = 3001
 
-[[ports]]
-localPort = 34145
-externalPort = 3002
-
 [deployment]
 deploymentTarget = "autoscale"
 run = ["gunicorn", "--config", "gunicorn.conf.py", "wsgi:application"]

@@ -2009,6 +2009,9 @@ def create_lower_third(reading_type: str, reference: str, date_str: Optional[str
     logo_path = branding.get('logo_path') if branding else None
     img = overlay_logo(img, logo_path, position='bottom-left', max_width=120)
     
+    if style.lower() == 'christmas_trinity':
+        _render_lower_third_christmas_trinity_with_image(img, draw, width, height, lower_third_start, background_end)
+    
     return img
 
 def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None, style: str = 'classic') -> Image.Image:
@@ -2053,6 +2056,9 @@ def create_blank_lower_third(date_str: Optional[str] = None, width: int = 1920, 
     # Get the appropriate blank style renderer from registry (default to classic if not found)
     style_renderer = BLANK_LOWER_THIRD_STYLE_REGISTRY.get(style.lower(), _render_blank_lower_third_classic)
     style_renderer(draw, width, height, lower_third_start, background_end, liturgical_colors)
+    
+    if style.lower() == 'christmas_trinity':
+        _render_lower_third_christmas_trinity_with_image(img, draw, width, height, lower_third_start, background_end)
     
     # No text drawn - this is a blank template
     
@@ -2333,6 +2339,152 @@ def _render_lower_third_elegant(draw: ImageDraw.Draw, width: int, height: int,
     )
 
 
+def _render_lower_third_christmas_trinity(draw: ImageDraw.Draw, width: int, height: int, 
+                                           lower_third_start: int, background_end: int, 
+                                           liturgical_colors: Dict[str, Tuple[int, int, int, int]]) -> None:
+    """Christmas Trinity style - rich gold and burgundy with Trinity Church building graphic
+    
+    Special branded style for Christmas season featuring the Trinity Church illustration,
+    deep gold gradients, burgundy accents, and festive Christmas liturgical theming.
+    """
+    gold_primary = (212, 175, 55)
+    gold_light = (245, 212, 100)
+    gold_dark = (160, 130, 40)
+    burgundy = (128, 0, 32)
+    burgundy_dark = (80, 0, 20)
+    cream = (255, 248, 235)
+    
+    bar_height = background_end - lower_third_start
+    gradient_steps = 80
+    for i in range(gradient_steps):
+        x_pos = int((width * i) / gradient_steps)
+        next_x = int((width * (i + 1)) / gradient_steps)
+        
+        factor = i / gradient_steps
+        r = int(gold_dark[0] + (gold_primary[0] - gold_dark[0]) * factor)
+        g = int(gold_dark[1] + (gold_primary[1] - gold_dark[1]) * factor)
+        b = int(gold_dark[2] + (gold_primary[2] - gold_dark[2]) * factor)
+        
+        draw.rectangle(
+            [x_pos, lower_third_start, next_x, background_end],
+            fill=(r, g, b, 245)
+        )
+    
+    left_panel_width = 350
+    angle_cut = 50
+    draw.polygon([
+        (0, lower_third_start),
+        (left_panel_width, lower_third_start),
+        (left_panel_width - angle_cut, background_end),
+        (0, background_end)
+    ], fill=(burgundy[0], burgundy[1], burgundy[2], 255))
+    
+    accent_width = 140
+    draw.polygon([
+        (0, lower_third_start),
+        (accent_width, lower_third_start),
+        (accent_width - 32, background_end),
+        (0, background_end)
+    ], fill=(burgundy_dark[0], burgundy_dark[1], burgundy_dark[2], 255))
+    
+    highlight_width = 80
+    draw.polygon([
+        (0, lower_third_start),
+        (highlight_width, lower_third_start),
+        (highlight_width - 18, background_end),
+        (0, background_end)
+    ], fill=(gold_light[0], gold_light[1], gold_light[2], 180))
+    
+    right_panel_start = width - 320
+    draw.polygon([
+        (right_panel_start, lower_third_start),
+        (width, lower_third_start),
+        (width, background_end),
+        (right_panel_start + 45, background_end)
+    ], fill=(burgundy_dark[0], burgundy_dark[1], burgundy_dark[2], 200))
+    
+    right_accent_start = width - 200
+    draw.polygon([
+        (right_accent_start, lower_third_start + 5),
+        (width, lower_third_start),
+        (width, background_end),
+        (right_accent_start + 25, background_end - 5)
+    ], fill=(burgundy[0], burgundy[1], burgundy[2], 180))
+    
+    stripe_height = 6
+    draw.polygon([
+        (0, lower_third_start),
+        (width, lower_third_start + 4),
+        (width, lower_third_start + stripe_height + 4),
+        (0, lower_third_start + stripe_height)
+    ], fill=(gold_light[0], gold_light[1], gold_light[2], 255))
+    
+    draw.polygon([
+        (0, background_end - stripe_height),
+        (width, background_end - stripe_height - 4),
+        (width, background_end - 4),
+        (0, background_end)
+    ], fill=(gold_light[0], gold_light[1], gold_light[2], 230))
+    
+    inner_stripe_y = lower_third_start + stripe_height + 2
+    draw.rectangle(
+        [0, inner_stripe_y, width, inner_stripe_y + 2],
+        fill=(burgundy[0], burgundy[1], burgundy[2], 200)
+    )
+    
+    star_center_x = left_panel_width - 70
+    star_center_y = lower_third_start + bar_height // 2
+    star_size = 18
+    for i in range(8):
+        angle = i * 45
+        import math
+        rad = math.radians(angle)
+        end_x = star_center_x + int(star_size * math.cos(rad))
+        end_y = star_center_y + int(star_size * math.sin(rad))
+        draw.line([(star_center_x, star_center_y), (end_x, end_y)], 
+                  fill=(gold_light[0], gold_light[1], gold_light[2], 255), width=2)
+    draw.ellipse([star_center_x - 6, star_center_y - 6, star_center_x + 6, star_center_y + 6],
+                 fill=(cream[0], cream[1], cream[2], 255))
+
+
+def _render_lower_third_christmas_trinity_with_image(img: Image.Image, draw: ImageDraw.Draw, 
+                                                      width: int, height: int, 
+                                                      lower_third_start: int, background_end: int) -> None:
+    """Overlay Trinity Church building graphic on lower third (called after base render)"""
+    try:
+        import os
+        church_path = 'attached_assets/Trin_High_Qual_-_trans_1766487556493.png'
+        if not os.path.exists(church_path):
+            return
+        
+        church_img = Image.open(church_path).convert('RGBA')
+        
+        bar_height = background_end - lower_third_start
+        target_height = int(bar_height * 1.2)
+        aspect_ratio = church_img.width / church_img.height
+        target_width = int(target_height * aspect_ratio)
+        
+        church_resized = church_img.resize((target_width, target_height), Image.Resampling.LANCZOS)
+        
+        alpha = church_resized.split()[3]
+        alpha = alpha.point(lambda p: int(p * 0.35))
+        church_resized.putalpha(alpha)
+        
+        x_pos = width - target_width - 50
+        y_pos = lower_third_start - int(target_height * 0.15)
+        
+        if img.mode != 'RGBA':
+            img = img.convert('RGBA')
+        
+        temp_layer = Image.new('RGBA', img.size, (0, 0, 0, 0))
+        temp_layer.paste(church_resized, (x_pos, y_pos), church_resized)
+        
+        img.alpha_composite(temp_layer)
+        
+    except Exception as e:
+        print(f"Could not overlay church image: {e}")
+
+
 # =============================================================================
 # BLANK LOWER THIRD STYLE RENDERER FUNCTIONS
 # =============================================================================
@@ -2372,6 +2524,13 @@ def _render_blank_lower_third_elegant(draw: ImageDraw.Draw, width: int, height: 
     _render_lower_third_elegant(draw, width, height, lower_third_start, background_end, liturgical_colors)
 
 
+def _render_blank_lower_third_christmas_trinity(draw: ImageDraw.Draw, width: int, height: int, 
+                                                 lower_third_start: int, background_end: int, 
+                                                 liturgical_colors: Dict[str, Tuple[int, int, int, int]]) -> None:
+    """Christmas Trinity style blank template"""
+    _render_lower_third_christmas_trinity(draw, width, height, lower_third_start, background_end, liturgical_colors)
+
+
 # =============================================================================
 # STYLE REGISTRIES
 # =============================================================================
@@ -2382,6 +2541,7 @@ LOWER_THIRD_STYLE_REGISTRY: Dict[str, callable] = {
     'modern_glass': _render_lower_third_modern_glass,
     'bold_banner': _render_lower_third_bold_banner,
     'elegant': _render_lower_third_elegant,
+    'christmas_trinity': _render_lower_third_christmas_trinity,
 }
 
 BLANK_LOWER_THIRD_STYLE_REGISTRY: Dict[str, callable] = {
@@ -2390,6 +2550,7 @@ BLANK_LOWER_THIRD_STYLE_REGISTRY: Dict[str, callable] = {
     'modern_glass': _render_blank_lower_third_modern_glass,
     'bold_banner': _render_blank_lower_third_bold_banner,
     'elegant': _render_blank_lower_third_elegant,
+    'christmas_trinity': _render_blank_lower_third_christmas_trinity,
 }
 
 
