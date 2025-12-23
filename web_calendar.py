@@ -590,15 +590,15 @@ class WebLiturgicalCalendar:
         # Note: Movable feasts (Maundy Thursday, Good Friday, Holy Saturday, Easter, Pentecost, etc.)
         # are handled by get_movable_feast_day() and should not be listed here
         feast_days = {
-            (1, 1): "New Year's Day",
-            (1, 6): "Epiphany",
+            (1, 1): "The Holy Name of Our Lord Jesus Christ",
+            (1, 6): "The Epiphany of Our Lord",
             (7, 4): "Independence Day",
             (8, 15): "St Mary, the Virgin",
             (9, 29): "St Michael and All Angels",
             (11, 1): "All Saints' Day",
             (11, 2): "All Souls' Day",
-            (12, 24): "Christmas Eve",
-            (12, 25): "Christmas Day",
+            (12, 24): "The Nativity of Our Lord: Christmas Eve",
+            (12, 25): "The Nativity of Our Lord: Christmas Day",
             (12, 26): "St Stephen, Deacon and Martyr"
         }
         
@@ -2706,22 +2706,7 @@ def _create_christmas_trinity_title_card(liturgical_reference: str, width: int, 
     except Exception as e:
         print(f"Could not load logo for Christmas title card: {e}")
     
-    church_name = branding.get('church_name', 'Trinity Episcopal Church')
-    church_bbox = draw.textbbox((0, 0), church_name, font=church_font)
-    church_width = church_bbox[2] - church_bbox[0]
-    church_x = (width - church_width) // 2
-    church_y = height - 180
-    
-    outline_width = 4
-    for offset_x in range(-outline_width, outline_width + 1):
-        for offset_y in range(-outline_width, outline_width + 1):
-            if offset_x != 0 or offset_y != 0:
-                draw.text((church_x + offset_x, church_y + offset_y), church_name, 
-                          fill=(burgundy_dark[0], burgundy_dark[1], burgundy_dark[2], 255), font=church_font)
-    draw.text((church_x, church_y), church_name, 
-              fill=(gold_light[0], gold_light[1], gold_light[2], 255), font=church_font)
-    
-    divider_y = height - 120
+    divider_y = height - 70
     for i in range(3):
         offset = i * 12
         draw.line([(center_x - 350 - offset, divider_y + i * 2), (center_x - 80, divider_y + i * 2)], 
@@ -2736,6 +2721,21 @@ def _create_christmas_trinity_title_card(liturgical_reference: str, width: int, 
         (center_x, divider_y + diamond_size),
         (center_x - diamond_size, divider_y)
     ], fill=(gold_light[0], gold_light[1], gold_light[2], 255))
+    
+    church_name = branding.get('church_name', 'Trinity Episcopal Church')
+    church_bbox = draw.textbbox((0, 0), church_name, font=church_font)
+    church_width = church_bbox[2] - church_bbox[0]
+    church_x = (width - church_width) // 2
+    church_y = height - 150
+    
+    outline_width = 4
+    for offset_x in range(-outline_width, outline_width + 1):
+        for offset_y in range(-outline_width, outline_width + 1):
+            if offset_x != 0 or offset_y != 0:
+                draw.text((church_x + offset_x, church_y + offset_y), church_name, 
+                          fill=(burgundy_dark[0], burgundy_dark[1], burgundy_dark[2], 255), font=church_font)
+    draw.text((church_x, church_y), church_name, 
+              fill=(gold_light[0], gold_light[1], gold_light[2], 255), font=church_font)
     
     return img
 
@@ -3700,9 +3700,12 @@ def preview_graphics():
         selected_date = datetime.fromisoformat(date_str)
         formatted_date = selected_date.strftime("%B %d, %Y")
         
-        # Get the liturgical name from the readings data
-        readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
-        liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
+        # Get the liturgical name - prefer feast day from liturgical_info, then API celebration
+        if liturgical_info.get('feast_day'):
+            liturgical_name = liturgical_info['feast_day']
+        else:
+            readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
+            liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
         
         # Remove "(Proper X)" pattern from the liturgical name (e.g., "Twentieth Sunday after Pentecost (Proper 25)" -> "Twentieth Sunday after Pentecost")
         import re
@@ -4093,9 +4096,12 @@ def export_all():
             # Format date nicely (e.g., "October 19, 2025")
             formatted_date = selected_date.strftime("%B %d, %Y")
             
-            # Get the liturgical name from the readings data
-            readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
-            liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
+            # Get the liturgical name - prefer feast day from liturgical_info, then API celebration
+            if liturgical_info.get('feast_day'):
+                liturgical_name = liturgical_info['feast_day']
+            else:
+                readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
+                liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
             
             # Remove "(Proper X)" pattern from the liturgical name (e.g., "Twentieth Sunday after Pentecost (Proper 25)" -> "Twentieth Sunday after Pentecost")
             import re
