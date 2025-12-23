@@ -3265,7 +3265,7 @@ def create_service_order_slide(order_item: str, liturgical_season: Optional[str]
     
     return img
 
-def create_countdown_slide(minutes: int, liturgical_season: Optional[str] = None, is_memorial: bool = False, welcome_message: Optional[str] = None, service_time: Optional[str] = None, width: int = 1920, height: int = 1080, branding: Optional[Dict[str, Any]] = None) -> Image.Image:
+def create_countdown_slide(minutes: int, liturgical_season: Optional[str] = None, is_memorial: bool = False, welcome_message: Optional[str] = None, service_time: Optional[str] = None, width: int = 1920, height: int = 1080, branding: Optional[Dict[str, Any]] = None, style: str = 'classic') -> Image.Image:
     """
     Create countdown timer slide
     
@@ -3278,6 +3278,7 @@ def create_countdown_slide(minutes: int, liturgical_season: Optional[str] = None
         width: Image width in pixels
         height: Image height in pixels
         branding: Optional branding configuration dictionary
+        style: Visual style name (e.g., 'christmas_trinity' for special Christmas branding)
     
     Returns:
         PIL Image object
@@ -3285,7 +3286,58 @@ def create_countdown_slide(minutes: int, liturgical_season: Optional[str] = None
     if branding is None:
         branding = load_branding_config()
     
-    if is_memorial:
+    # Check for Christmas Trinity style
+    is_christmas_trinity = (style == 'christmas_trinity')
+    
+    if is_christmas_trinity:
+        # Christmas Trinity color palette
+        gold = (212, 175, 55, 255)
+        burgundy = (128, 0, 32, 255)
+        cream = (255, 248, 235, 255)
+        
+        # Create burgundy gradient background
+        img = Image.new('RGBA', (width, height), color=burgundy[:3] + (255,))
+        overlay = Image.new('RGBA', (width, height), color=(0, 0, 0, 0))
+        draw_overlay = ImageDraw.Draw(overlay)
+        
+        # Vertical gradient from darker burgundy at top to lighter at bottom
+        for i in range(height):
+            blend = i / height
+            r = int(burgundy[0] * (1 - blend * 0.3) + 80 * blend * 0.3)
+            g = int(burgundy[1] * (1 - blend * 0.3))
+            b = int(burgundy[2] * (1 - blend * 0.3) + 40 * blend * 0.3)
+            draw_overlay.rectangle([(0, i), (width, i + 1)], fill=(r, g, b, 255))
+        
+        img = Image.alpha_composite(img, overlay)
+        
+        # Add church building overlay
+        try:
+            church_img = Image.open('attached_assets/Trin_High_Qual_-_trans_1766487556493.png').convert('RGBA')
+            church_size = int(min(width, height) * 0.7)
+            church_img = church_img.resize((church_size, church_size), Image.LANCZOS)
+            
+            # Apply gold tint and reduce opacity
+            church_overlay = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+            church_x = (width - church_size) // 2
+            church_y = (height - church_size) // 2
+            
+            # Reduce opacity to 25%
+            alpha = church_img.split()[3]
+            alpha = alpha.point(lambda x: int(x * 0.25))
+            church_img.putalpha(alpha)
+            
+            church_overlay.paste(church_img, (church_x, church_y), church_img)
+            img = Image.alpha_composite(img, church_overlay)
+        except Exception as e:
+            print(f"Could not load church image for countdown: {e}")
+        
+        theme_colors = {
+            'background': burgundy,
+            'accent': gold,
+            'title': cream,
+            'text': cream
+        }
+    elif is_memorial:
         img = Image.new('RGBA', (width, height), color=(0, 0, 0, 255))
         theme_colors = {
             'background': (0, 0, 0, 255),
@@ -3325,18 +3377,63 @@ def create_countdown_slide(minutes: int, liturgical_season: Optional[str] = None
         center_x = width // 2
         center_y = height // 2
         radius = 250
-        draw.ellipse(
-            [center_x - radius, center_y - radius, center_x + radius, center_y + radius],
-            outline=theme_colors['accent'],
-            width=8
-        )
-        for angle in range(0, 360, 30):
+        
+        if is_christmas_trinity:
+            # Christmas Trinity: Gold circle with decorative stars
+            gold = (212, 175, 55, 255)
+            
+            # Draw outer decorative ring
+            draw.ellipse(
+                [center_x - radius - 10, center_y - radius - 10, center_x + radius + 10, center_y + radius + 10],
+                outline=gold,
+                width=3
+            )
+            draw.ellipse(
+                [center_x - radius, center_y - radius, center_x + radius, center_y + radius],
+                outline=gold,
+                width=8
+            )
+            
+            # Draw Christmas stars around the circle
             import math
-            x1 = center_x + int((radius - 20) * math.cos(math.radians(angle)))
-            y1 = center_y + int((radius - 20) * math.sin(math.radians(angle)))
-            x2 = center_x + int(radius * math.cos(math.radians(angle)))
-            y2 = center_y + int(radius * math.sin(math.radians(angle)))
-            draw.line([(x1, y1), (x2, y2)], fill=theme_colors['accent'], width=4)
+            star_positions = [0, 45, 90, 135, 180, 225, 270, 315]
+            for angle in star_positions:
+                star_x = center_x + int((radius + 40) * math.cos(math.radians(angle - 90)))
+                star_y = center_y + int((radius + 40) * math.sin(math.radians(angle - 90)))
+                star_size = 12
+                # Draw 4-point star
+                draw.polygon([
+                    (star_x, star_y - star_size),
+                    (star_x + star_size // 3, star_y - star_size // 3),
+                    (star_x + star_size, star_y),
+                    (star_x + star_size // 3, star_y + star_size // 3),
+                    (star_x, star_y + star_size),
+                    (star_x - star_size // 3, star_y + star_size // 3),
+                    (star_x - star_size, star_y),
+                    (star_x - star_size // 3, star_y - star_size // 3),
+                ], fill=gold)
+            
+            # Draw tick marks
+            for angle in range(0, 360, 30):
+                x1 = center_x + int((radius - 20) * math.cos(math.radians(angle)))
+                y1 = center_y + int((radius - 20) * math.sin(math.radians(angle)))
+                x2 = center_x + int(radius * math.cos(math.radians(angle)))
+                y2 = center_y + int(radius * math.sin(math.radians(angle)))
+                draw.line([(x1, y1), (x2, y2)], fill=gold, width=4)
+        else:
+            # Standard liturgical timer circle
+            draw.ellipse(
+                [center_x - radius, center_y - radius, center_x + radius, center_y + radius],
+                outline=theme_colors['accent'],
+                width=8
+            )
+            for angle in range(0, 360, 30):
+                import math
+                x1 = center_x + int((radius - 20) * math.cos(math.radians(angle)))
+                y1 = center_y + int((radius - 20) * math.sin(math.radians(angle)))
+                x2 = center_x + int(radius * math.cos(math.radians(angle)))
+                y2 = center_y + int(radius * math.sin(math.radians(angle)))
+                draw.line([(x1, y1), (x2, y2)], fill=theme_colors['accent'], width=4)
     
     header_text = "Service Begins In"
     header_bbox = draw.textbbox((0, 0), header_text, font=header_font)
@@ -4722,6 +4819,7 @@ def preview_countdown():
         is_memorial = data.get('isMemorial', False)
         welcome_message = data.get('welcomeMessage', '').strip()
         service_time = data.get('serviceTime', '').strip()
+        style = data.get('style', 'classic')
         
         all_times = list(times)
         if custom_time and custom_time > 0:
@@ -4742,7 +4840,8 @@ def preview_countdown():
                 is_memorial=is_memorial,
                 welcome_message=welcome_message if welcome_message else None,
                 service_time=service_time if service_time else None,
-                branding=branding
+                branding=branding,
+                style=style
             )
             
             img_buffer = io.BytesIO()
@@ -4778,6 +4877,7 @@ def generate_countdown():
         is_memorial = data.get('isMemorial', False)
         welcome_message = data.get('welcomeMessage', '').strip()
         service_time = data.get('serviceTime', '').strip()
+        style = data.get('style', 'classic')
         
         all_times = list(times)
         if custom_time and custom_time > 0:
@@ -4801,7 +4901,8 @@ def generate_countdown():
                     is_memorial=is_memorial,
                     welcome_message=welcome_message if welcome_message else None,
                     service_time=service_time if service_time else None,
-                    branding=branding
+                    branding=branding,
+                    style=style
                 )
                 
                 img_buffer = io.BytesIO()
