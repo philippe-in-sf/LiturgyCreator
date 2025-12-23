@@ -2630,7 +2630,7 @@ def _create_christmas_trinity_title_card(liturgical_reference: str, width: int, 
             church_resized = church_img.resize((target_width, target_height), Image.Resampling.LANCZOS)
             
             alpha = church_resized.split()[3]
-            alpha = alpha.point(lambda p: int(p * 0.25))
+            alpha = alpha.point(lambda p: int(p * 0.35))
             church_resized.putalpha(alpha)
             
             x_pos = width - target_width - 80
@@ -4325,6 +4325,7 @@ def generate_custom_title_card():
         custom_text = data.get('customText', '').strip()
         liturgical_season = data.get('liturgicalSeason')  # Optional: liturgical season for colors
         is_funeral = data.get('isFuneral', False)  # Optional: for black/white theme
+        style = data.get('style', 'classic')  # Get style for Christmas Trinity, etc.
         
         if not custom_text:
             return jsonify({
@@ -4335,7 +4336,7 @@ def generate_custom_title_card():
         branding = load_branding_config()
         
         # Generate the title card using the existing function
-        title_card_img = create_title_card(custom_text, liturgical_season=liturgical_season, is_funeral=is_funeral, branding=branding)
+        title_card_img = create_title_card(custom_text, liturgical_season=liturgical_season, is_funeral=is_funeral, branding=branding, style=style)
         
         # Convert to PNG and send as file download
         img_buffer = io.BytesIO()

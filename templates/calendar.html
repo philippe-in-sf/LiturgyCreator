@@ -3728,6 +3728,7 @@
             }
             
             try {
+                const selectedStyle = document.getElementById('lower-third-style')?.value || 'classic';
                 const response = await fetch('/api/generate_custom_title_card', {
                     method: 'POST',
                     headers: {
@@ -3736,7 +3737,8 @@
                     body: JSON.stringify({
                         customText: customText,
                         liturgicalSeason: liturgicalSeason || null,
-                        isFuneral: isFuneral
+                        isFuneral: isFuneral,
+                        style: selectedStyle
                     })
                 });
                 
