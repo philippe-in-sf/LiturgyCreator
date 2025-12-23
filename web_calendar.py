@@ -2554,7 +2554,193 @@ BLANK_LOWER_THIRD_STYLE_REGISTRY: Dict[str, callable] = {
 }
 
 
-def create_title_card(liturgical_reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None, theme: str = 'liturgical', branding: Optional[Dict[str, Any]] = None) -> Image.Image:
+def _create_christmas_trinity_title_card(liturgical_reference: str, width: int, height: int, branding: Dict[str, Any]) -> Image.Image:
+    """Create a special Christmas-themed title card with Trinity Church branding
+    
+    Features rich gold and burgundy colors, Trinity Church building graphic,
+    and festive Christmas liturgical design.
+    """
+    import math
+    
+    gold_primary = (212, 175, 55)
+    gold_light = (245, 212, 100)
+    gold_dark = (160, 130, 40)
+    burgundy = (128, 0, 32)
+    burgundy_dark = (80, 0, 20)
+    cream = (255, 248, 235)
+    
+    img = Image.new('RGBA', (width, height), color=(burgundy_dark[0], burgundy_dark[1], burgundy_dark[2], 255))
+    draw = ImageDraw.Draw(img)
+    
+    gradient_steps = 60
+    for i in range(gradient_steps):
+        y_pos = int((height * i) / gradient_steps)
+        next_y = int((height * (i + 1)) / gradient_steps)
+        
+        factor = i / gradient_steps
+        r = int(burgundy_dark[0] + (burgundy[0] - burgundy_dark[0]) * factor * 0.7)
+        g = int(burgundy_dark[1] + (burgundy[1] - burgundy_dark[1]) * factor * 0.5)
+        b = int(burgundy_dark[2] + (burgundy[2] - burgundy_dark[2]) * factor * 0.7)
+        
+        draw.rectangle([0, y_pos, width, next_y], fill=(r, g, b, 255))
+    
+    border_width = 40
+    draw.rectangle([border_width, border_width, width - border_width, height - border_width], 
+                   outline=(gold_primary[0], gold_primary[1], gold_primary[2], 255), width=10)
+    draw.rectangle([border_width + 15, border_width + 15, width - border_width - 15, height - border_width - 15], 
+                   outline=(gold_light[0], gold_light[1], gold_light[2], 180), width=3)
+    
+    corner_size = 100
+    corner_inset = border_width + 30
+    corner_positions = [
+        (corner_inset, corner_inset, 180, 270),
+        (width - corner_inset - corner_size, corner_inset, 270, 360),
+        (corner_inset, height - corner_inset - corner_size, 90, 180),
+        (width - corner_inset - corner_size, height - corner_inset - corner_size, 0, 90)
+    ]
+    
+    for x, y, start, end in corner_positions:
+        draw.arc([x, y, x + corner_size, y + corner_size], start=start, end=end, 
+                 fill=(gold_light[0], gold_light[1], gold_light[2], 255), width=8)
+    
+    center_x = width // 2
+    
+    for angle in range(0, 360, 45):
+        rad = math.radians(angle)
+        for r in [30, 50]:
+            end_x = center_x + int(r * math.cos(rad))
+            end_y = 160 + int(r * math.sin(rad))
+            draw.line([(center_x, 160), (end_x, end_y)], 
+                      fill=(gold_light[0], gold_light[1], gold_light[2], 255), width=3)
+    draw.ellipse([center_x - 15, 160 - 15, center_x + 15, 160 + 15],
+                 fill=(gold_light[0], gold_light[1], gold_light[2], 255))
+    draw.ellipse([center_x - 8, 160 - 8, center_x + 8, 160 + 8],
+                 fill=(cream[0], cream[1], cream[2], 255))
+    
+    try:
+        church_path = 'attached_assets/Trin_High_Qual_-_trans_1766487556493.png'
+        import os
+        if os.path.exists(church_path):
+            church_img = Image.open(church_path).convert('RGBA')
+            
+            target_height = int(height * 0.6)
+            aspect_ratio = church_img.width / church_img.height
+            target_width = int(target_height * aspect_ratio)
+            
+            church_resized = church_img.resize((target_width, target_height), Image.Resampling.LANCZOS)
+            
+            alpha = church_resized.split()[3]
+            alpha = alpha.point(lambda p: int(p * 0.25))
+            church_resized.putalpha(alpha)
+            
+            x_pos = width - target_width - 80
+            y_pos = (height - target_height) // 2
+            
+            temp_layer = Image.new('RGBA', img.size, (0, 0, 0, 0))
+            temp_layer.paste(church_resized, (x_pos, y_pos), church_resized)
+            img.alpha_composite(temp_layer)
+            
+            draw = ImageDraw.Draw(img)
+    except Exception as e:
+        print(f"Could not load church image for Christmas title card: {e}")
+    
+    title_font = load_stack_sans_font(70, bold=True)
+    subtitle_font = load_stack_sans_font(55, bold=True)
+    church_font = load_stack_sans_font(60, bold=True)
+    
+    reference_parts = liturgical_reference.split('\n')
+    service_type = reference_parts[0] if reference_parts else "Christmas Eve"
+    service_date = reference_parts[1] if len(reference_parts) > 1 else ""
+    
+    bbox = draw.textbbox((0, 0), service_type, font=title_font)
+    service_width = bbox[2] - bbox[0]
+    service_x = (width - service_width) // 2
+    service_y = 250
+    
+    outline_width = 5
+    for offset_x in range(-outline_width, outline_width + 1):
+        for offset_y in range(-outline_width, outline_width + 1):
+            if offset_x != 0 or offset_y != 0:
+                draw.text((service_x + offset_x, service_y + offset_y), service_type, 
+                          fill=(burgundy_dark[0], burgundy_dark[1], burgundy_dark[2], 255), font=title_font)
+    draw.text((service_x, service_y), service_type, fill=(cream[0], cream[1], cream[2], 255), font=title_font)
+    
+    if service_date:
+        date_bbox = draw.textbbox((0, 0), service_date, font=subtitle_font)
+        date_width = date_bbox[2] - date_bbox[0]
+        date_x = (width - date_width) // 2
+        date_y = 340
+        
+        outline_width = 4
+        for offset_x in range(-outline_width, outline_width + 1):
+            for offset_y in range(-outline_width, outline_width + 1):
+                if offset_x != 0 or offset_y != 0:
+                    draw.text((date_x + offset_x, date_y + offset_y), service_date, 
+                              fill=(burgundy_dark[0], burgundy_dark[1], burgundy_dark[2], 255), font=subtitle_font)
+        draw.text((date_x, date_y), service_date, 
+                  fill=(gold_light[0], gold_light[1], gold_light[2], 255), font=subtitle_font)
+    
+    try:
+        logo_path = "attached_assets/Trin High Qual - trans_1760427955140.png"
+        import os
+        if os.path.exists(logo_path):
+            logo = Image.open(logo_path).convert('RGBA')
+            
+            max_logo_width = 450
+            max_logo_height = 350
+            
+            width_ratio = max_logo_width / logo.width
+            height_ratio = max_logo_height / logo.height
+            scale_ratio = min(width_ratio, height_ratio)
+            
+            new_logo_width = int(logo.width * scale_ratio)
+            new_logo_height = int(logo.height * scale_ratio)
+            
+            logo_resized = logo.resize((new_logo_width, new_logo_height), Image.Resampling.LANCZOS)
+            
+            logo_x = (width - new_logo_width) // 2
+            logo_y = 450
+            
+            img.paste(logo_resized, (logo_x, logo_y), logo_resized)
+            draw = ImageDraw.Draw(img)
+    except Exception as e:
+        print(f"Could not load logo for Christmas title card: {e}")
+    
+    church_name = branding.get('church_name', 'Trinity Episcopal Church')
+    church_bbox = draw.textbbox((0, 0), church_name, font=church_font)
+    church_width = church_bbox[2] - church_bbox[0]
+    church_x = (width - church_width) // 2
+    church_y = height - 180
+    
+    outline_width = 4
+    for offset_x in range(-outline_width, outline_width + 1):
+        for offset_y in range(-outline_width, outline_width + 1):
+            if offset_x != 0 or offset_y != 0:
+                draw.text((church_x + offset_x, church_y + offset_y), church_name, 
+                          fill=(burgundy_dark[0], burgundy_dark[1], burgundy_dark[2], 255), font=church_font)
+    draw.text((church_x, church_y), church_name, 
+              fill=(gold_light[0], gold_light[1], gold_light[2], 255), font=church_font)
+    
+    divider_y = height - 120
+    for i in range(3):
+        offset = i * 12
+        draw.line([(center_x - 350 - offset, divider_y + i * 2), (center_x - 80, divider_y + i * 2)], 
+                  fill=(gold_primary[0], gold_primary[1], gold_primary[2], 200), width=2)
+        draw.line([(center_x + 80, divider_y + i * 2), (center_x + 350 + offset, divider_y + i * 2)], 
+                  fill=(gold_primary[0], gold_primary[1], gold_primary[2], 200), width=2)
+    
+    diamond_size = 20
+    draw.polygon([
+        (center_x, divider_y - diamond_size),
+        (center_x + diamond_size, divider_y),
+        (center_x, divider_y + diamond_size),
+        (center_x - diamond_size, divider_y)
+    ], fill=(gold_light[0], gold_light[1], gold_light[2], 255))
+    
+    return img
+
+
+def create_title_card(liturgical_reference: str, date_str: Optional[str] = None, width: int = 1920, height: int = 1080, is_funeral: bool = False, liturgical_season: Optional[str] = None, theme: str = 'liturgical', branding: Optional[Dict[str, Any]] = None, style: str = 'classic') -> Image.Image:
     """Create a full-screen title card with liturgical reference and church name
     
     Args:
@@ -2566,9 +2752,14 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
         liturgical_season: Directly specify liturgical season (advent, christmas, lent, etc.)
         theme: Theme name ('liturgical' or 'concert'), defaults to 'liturgical'
         branding: Optional branding configuration dictionary
+        style: Visual style name (e.g., 'christmas_trinity' for special Christmas branding)
     """
     if branding is None:
         branding = load_branding_config()
+    
+    if style.lower() == 'christmas_trinity' and not is_funeral:
+        return _create_christmas_trinity_title_card(liturgical_reference, width, height, branding)
+    
     # Create image with appropriate background based on service type and theme
     if is_funeral:
         # Funeral: black background
@@ -3519,7 +3710,7 @@ def preview_graphics():
         
         # Just use the liturgical name without "Holy Eucharist for" prefix
         title_reference = f"{liturgical_name}\n{formatted_date}"
-        title_card = create_title_card(title_reference, date_str, branding=branding)
+        title_card = create_title_card(title_reference, date_str, branding=branding, style=style)
         
         # Convert title card to base64
         title_buffer = io.BytesIO()
@@ -3649,7 +3840,7 @@ def preview_special_service():
         selected_date = datetime.fromisoformat(service_date)
         formatted_date = selected_date.strftime("%B %d, %Y")
         title_reference = f"{service_title}\n{formatted_date}"
-        title_card = create_title_card(title_reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding)
+        title_card = create_title_card(title_reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding, style=style)
         
         # Convert to base64
         title_buffer = io.BytesIO()
@@ -3913,7 +4104,7 @@ def export_all():
             # Just use the liturgical name without "Holy Eucharist for" prefix
             title_reference = f"{liturgical_name}\n{formatted_date}"
             
-            title_card_img = create_title_card(title_reference, date_str, is_funeral=is_funeral_service, liturgical_season=liturgical_season_override, branding=branding)
+            title_card_img = create_title_card(title_reference, date_str, is_funeral=is_funeral_service, liturgical_season=liturgical_season_override, branding=branding, style=style)
             title_card_buffer = io.BytesIO()
             title_card_img.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
@@ -4830,7 +5021,7 @@ def special_service():
             # ===== PART 3: Generate title card with service title and date =====
             formatted_date = selected_date.strftime("%B %d, %Y")
             title_reference = f"{service_title}\n{formatted_date}"
-            title_card = create_title_card(title_reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding)
+            title_card = create_title_card(title_reference, service_date, is_funeral=is_funeral, liturgical_season=liturgical_season if liturgical_season else None, branding=branding, style=style)
             title_card_buffer = io.BytesIO()
             title_card.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
@@ -4986,7 +5177,7 @@ def evensong_service():
             # ===== Generate title card for Evensong service =====
             formatted_date = selected_date.strftime("%B %d, %Y")
             title_reference = f"Evensong\n{formatted_date}"
-            title_card = create_title_card(title_reference, service_date, branding=branding)
+            title_card = create_title_card(title_reference, service_date, branding=branding, style=style)
             title_card_buffer = io.BytesIO()
             title_card.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
