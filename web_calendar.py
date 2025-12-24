@@ -2681,13 +2681,13 @@ def _create_christmas_trinity_title_card(liturgical_reference: str, width: int, 
                   fill=(gold_light[0], gold_light[1], gold_light[2], 255), font=subtitle_font)
     
     try:
-        logo_path = "attached_assets/Trin High Qual - trans_1760427955140.png"
+        logo_path = "attached_assets/Trin_overhead_2008_1766580299806.png"
         import os
         if os.path.exists(logo_path):
             logo = Image.open(logo_path).convert('RGBA')
             
-            max_logo_width = 450
-            max_logo_height = 350
+            max_logo_width = 500
+            max_logo_height = 400
             
             width_ratio = max_logo_width / logo.width
             height_ratio = max_logo_height / logo.height
