@@ -2946,7 +2946,7 @@ def create_title_card(liturgical_reference: str, date_str: Optional[str] = None,
     
     return img
 
-def create_announcement_slide(announcement_data: dict, width: int = 1920, height: int = 1080, branding: Optional[Dict[str, Any]] = None) -> Image.Image:
+def create_announcement_slide(announcement_data: dict, width: int = 1920, height: int = 1080, branding: Optional[Dict[str, Any]] = None, style: str = 'classic') -> Image.Image:
     """Create an announcement slide with type-specific formatting
     
     Args:
@@ -2959,6 +2959,7 @@ def create_announcement_slide(announcement_data: dict, width: int = 1920, height
         width: Image width in pixels
         height: Image height in pixels
         branding: Optional branding configuration dictionary
+        style: Visual style name (e.g., 'christmas_trinity' for special Christmas branding)
     
     Returns:
         PIL Image object
@@ -2972,7 +2973,56 @@ def create_announcement_slide(announcement_data: dict, width: int = 1920, height
     liturgical_season = announcement_data.get('liturgicalSeason')
     is_memorial = announcement_data.get('isMemorial', False)
     
-    if is_memorial:
+    # Check for Christmas Trinity style
+    is_christmas_trinity = (style == 'christmas_trinity')
+    
+    if is_christmas_trinity:
+        # Christmas Trinity color palette
+        gold = (212, 175, 55, 255)
+        gold_light = (255, 215, 100, 255)
+        burgundy = (128, 0, 32, 255)
+        cream = (255, 248, 235, 255)
+        
+        # Create burgundy gradient background
+        img = Image.new('RGBA', (width, height), color=burgundy[:3] + (255,))
+        overlay = Image.new('RGBA', (width, height), color=(0, 0, 0, 0))
+        draw_overlay = ImageDraw.Draw(overlay)
+        
+        for i in range(height):
+            blend = i / height
+            r = int(burgundy[0] * (1 - blend * 0.3) + 80 * blend * 0.3)
+            g = int(burgundy[1] * (1 - blend * 0.3))
+            b = int(burgundy[2] * (1 - blend * 0.3) + 40 * blend * 0.3)
+            draw_overlay.rectangle([(0, i), (width, i + 1)], fill=(r, g, b, 255))
+        
+        img = Image.alpha_composite(img, overlay)
+        
+        # Add church building overlay
+        try:
+            church_img = Image.open('attached_assets/Trin_High_Qual_-_trans_1766487556493.png').convert('RGBA')
+            church_size = int(min(width, height) * 0.5)
+            church_img = church_img.resize((church_size, church_size), Image.LANCZOS)
+            
+            church_overlay = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+            church_x = width - church_size + 100
+            church_y = (height - church_size) // 2
+            
+            alpha = church_img.split()[3]
+            alpha = alpha.point(lambda x: int(x * 0.15))
+            church_img.putalpha(alpha)
+            
+            church_overlay.paste(church_img, (church_x, church_y), church_img)
+            img = Image.alpha_composite(img, church_overlay)
+        except Exception as e:
+            print(f"Could not load church image for announcement: {e}")
+        
+        theme_colors = {
+            'background': burgundy,
+            'accent': gold,
+            'title': cream,
+            'text': cream
+        }
+    elif is_memorial:
         img = Image.new('RGBA', (width, height), color=(0, 0, 0, 255))
         theme_colors = {
             'background': (0, 0, 0, 255),
@@ -3014,7 +3064,10 @@ def create_announcement_slide(announcement_data: dict, width: int = 1920, height
     card_x = (width - card_width) // 2
     card_y = (height - card_height) // 2
     
-    if is_memorial:
+    if is_christmas_trinity:
+        card_bg = (255, 248, 235, 240)  # Cream card
+        text_color = (80, 0, 20, 255)  # Dark burgundy text
+    elif is_memorial:
         card_bg = (40, 40, 40, 230)
         text_color = (255, 255, 255, 255)
     else:
@@ -4584,6 +4637,7 @@ def preview_announcements():
         
         data = request.get_json()
         announcements = data.get('announcements', [])
+        style = data.get('style', 'classic')
         
         if not announcements:
             return jsonify({
@@ -4597,7 +4651,7 @@ def preview_announcements():
             ann_type = announcement.get('type', 'general')
             title = announcement.get('title', '')
             
-            ann_img = create_announcement_slide(announcement, branding=branding)
+            ann_img = create_announcement_slide(announcement, branding=branding, style=style)
             
             img_buffer = io.BytesIO()
             ann_img.save(img_buffer, format='PNG')
@@ -4635,6 +4689,7 @@ def generate_announcements():
     try:
         data = request.get_json()
         announcements = data.get('announcements', [])
+        style = data.get('style', 'classic')
         
         if not announcements:
             return jsonify({
@@ -4651,7 +4706,7 @@ def generate_announcements():
                 ann_type = announcement.get('type', 'general')
                 title = announcement.get('title', '')
                 
-                ann_img = create_announcement_slide(announcement, branding=branding)
+                ann_img = create_announcement_slide(announcement, branding=branding, style=style)
                 
                 img_buffer = io.BytesIO()
                 ann_img.save(img_buffer, format='PNG')
