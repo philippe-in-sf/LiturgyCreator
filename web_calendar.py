@@ -2618,7 +2618,7 @@ def _create_christmas_trinity_title_card(liturgical_reference: str, width: int, 
                  fill=(cream[0], cream[1], cream[2], 255))
     
     try:
-        church_path = 'attached_assets/Trin_High_Qual_-_trans_1766487556493.png'
+        church_path = 'attached_assets/Trin_overhead_2008_1766580299806.png'
         import os
         if os.path.exists(church_path):
             church_img = Image.open(church_path).convert('RGBA')
