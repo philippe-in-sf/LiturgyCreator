@@ -1,6 +1,6 @@
 # Overview
 
-This project is a Daily Liturgical Scripture OBS Automation system designed for the Episcopal Church. It fetches liturgical readings from the Revised Common Lectionary, processes them, and automatically updates text sources within OBS Studio via WebSocket for live streaming or recording. The system includes a web-based liturgical calendar for browsing and managing readings.
+This project is a Daily Liturgical Scripture OBS Automation system designed for the Episcopal Church. It automates the process of fetching liturgical readings from the Revised Common Lectionary, formatting them, and updating text sources within OBS Studio via WebSocket for live streaming or recording. The system also includes a web-based liturgical calendar for browsing readings and integrates with Blackmagic ATEM video switchers. Its primary purpose is to streamline the creation of broadcast-ready graphics and manage live production elements for church services.
 
 # User Preferences
 
@@ -11,64 +11,42 @@ Preferred communication style: Simple, everyday language.
 
 ## Deployment Preferences
 - **Version Updates**: When updating version number and deploying, always update both:
-  1. Version number in `pyproject.toml` 
+  1. Version number in `pyproject.toml`
   2. Footer version number in `templates/calendar.html`
-- **macOS Application Bundle**: Project includes py2app configuration for creating standalone macOS application. Run `./build_macos_app.sh` to build. See `MACOS_INSTALLATION.md` and `README_BUILD.md` for details.
+- **macOS Application Bundle**: Project includes py2app configuration for creating standalone macOS application. Run `./build_macos_app.sh` to build.
 
 # System Architecture
 
 ## Core Components
 
 The application features a modular architecture:
-- **LiturgyFetcher**: Retrieves Episcopal liturgical calendar data and scripture readings from multiple sources (The Lectionary Page, Vanderbilt Divinity Library) using web scraping.
+- **LiturgyFetcher**: Retrieves Episcopal liturgical calendar data and scripture readings from multiple sources using web scraping.
 - **OBSController**: Manages WebSocket communication with OBS Studio for updating text sources.
-- **ATEMController**: Manages network communication with Blackmagic ATEM video switchers via PyATEMMax library for video switching, transitions, and audio control.
+- **ATEMController**: Manages network communication with Blackmagic ATEM video switchers via PyATEMMax library.
 - **ScriptureParser**: Formats liturgical readings for display.
 - **Main Application Controller**: Orchestrates the workflow, manages configuration, and handles logging.
-- **Interactive Liturgical Calendar**: A Flask web interface providing a visual calendar with month navigation, liturgical color coding, reading previews, OBS integration, and ATEM switcher control. It tracks the Episcopal liturgical year and detects seasons/feast days.
+- **Interactive Liturgical Calendar**: A Flask web interface providing a visual calendar with month navigation, liturgical color coding, reading previews, OBS integration, and ATEM switcher control.
 
 ## UI/UX Decisions
 
-- **Liturgical Season Colors**: Dynamic adaptation of lower third graphics to match liturgical season colors (Advent, Christmas, Epiphany, Lent, Easter, Pentecost).
-- **Lower Thirds Layout**: Broadcast-style design with abstract, angled edges, layered elements, and dynamic liturgical color themes, positioned at 5/6 screen height with text starting at 1/5 from the left.
+- **Liturgical Season Colors**: Dynamic adaptation of graphics to match liturgical season colors (Advent, Christmas, Epiphany, Lent, Easter, Pentecost).
+- **Lower Thirds Layout**: Broadcast-style design with abstract, angled edges, layered elements, and dynamic liturgical color themes. Five selectable lower third design styles are available: Classic, Minimal, Modern Glass, Bold Banner, and Elegant.
 - **Mobile Responsive Design**: Comprehensive mobile-responsive interface across all screen sizes.
-- **OBS Path Configuration**: Settings interface for OBS file path configuration with OS selection and base path configuration.
-- **Broadcast Graphics**: Full-screen title cards and lower thirds are dynamically generated with liturgical season-themed designs, decorative elements, and specific typography.
-- **Graphics Previews**: Preview functionality for title cards and lower thirds before download.
+- **Broadcast Graphics**: Full-screen title cards and lower thirds are dynamically generated with liturgical season-themed designs, decorative elements, and specific typography (Stack Sans font family). Graphics previews are available.
+- **Dark Mode Support**: Full dark mode implementation with toggle button and localStorage persistence.
+- **Modern Dashboard UI**: Redesigned main page with a cleaner look, compact header, and reorganized collapsible sidebar sections (Quick Actions, Service Options, Readings, Advanced Tools, Export, Quick Guide).
+- **Service Preparation Wizard**: A guided, step-by-step workflow for preparing complete service graphics packages, accessible at `/wizard`.
 
 ## Technical Implementations
 
 - **PDF Upload**: Drag-and-drop PDF upload with text extraction and smart liturgical content detection.
 - **Service Details Interview**: Modal form for gathering service information (hymns, musicians, clergy, scripture references) with local storage and server backup.
-- **Text Export**: ZIP export for liturgical readings and service details, creating individual text files with formatted content.
-- **Dynamic Service Details Form**: Unified interface that adapts based on selected service type (Eucharist, Evensong, Funeral), displaying relevant fields and independently storing data for each.
-- **Service Type Support**: Multi-service type architecture (Eucharist, Evensong, Special Services, Funeral) with independent readings and service details. Evensong includes automatic fetching of Evening Prayer readings from the Daily Office Lectionary. Funeral services utilize a black and white visual theme for graphics.
-- **OBS Scene Collection Export**: Generation of OBS scene collection JSON conforming to native OBS Studio format for seamless import.
-- **Calendar Date Offset Resolution**: JavaScript date parsing for correct timezone handling.
-- **Deployment Configuration**: Google Cloud Run deployment configuration (Procfile, Dockerfile, pyproject.toml).
-- **Readings API Resolution**: Enhanced fallback system for liturgical APIs.
-- **Folder Naming Standardization**: Consistent ZIP export folder structure ("lower_thirds", "readings", "service_details").
-- **Blank Lower Third Template**: All ZIP exports include a blank lower third template (BLANK_TEMPLATE.png) with liturgical or funeral season colors for manual service element additions.
-- **Custom Title Card Generator**: On-demand custom title card generation feature allowing users to create title cards with custom text, optional liturgical season colors, and funeral theme support. Perfect for video editing purposes and creating title cards for past services.
-- **Organized Action Buttons (v2.3.9)**: Action buttons reorganized into three clear sections (Basic, Advanced, Export) for better usability and reduced visual clutter.
-- **Custom Title Card Liturgical Season Selector (v2.4.0)**: Replaced date picker with dropdown menu for selecting liturgical seasons directly in custom title card generator, making it easier to choose colors without knowing specific dates.
-- **Corrected Advent Liturgical Colors (v2.4.1)**: Updated Advent liturgical color from purple to royal blue per Episcopal tradition.
-- **Removed Composer Fields (v2.4.3)**: Removed prelude composer and postlude composer fields from all service forms (Eucharist, Special Services, Evensong) per user preference. Only prelude/postlude titles are now collected.
-- **Concert Program Feature (v2.4.3)**: Added comprehensive concert program creation with grey-themed graphics. Includes title card generation with performer name, date, and time, plus dynamic form for up to 10 concert pieces. Generates lower thirds for each piece with neutral grey theme suitable for concert broadcasts. Uses new theme system that supports both liturgical (seasonal colors) and concert (grey/neutral) styling.
-- **Concert Graphics Enhancements (v2.4.4)**: Improved concert program readability and usability. Added black text outline (4px for titles, 3px for secondary text) to concert lower thirds for better visibility on grey backgrounds. Implemented preview functionality allowing users to see title card and all piece lower thirds before downloading. Fixed filtering logic to accept pieces with either title or composer (previously required both), with smart text formatting for partial entries.
-- **Custom Lower Third Generator (v2.4.5)**: Added one-off custom lower third generation feature similar to custom title card generator. Users can create custom lower thirds with their own label/type and content text, select liturgical season colors from dropdown menu, and use memorial service theme (black/white) for memorial services. Perfect for special announcements, custom elements, or editing videos from previous weeks.
-- **Announcement Slides Generator (v2.4.6)**: Comprehensive announcement slide creation system supporting four announcement types (Event, Prayer Request, Giving, General). Features batch creation workflow allowing users to queue multiple announcements, preview all slides before downloading, and export as ZIP file. Each announcement type has tailored form fields and type-specific icons. Supports full liturgical season theming and memorial service theme (black/white). Generates 1920x1080 full-screen graphics with centered content cards, gradient backgrounds, and decorative elements matching liturgical seasons.
-- **Service Order Slides Generator (v2.4.7)**: Create slides displaying the order/flow of church services. Users can add up to 15 service order items (e.g., "Opening Hymn", "First Reading", "Sermon") with optional automatic numbering. Features liturgical season theming, memorial service theme support, preview functionality, and batch creation. Generates 1920x1080 full-screen slides with large centered text and liturgical season-specific gradients and decorative elements. Downloads as ZIP file with Order_01_ItemName.png naming convention.
-- **Countdown Timer Generator (v2.4.7)**: Pre-service countdown timer slides with customizable time intervals. Supports preset times (30, 15, 10, 5 minutes) and custom time input. Features optional service start time display, welcome message, liturgical season theming, and memorial service theme. Generates 1920x1080 full-screen slides with oversized countdown text (180pt), decorative circular timer motif with tick marks, and liturgical season-specific gradients. Downloads as ZIP file with Countdown_15min.png naming convention.
-- **Dark Mode Support (v2.4.7)**: Full dark mode implementation with CSS variables, toggle button in navigation bar, and localStorage persistence for user preference.
-- **ATEM Video Switcher Integration (v2.4.8)**: Comprehensive Blackmagic ATEM video switcher control via PyATEMMax library. Features include: connection management, program/preview video source switching, cut and auto transitions, audio channel volume control, and switcher status monitoring. Accessible via dedicated ATEM Control panel in the web interface. Supports all ATEM switcher models with network connectivity.
-- **ATEM Connection Timeout Fix (v2.4.9)**: Fixed ATEM connection endpoint hanging indefinitely when switcher is unreachable. Added 5-second connection timeout to ensure graceful failure with proper JSON error response instead of HTML timeout page.
-- **Service Details Liturgical Season Override (v2.5.0)**: Added liturgical season selector to service details form allowing users to override the automatic season detection. Useful for special occasions like baptisms, weddings, or other services that might use different liturgical colors than the calendar date suggests. Supports all seasons (Advent, Christmas, Epiphany, Lent, Easter, Pentecost) plus Memorial Service theme. All generated graphics (title cards, lower thirds, blank templates) respect this override.
-- **Stack Sans Font Standardization (v2.5.0)**: Standardized typography across the entire application using Stack Sans font family from Google Fonts. Web interface uses Stack Sans via Google Fonts CDN, while all generated graphics (title cards, lower thirds, announcements, service order slides, countdown timers) use Stack Sans Text for body text and Stack Sans Headline for titles/emphasis. Font files (StackSans-Text.ttf, StackSans-Headline.ttf, StackSans-Notch.ttf) are stored in `/fonts/` directory and loaded via custom helper function with DejaVu fallback for robustness.
-- **Multiple Lower Third Styles (v2.6.0)**: Added 5 selectable lower third design styles: Classic (angled layers with gradients), Minimal (clean single bar), Modern Glass (frosted glassmorphism effect), Bold Banner (solid full-width block), and Elegant (refined thin accent lines). Users select style via dropdown in sidebar. Style preference persists in localStorage. All styles respect liturgical season colors, funeral themes, and branding configuration. Implemented via style registry pattern with separate renderer functions for modularity.
-- **Modern Dashboard UI Redesign (v2.6.0)**: Complete main page redesign for cleaner, more professional look. Compact header reduced from ~150px to ~50px. Sidebar reorganized into collapsible sections: Quick Actions, Service Options, Readings, Advanced Tools (collapsed by default), Export, and Quick Guide. Better visual hierarchy with calendar as focal point. Added smooth CSS transitions, improved shadows, and consistent spacing. Maintained dark mode compatibility and mobile responsiveness.
-- **Advent Color Customization (v2.5.1)**: Added three Advent color options across all liturgical season dropdowns: Royal Blue (Episcopal tradition), Purple (traditional/Roman), and Pink/Rose (for Gaudete Sunday). Users can choose the Advent color that matches their parish tradition.
-- **Christmas Trinity Branding (v2.6.0, TEMPORARY)**: Special seasonal Christmas branding featuring Trinity Church building graphic with gold/burgundy/cream color palette. New "Christmas Trinity" lower third style with: gold gradient background, burgundy accents, church building overlay at 35% opacity, Christmas star decorations. Special Christmas Trinity title card with festive border, corner flourishes, starburst decoration, and centered Trinity logo. Designed to be removed after Christmas season. Uses church building image from attached_assets folder.
+- **Text Export**: ZIP export for liturgical readings and service details, creating individual text files.
+- **Dynamic Service Details Form**: Unified interface that adapts based on selected service type (Eucharist, Evensong, Special Services, Funeral) with independent data storage. Evensong includes automatic fetching of Evening Prayer readings.
+- **OBS Scene Collection Export**: Generation of OBS scene collection JSON for seamless import.
+- **Custom Graphics Generators**: On-demand custom title card, lower third, announcement slide, service order slide, and countdown timer generators with customizable text, liturgical season themes, and memorial service options.
+- **ATEM Video Switcher Integration**: Comprehensive Blackmagic ATEM video switcher control, including connection management, program/preview switching, transitions, and audio control.
+- **Liturgical Season Override**: Option to override automatic season detection in the service details form for all generated graphics.
 
 ## Configuration Management
 
@@ -77,8 +55,7 @@ The application features a modular architecture:
 ## Error Handling Strategy
 
 - Graceful degradation with multiple API fallbacks.
-- Connection resilience for OBS with logging of failures.
-- Comprehensive logging for debugging.
+- Connection resilience for OBS and ATEM with logging of failures.
 
 ## Data Flow Architecture
 
@@ -101,7 +78,7 @@ The application features a modular architecture:
 ## External APIs
 - **The Lectionary Page (lectionarypage.net)**: Primary source for Episcopal RCL readings.
 - **Vanderbilt Divinity Library RCL**: Fallback source for Revised Common Lectionary.
-- **Hymnary.org**: Used for fetching hymn texts (Evensong feature).
+- **Hymnary.org**: Used for fetching hymn texts.
 
 ## System Requirements
 - **OBS Studio**: Must be running with WebSocket server enabled.
