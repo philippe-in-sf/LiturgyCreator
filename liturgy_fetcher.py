@@ -835,6 +835,35 @@ class LiturgyFetcher:
     
     def _get_episcopal_celebration_name(self, date_obj: datetime) -> str:
         """Determine the Episcopal liturgical celebration name for the date"""
+        from datetime import date as date_type
+        
+        # Convert to date if needed
+        if isinstance(date_obj, datetime):
+            check_date = date_obj.date()
+        else:
+            check_date = date_obj
+        
+        year = check_date.year
+        
+        # Check for Baptism of Our Lord (First Sunday after Epiphany)
+        epiphany = date_type(year, 1, 6)
+        days_until_sunday = (6 - epiphany.weekday()) % 7
+        if days_until_sunday == 0:
+            days_until_sunday = 7
+        baptism_of_our_lord = epiphany + timedelta(days=days_until_sunday)
+        if check_date == baptism_of_our_lord:
+            return "The Baptism of Our Lord"
+        
+        # Check for fixed feast days
+        month = check_date.month
+        day = check_date.day
+        if month == 1 and day == 1:
+            return "The Holy Name of Our Lord Jesus Christ"
+        if month == 1 and day == 6:
+            return "The Epiphany of Our Lord"
+        if month == 12 and day == 25:
+            return "The Nativity of our Lord: Christmas Day"
+        
         date_str = date_obj.strftime('%Y-%m-%d')
         
         # Episcopal celebration names for specific dates
