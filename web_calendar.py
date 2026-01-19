@@ -649,13 +649,93 @@ class WebLiturgicalCalendar:
         """Get the proper name for Sunday in the liturgical calendar"""
         season = self.get_liturgical_season(date_obj)
         
+        # Convert datetime to date if needed
+        if isinstance(date_obj, datetime):
+            check_date = date_obj.date()
+        else:
+            check_date = date_obj
+        
+        year = check_date.year
+        
+        # Epiphany season - calculate which Sunday after Epiphany
+        if season == "Season after Epiphany":
+            epiphany = date(year, 1, 6)
+            # Find first Sunday after Epiphany (Baptism of Our Lord)
+            days_until_sunday = (6 - epiphany.weekday()) % 7
+            if days_until_sunday == 0:
+                days_until_sunday = 7
+            first_sunday_after = epiphany + timedelta(days=days_until_sunday)
+            
+            # Count weeks since Baptism of Our Lord (which is First Sunday after Epiphany)
+            days_diff = (check_date - first_sunday_after).days
+            week_num = (days_diff // 7) + 1  # Baptism is 1st, so +7 days is 2nd, etc.
+            
+            ordinals = ['', 'First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth', 'Ninth']
+            if week_num < len(ordinals):
+                return f"{ordinals[week_num]} Sunday after the Epiphany"
+            else:
+                return f"{week_num}th Sunday after the Epiphany"
+        
+        # Pentecost season
         if "Pentecost" in season:
             week_of_year = date_obj.isocalendar()[1]
             if week_of_year >= 20 and week_of_year <= 45:
                 proper_num = week_of_year - 19
                 return f"Proper {proper_num} (Sunday after Pentecost)"
+        
+        # Advent season
+        if season == "Advent":
+            christmas = date(year, 12, 25)
+            days_until_sunday = (christmas.weekday() + 1) % 7
+            if days_until_sunday == 0:
+                days_until_sunday = 7
+            fourth_sunday_before = christmas - timedelta(days=(3 * 7 + days_until_sunday))
+            first_advent = fourth_sunday_before
+            
+            days_diff = (check_date - first_advent).days
+            week_num = (days_diff // 7) + 1
+            
+            ordinals = ['', 'First', 'Second', 'Third', 'Fourth']
+            if week_num <= 4:
+                return f"{ordinals[week_num]} Sunday of Advent"
+        
+        # Lent season
+        if season == "Lent":
+            easter = self._calculate_easter(year)
+            ash_wednesday = easter - timedelta(days=46)
+            first_sunday_lent = ash_wednesday + timedelta(days=(6 - ash_wednesday.weekday() + 7) % 7 + 1)
+            if first_sunday_lent < ash_wednesday:
+                first_sunday_lent += timedelta(days=7)
+            # Find first Sunday of Lent (Sunday after Ash Wednesday)
+            days_after_ash = (6 - ash_wednesday.weekday()) % 7
+            if days_after_ash == 0:
+                days_after_ash = 7
+            first_sunday_lent = ash_wednesday + timedelta(days=days_after_ash)
+            
+            days_diff = (check_date - first_sunday_lent).days
+            week_num = (days_diff // 7) + 1
+            
+            ordinals = ['', 'First', 'Second', 'Third', 'Fourth', 'Fifth']
+            if week_num <= 5:
+                return f"{ordinals[week_num]} Sunday in Lent"
+        
+        # Easter season
+        if season == "Easter":
+            easter = self._calculate_easter(year)
+            days_diff = (check_date - easter).days
+            week_num = (days_diff // 7) + 1
+            
+            ordinals = ['', 'Easter', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh']
+            if week_num == 1:
+                return "Easter Day"
+            elif week_num <= 7:
+                return f"{ordinals[week_num]} Sunday of Easter"
+        
+        # Christmas season
+        if season == "Christmas":
+            return "Sunday after Christmas"
                 
-        return f"Sunday in {season}"
+        return f"Sunday in the {season}"
         
     def get_calendar_data(self, year: int, month: int) -> Dict:
         """Get calendar data for a specific month"""
