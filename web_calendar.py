@@ -5641,9 +5641,29 @@ def wizard_export():
         
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             liturgical_info = calendar_instance.get_liturgical_info(selected_date.date())
-            celebration = liturgical_info.get('celebration', '') or liturgical_info.get('proper', '') or 'Sunday Service'
+            
+            # Get liturgical name - prefer feast day, then proper Sunday name, then API
+            if liturgical_info.get('feast_day'):
+                liturgical_name = liturgical_info['feast_day']
+            elif liturgical_info.get('is_sunday'):
+                liturgical_name = calendar_instance.get_sunday_name(selected_date)
+            else:
+                readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
+                liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
+            
             formatted_date = selected_date.strftime("%B %d, %Y")
-            title_text = f"{celebration}\n{formatted_date}"
+            
+            # Format title based on service type
+            if service_type == 'eucharist':
+                title_text = f"Holy Eucharist for the\n{liturgical_name}\n{formatted_date}"
+            elif service_type == 'evensong':
+                title_text = f"Evensong for the\n{liturgical_name}\n{formatted_date}"
+            elif service_type == 'funeral':
+                title_text = f"Funeral Service\n{formatted_date}"
+            elif service_type == 'concert':
+                title_text = f"Concert\n{formatted_date}"
+            else:
+                title_text = f"{liturgical_name}\n{formatted_date}"
             
             title_card = create_title_card(
                 title_text,
@@ -5855,9 +5875,29 @@ def wizard_preview():
         previews = []
         
         liturgical_info = calendar_instance.get_liturgical_info(selected_date.date())
-        celebration = liturgical_info.get('celebration', '') or liturgical_info.get('proper', '') or 'Sunday Service'
+        
+        # Get liturgical name - prefer feast day, then proper Sunday name, then API
+        if liturgical_info.get('feast_day'):
+            liturgical_name = liturgical_info['feast_day']
+        elif liturgical_info.get('is_sunday'):
+            liturgical_name = calendar_instance.get_sunday_name(selected_date)
+        else:
+            readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
+            liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
+        
         formatted_date = selected_date.strftime("%B %d, %Y")
-        title_text = f"{celebration}\n{formatted_date}"
+        
+        # Format title based on service type
+        if service_type == 'eucharist':
+            title_text = f"Holy Eucharist for the\n{liturgical_name}\n{formatted_date}"
+        elif service_type == 'evensong':
+            title_text = f"Evensong for the\n{liturgical_name}\n{formatted_date}"
+        elif service_type == 'funeral':
+            title_text = f"Funeral Service\n{formatted_date}"
+        elif service_type == 'concert':
+            title_text = f"Concert\n{formatted_date}"
+        else:
+            title_text = f"{liturgical_name}\n{formatted_date}"
         
         title_card = create_title_card(
             title_text,
