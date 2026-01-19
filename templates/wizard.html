@@ -931,6 +931,24 @@
                     </div>
                     
                     <div class="checkbox-item" onclick="toggleCheckbox(this)">
+                        <input type="checkbox" id="includeCustomTitleSlide">
+                        <div class="checkbox-item-content">
+                            <h4>🎬 Custom Title Slide</h4>
+                            <p>Create an additional title slide with your own custom text</p>
+                        </div>
+                    </div>
+                    <div class="extra-form" id="customTitleSlideForm">
+                        <h4 style="margin-bottom: 15px;">Custom Title Slide</h4>
+                        <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 14px;">
+                            Enter your custom text for an additional title slide (e.g., special event, memorial, etc.)
+                        </p>
+                        <div class="form-group">
+                            <label for="customTitleText">Title Text</label>
+                            <textarea id="customTitleText" rows="3" placeholder="e.g., Memorial Service for&#10;John Smith&#10;January 25, 2026" style="width: 100%; resize: vertical;"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-item" onclick="toggleCheckbox(this)">
                         <input type="checkbox" id="includeCustomLowerThirds">
                         <div class="checkbox-item-content">
                             <h4>🎨 Custom Lower Thirds</h4>
@@ -1125,8 +1143,13 @@
                 includeAnnouncements: document.getElementById('includeAnnouncements').checked,
                 includeServiceOrder: document.getElementById('includeServiceOrder').checked,
                 includeCountdown: document.getElementById('includeCountdown').checked,
+                includeCustomTitleSlide: document.getElementById('includeCustomTitleSlide').checked,
                 includeCustomLowerThirds: document.getElementById('includeCustomLowerThirds').checked
             };
+            
+            if (extras.includeCustomTitleSlide) {
+                extras.customTitleText = document.getElementById('customTitleText').value.trim();
+            }
             
             if (extras.includeAnnouncements) {
                 extras.announcements = [];

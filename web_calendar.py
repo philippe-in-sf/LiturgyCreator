@@ -5886,6 +5886,21 @@ def wizard_export():
                     img_buffer.seek(0)
                     zip_file.writestr(f"{date_folder_name}/countdown/Countdown_{minutes:02d}min.png", img_buffer.read())
             
+            # Generate custom title slide
+            if extras.get('includeCustomTitleSlide') and extras.get('customTitleText'):
+                custom_title_text = extras['customTitleText']
+                custom_title_card = create_title_card(
+                    custom_title_text,
+                    liturgical_season=liturgical_season,
+                    is_funeral=is_funeral,
+                    branding=branding,
+                    style=style
+                )
+                img_buffer = io.BytesIO()
+                custom_title_card.save(img_buffer, format='PNG')
+                img_buffer.seek(0)
+                zip_file.writestr(f"{date_folder_name}/title_cards/Custom_Title_Card.png", img_buffer.read())
+            
             # Generate custom lower thirds
             custom_lower_thirds_count = 0
             if extras.get('includeCustomLowerThirds') and extras.get('customLowerThirds'):
@@ -5930,6 +5945,8 @@ def wizard_export():
                 summary_content.append(f"- Service Order: {len([i for i in extras.get('serviceOrderItems', []) if i.strip()])} slides")
             if extras.get('includeCountdown'):
                 summary_content.append(f"- Countdown: {len(extras.get('countdownTimes', []))} slides")
+            if extras.get('includeCustomTitleSlide') and extras.get('customTitleText'):
+                summary_content.append("- Custom Title Card: 1 slide")
             if custom_lower_thirds_count > 0:
                 summary_content.append(f"- Custom Lower Thirds: {custom_lower_thirds_count} slides")
             
