@@ -1261,8 +1261,14 @@
                     loadingDiv.style.display = 'none';
                     container.style.display = 'block';
                     
-                    if (data.success && data.readings) {
+                    if (data.readings && data.has_readings) {
                         renderReadings(data.readings);
+                        wizardState.celebration = data.celebration || '';
+                        wizardState.liturgicalInfo = data.liturgical_info || {};
+                    } else if (data.readings) {
+                        renderReadings(data.readings);
+                        wizardState.celebration = data.celebration || '';
+                        wizardState.liturgicalInfo = data.liturgical_info || {};
                     } else {
                         container.innerHTML = `
                             <div class="status-message error">
