@@ -1277,8 +1277,8 @@
                     
                     if (data.readings && Object.keys(data.readings).length > 0) {
                         renderReadings(data.readings);
-                        wizardState.celebration = data.celebration || '';
-                        wizardState.liturgicalInfo = data.liturgical_info || {};
+                        wizardData.celebration = data.celebration || '';
+                        wizardData.liturgicalInfo = data.liturgical_info || {};
                     } else {
                         container.innerHTML = `
                             <div class="status-message" style="background: #fff3cd; color: #856404; border: 1px solid #ffc107;">
