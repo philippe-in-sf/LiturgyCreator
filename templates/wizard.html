@@ -1252,37 +1252,48 @@
             const loadingDiv = document.getElementById('readingsLoading');
             const container = document.getElementById('readingsContainer');
             
+            if (!dateStr) {
+                container.innerHTML = `
+                    <div class="status-message error">
+                        <p>Please select a date first.</p>
+                    </div>
+                `;
+                return;
+            }
+            
             loadingDiv.style.display = 'block';
             container.style.display = 'none';
             
             fetch(`/api/readings/${dateStr}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     loadingDiv.style.display = 'none';
                     container.style.display = 'block';
                     
-                    if (data.readings && data.has_readings) {
-                        renderReadings(data.readings);
-                        wizardState.celebration = data.celebration || '';
-                        wizardState.liturgicalInfo = data.liturgical_info || {};
-                    } else if (data.readings) {
+                    if (data.readings && Object.keys(data.readings).length > 0) {
                         renderReadings(data.readings);
                         wizardState.celebration = data.celebration || '';
                         wizardState.liturgicalInfo = data.liturgical_info || {};
                     } else {
                         container.innerHTML = `
-                            <div class="status-message error">
+                            <div class="status-message" style="background: #fff3cd; color: #856404; border: 1px solid #ffc107;">
                                 <p>No readings found for this date. You can still proceed with service details.</p>
                             </div>
                         `;
                     }
                 })
                 .catch(err => {
+                    console.error('Readings fetch error:', err);
                     loadingDiv.style.display = 'none';
                     container.style.display = 'block';
                     container.innerHTML = `
                         <div class="status-message error">
-                            <p>Error loading readings. Please try again.</p>
+                            <p>Error loading readings: ${err.message}. You can still proceed with service details.</p>
                         </div>
                     `;
                 });
