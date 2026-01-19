@@ -5886,6 +5886,29 @@ def wizard_export():
                     img_buffer.seek(0)
                     zip_file.writestr(f"{date_folder_name}/countdown/Countdown_{minutes:02d}min.png", img_buffer.read())
             
+            # Generate custom lower thirds
+            custom_lower_thirds_count = 0
+            if extras.get('includeCustomLowerThirds') and extras.get('customLowerThirds'):
+                custom_lts = extras['customLowerThirds']
+                for idx, custom_lt in enumerate(custom_lts, 1):
+                    label = custom_lt.get('label', '').strip()
+                    content = custom_lt.get('content', '').strip()
+                    if label or content:
+                        lower_third = create_lower_third(
+                            reading_type=label if label else 'Custom',
+                            reference=content if content else '',
+                            liturgical_season=liturgical_season,
+                            is_funeral=is_funeral,
+                            branding=branding,
+                            style=style
+                        )
+                        img_buffer = io.BytesIO()
+                        lower_third.save(img_buffer, format='PNG')
+                        img_buffer.seek(0)
+                        safe_label = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in label)[:30].strip() if label else f'Custom_{idx}'
+                        zip_file.writestr(f"{date_folder_name}/lower_thirds/Custom_{idx:02d}_{safe_label}.png", img_buffer.read())
+                        custom_lower_thirds_count += 1
+            
             summary_content = []
             summary_content.append(f"Service Preparation Package")
             summary_content.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -5907,6 +5930,8 @@ def wizard_export():
                 summary_content.append(f"- Service Order: {len([i for i in extras.get('serviceOrderItems', []) if i.strip()])} slides")
             if extras.get('includeCountdown'):
                 summary_content.append(f"- Countdown: {len(extras.get('countdownTimes', []))} slides")
+            if custom_lower_thirds_count > 0:
+                summary_content.append(f"- Custom Lower Thirds: {custom_lower_thirds_count} slides")
             
             zip_file.writestr(f"{date_folder_name}/Package_Summary.txt", "\n".join(summary_content))
         

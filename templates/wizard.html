@@ -929,6 +929,28 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="checkbox-item" onclick="toggleCheckbox(this)">
+                        <input type="checkbox" id="includeCustomLowerThirds">
+                        <div class="checkbox-item-content">
+                            <h4>🎨 Custom Lower Thirds</h4>
+                            <p>Create additional lower thirds with custom labels and content</p>
+                        </div>
+                    </div>
+                    <div class="extra-form" id="customLowerThirdsForm">
+                        <h4 style="margin-bottom: 15px;">Custom Lower Thirds</h4>
+                        <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 14px;">
+                            Add any additional lower thirds you need (e.g., special announcements, guest speakers, etc.)
+                        </p>
+                        <div id="customLowerThirdsList">
+                            <div class="custom-lower-third-item" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                                <input type="text" placeholder="Label (e.g., Guest Speaker)" class="custom-lt-label" style="flex: 1;">
+                                <input type="text" placeholder="Content (e.g., Dr. Jane Smith)" class="custom-lt-content" style="flex: 2;">
+                                <button class="remove-btn" onclick="removeCustomLowerThird(this)">×</button>
+                            </div>
+                        </div>
+                        <button class="add-btn" onclick="addCustomLowerThird()">+ Add Lower Third</button>
+                    </div>
                 </div>
             </div>
             
@@ -1102,7 +1124,8 @@
             const extras = {
                 includeAnnouncements: document.getElementById('includeAnnouncements').checked,
                 includeServiceOrder: document.getElementById('includeServiceOrder').checked,
-                includeCountdown: document.getElementById('includeCountdown').checked
+                includeCountdown: document.getElementById('includeCountdown').checked,
+                includeCustomLowerThirds: document.getElementById('includeCustomLowerThirds').checked
             };
             
             if (extras.includeAnnouncements) {
@@ -1134,6 +1157,17 @@
                 });
                 extras.countdownServiceTime = document.getElementById('countdownServiceTime').value;
                 extras.countdownWelcome = document.getElementById('countdownWelcome').value;
+            }
+            
+            if (extras.includeCustomLowerThirds) {
+                extras.customLowerThirds = [];
+                document.querySelectorAll('#customLowerThirdsList .custom-lower-third-item').forEach(item => {
+                    const label = item.querySelector('.custom-lt-label').value.trim();
+                    const content = item.querySelector('.custom-lt-content').value.trim();
+                    if (label || content) {
+                        extras.customLowerThirds.push({ label, content });
+                    }
+                });
             }
             
             return extras;
@@ -1390,6 +1424,26 @@
         
         function removeOrderItem(btn) {
             const list = document.getElementById('serviceOrderList');
+            if (list.children.length > 1) {
+                btn.parentElement.remove();
+            }
+        }
+        
+        function addCustomLowerThird() {
+            const list = document.getElementById('customLowerThirdsList');
+            const item = document.createElement('div');
+            item.className = 'custom-lower-third-item';
+            item.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
+            item.innerHTML = `
+                <input type="text" placeholder="Label (e.g., Guest Speaker)" class="custom-lt-label" style="flex: 1;">
+                <input type="text" placeholder="Content (e.g., Dr. Jane Smith)" class="custom-lt-content" style="flex: 2;">
+                <button class="remove-btn" onclick="removeCustomLowerThird(this)">×</button>
+            `;
+            list.appendChild(item);
+        }
+        
+        function removeCustomLowerThird(btn) {
+            const list = document.getElementById('customLowerThirdsList');
             if (list.children.length > 1) {
                 btn.parentElement.remove();
             }
