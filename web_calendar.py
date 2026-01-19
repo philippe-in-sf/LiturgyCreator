@@ -450,13 +450,13 @@ class WebLiturgicalCalendar:
         return date(year, month, day)
     
     def get_movable_feast_day(self, date_obj: date) -> Optional[tuple]:
-        """Check if date is a movable feast day (based on Easter)
+        """Check if date is a movable feast day (based on Easter or Epiphany)
         Returns tuple of (feast_name, color_override) or None"""
         
         year = date_obj.year
         easter_date = self.calculate_easter(year)
         
-        # Calculate movable feast days
+        # Calculate movable feast days based on Easter
         ash_wednesday = easter_date - timedelta(days=46)
         palm_sunday = easter_date - timedelta(days=7)
         maundy_thursday = easter_date - timedelta(days=3)
@@ -466,8 +466,16 @@ class WebLiturgicalCalendar:
         pentecost = easter_date + timedelta(days=49)  # 50 days after Easter
         trinity_sunday = easter_date + timedelta(days=56)  # Week after Pentecost
         
+        # Calculate Baptism of Our Lord (First Sunday after Epiphany)
+        epiphany = date(year, 1, 6)
+        days_until_sunday = (6 - epiphany.weekday()) % 7  # Days until next Sunday
+        if days_until_sunday == 0:
+            days_until_sunday = 7  # If Epiphany is Sunday, Baptism is next Sunday
+        baptism_of_our_lord = epiphany + timedelta(days=days_until_sunday)
+        
         # Check for movable feasts with their liturgical colors
         movable_feasts = {
+            baptism_of_our_lord: ("The Baptism of Our Lord", "epiphany"),
             ash_wednesday: ("Ash Wednesday", "lent"),
             palm_sunday: ("Palm Sunday", "palm_sunday"),
             maundy_thursday: ("Maundy Thursday", "maundy_thursday"),
@@ -3850,9 +3858,11 @@ def preview_graphics():
         selected_date = datetime.fromisoformat(date_str)
         formatted_date = selected_date.strftime("%B %d, %Y")
         
-        # Get the liturgical name - prefer feast day from liturgical_info, then API celebration
+        # Get the liturgical name - prefer feast day, then proper Sunday name, then API celebration
         if liturgical_info.get('feast_day'):
             liturgical_name = liturgical_info['feast_day']
+        elif liturgical_info.get('is_sunday'):
+            liturgical_name = calendar_instance.get_sunday_name(selected_date)
         else:
             readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
             liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
@@ -4246,9 +4256,11 @@ def export_all():
             # Format date nicely (e.g., "October 19, 2025")
             formatted_date = selected_date.strftime("%B %d, %Y")
             
-            # Get the liturgical name - prefer feast day from liturgical_info, then API celebration
+            # Get the liturgical name - prefer feast day, then proper Sunday name, then API celebration
             if liturgical_info.get('feast_day'):
                 liturgical_name = liturgical_info['feast_day']
+            elif liturgical_info.get('is_sunday'):
+                liturgical_name = calendar_instance.get_sunday_name(selected_date)
             else:
                 readings_data = calendar_instance.liturgy_fetcher.fetch_daily_readings(selected_date)
                 liturgical_name = readings_data.get('celebration', 'Sunday Service') if readings_data else 'Sunday Service'
@@ -5446,7 +5458,11 @@ def concert_program():
         
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             title_text = f"{performer}\n{concert_date} at {concert_time}"
-            title_card = create_title_card(title_text, theme='concert', branding=branding)
+            # Use Christmas Trinity style for title card if selected, otherwise concert theme
+            if style == 'christmas_trinity':
+                title_card = create_title_card(title_text, branding=branding, style=style)
+            else:
+                title_card = create_title_card(title_text, theme='concert', branding=branding)
             title_card_buffer = io.BytesIO()
             title_card.save(title_card_buffer, format='PNG')
             title_card_buffer.seek(0)
@@ -5536,7 +5552,11 @@ def preview_concert_program():
         
         # Generate title card preview
         title_text = f"{performer}\n{concert_date} at {concert_time}"
-        title_card = create_title_card(title_text, theme='concert', branding=branding)
+        # Use Christmas Trinity style for title card if selected, otherwise concert theme
+        if style == 'christmas_trinity':
+            title_card = create_title_card(title_text, branding=branding, style=style)
+        else:
+            title_card = create_title_card(title_text, theme='concert', branding=branding)
         
         # Convert title card to base64
         title_buffer = io.BytesIO()
