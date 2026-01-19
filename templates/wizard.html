@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Preparation Wizard - Trinity Church</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Stack+Sans:ital,wght@0,200..700;1,200..700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-color: #e9ecef;
+            --card-bg: #ffffff;
+            --accent-color: #667eea;
+            --accent-hover: #5a6fd8;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.25s ease;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+        
+        body.dark-mode {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --border-color: #404040;
+            --card-bg: #262626;
+        }
+        
+        body {
+            font-family: 'Stack Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-secondary);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+        
+        .wizard-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .wizard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .wizard-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .wizard-header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .header-btn {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+        
+        .header-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        
+        .progress-container {
+            background: var(--card-bg);
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--border-color);
+            z-index: 0;
+        }
+        
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            border: 3px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            transition: all var(--transition-normal);
+        }
+        
+        .progress-step.active .step-circle {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+        
+        .progress-step.completed .step-circle {
+            background: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+        
+        .step-label {
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: center;
+            max-width: 80px;
+        }
+        
+        .progress-step.active .step-label {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        
+        .wizard-content {
+            background: var(--card-bg);
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .wizard-step {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .wizard-step.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .step-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        
+        .step-description {
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-family: inherit;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-section {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+        }
+        
+        .form-section h3 {
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+        
+        .reading-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .reading-card h4 {
+            font-size: 1rem;
+            color: var(--accent-color);
+            margin-bottom: 8px;
+        }
+        
+        .reading-card .reference {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .reading-card textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 15px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .checkbox-item:hover {
+            border-color: var(--accent-color);
+        }
+        
+        .checkbox-item.checked {
+            border-color: var(--accent-color);
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+        
+        .checkbox-item-content h4 {
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+        
+        .checkbox-item-content p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        
+        .extra-form {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+        }
+        
+        .extra-form.visible {
+            display: block;
+        }
+        
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .preview-card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .preview-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .preview-card .preview-name {
+            padding: 10px 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: var(--card-bg);
+        }
+        
+        .preview-category {
+            margin-bottom: 25px;
+        }
+        
+        .preview-category h4 {
+            font-size: 1rem;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .wizard-footer {
+            background: var(--card-bg);
+            padding: 20px 30px;
+            border-top: 1px solid var(--border-color);
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            filter: brightness(1.1);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loading-overlay.visible {
+            display: flex;
+        }
+        
+        .loading-content {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .announcement-item,
+        .order-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .announcement-item input,
+        .order-item input {
+            flex: 1;
+        }
+        
+        .remove-btn {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .add-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        
+        .countdown-checkboxes {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .countdown-checkboxes label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+        }
+        
+        .countdown-checkboxes label:has(input:checked) {
+            border-color: var(--accent-color);
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .status-message {
+            padding: 15px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+        }
+        
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 768px) {
+            .wizard-container {
+                padding: 10px;
+            }
+            
+            .wizard-header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .progress-container {
+                padding: 15px;
+                overflow-x: auto;
+            }
+            
+            .progress-steps {
+                min-width: 500px;
+            }
+            
+            .step-label {
+                display: none;
+            }
+            
+            .wizard-content {
+                padding: 20px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .wizard-footer {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .wizard-footer .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .preview-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wizard-container">
+        <div class="wizard-header">
+            <h1>🎬 Service Preparation Wizard</h1>
+            <div class="wizard-header-actions">
+                <button class="header-btn" onclick="toggleDarkMode()">🌙 Dark</button>
+                <a href="/" class="header-btn">← Back to Calendar</a>
+            </div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-steps">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Date & Type</div>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Service Details</div>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Readings</div>
+                </div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Style</div>
+                </div>
+                <div class="progress-step" data-step="5">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">Extras</div>
+                </div>
+                <div class="progress-step" data-step="6">
+                    <div class="step-circle">6</div>
+                    <div class="step-label">Review</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="wizard-content">
+            <div class="wizard-step active" data-step="1">
+                <h2 class="step-title">Date & Service Type</h2>
+                <p class="step-description">Select the date and type of service you're preparing graphics for.</p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="serviceDate">Service Date</label>
+                        <input type="date" id="serviceDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="serviceType">Service Type</label>
+                        <select id="serviceType">
+                            <option value="eucharist">Eucharist</option>
+                            <option value="evensong">Evensong</option>
+                            <option value="special">Special Service</option>
+                            <option value="funeral">Funeral</option>
+                            <option value="concert">Concert</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="liturgicalInfoDisplay" class="form-section" style="display: none;">
+                    <h3>📅 Liturgical Information</h3>
+                    <p id="liturgicalCelebration" style="font-size: 1.1rem; font-weight: 600;"></p>
+                    <p id="liturgicalSeason" style="color: var(--text-secondary);"></p>
+                </div>
+            </div>
+            
+            <div class="wizard-step" data-step="2">
+                <h2 class="step-title">Service Details</h2>
+                <p class="step-description">Enter the details for your <span id="serviceTypeLabel">service</span>.</p>
+                
+                <div id="eucharistFields">
+                    <div class="form-section">
+                        <h3>🎵 Music</h3>
+                        <div class="form-group">
+                            <label for="preludeTitle">Prelude Title</label>
+                            <input type="text" id="preludeTitle" placeholder="e.g., Prelude in C Major">
+                        </div>
+                        <div class="form-group">
+                            <label for="openingHymn">Opening Hymn</label>
+                            <input type="text" id="openingHymn" placeholder="e.g., Hymn 410 - Praise, my soul">
+                        </div>
+                        <div class="form-group">
+                            <label for="sequenceHymn">Sequence Hymn</label>
+                            <input type="text" id="sequenceHymn" placeholder="e.g., Hymn 525 - The Church's one foundation">
+                        </div>
+                        <div class="form-group">
+                            <label for="offertoryHymn">Offertory Hymn</label>
+                            <input type="text" id="offertoryHymn" placeholder="e.g., Hymn 380 - From all that dwell">
+                        </div>
+                        <div class="form-group">
+                            <label for="communionMotet">Communion Motet</label>
+                            <input type="text" id="communionMotet" placeholder="e.g., Ave Verum Corpus">
+                        </div>
+                        <div class="form-group">
+                            <label for="closingHymn">Closing Hymn</label>
+                            <input type="text" id="closingHymn" placeholder="e.g., Hymn 690 - Guide me, O thou great Jehovah">
+                        </div>
+                        <div class="form-group">
+                            <label for="postludeTitle">Postlude Title</label>
+                            <input type="text" id="postludeTitle" placeholder="e.g., Toccata in D Minor">
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>👤 Clergy & Musicians</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="presiderName">Presider</label>
+                                <input type="text" id="presiderName" placeholder="e.g., The Rev. John Smith">
+                            </div>
+                            <div class="form-group">
+                                <label for="preacherName">Preacher</label>
+                                <input type="text" id="preacherName" placeholder="e.g., The Rev. Jane Doe">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="organistName">Organist</label>
+                            <input type="text" id="organistName" placeholder="e.g., Dr. William Jones">
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="evensongFields" style="display: none;">
+                    <div class="form-section">
+                        <h3>🎵 Evensong Music</h3>
+                        <div class="form-group">
+                            <label for="evensongPrelude">Prelude</label>
+                            <input type="text" id="evensongPrelude" placeholder="Prelude title">
+                        </div>
+                        <div class="form-group">
+                            <label for="evensongOpeningHymn">Opening Hymn</label>
+                            <input type="text" id="evensongOpeningHymn" placeholder="Opening hymn">
+                        </div>
+                        <div class="form-group">
+                            <label for="evensongAnthem">Anthem</label>
+                            <input type="text" id="evensongAnthem" placeholder="Anthem title">
+                        </div>
+                        <div class="form-group">
+                            <label for="evensongClosingHymn">Closing Hymn</label>
+                            <input type="text" id="evensongClosingHymn" placeholder="Closing hymn">
+                        </div>
+                        <div class="form-group">
+                            <label for="evensongPostlude">Postlude</label>
+                            <input type="text" id="evensongPostlude" placeholder="Postlude title">
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>👤 Officiant & Musicians</h3>
+                        <div class="form-group">
+                            <label for="evensongOfficiant">Officiant</label>
+                            <input type="text" id="evensongOfficiant" placeholder="e.g., The Rev. John Smith">
+                        </div>
+                        <div class="form-group">
+                            <label for="evensongOrganist">Organist/Choirmaster</label>
+                            <input type="text" id="evensongOrganist" placeholder="e.g., Dr. William Jones">
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="concertFields" style="display: none;">
+                    <div class="form-section">
+                        <h3>🎼 Concert Details</h3>
+                        <div class="form-group">
+                            <label for="concertPerformer">Performer/Ensemble</label>
+                            <input type="text" id="concertPerformer" placeholder="e.g., Trinity Church Choir">
+                        </div>
+                        <div class="form-group">
+                            <label for="concertTime">Concert Time</label>
+                            <input type="text" id="concertTime" placeholder="e.g., 7:00 PM">
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="funeralFields" style="display: none;">
+                    <div class="form-section">
+                        <h3>🕊️ Funeral Service Details</h3>
+                        <div class="form-group">
+                            <label for="deceasedName">Name of Deceased</label>
+                            <input type="text" id="deceasedName" placeholder="Full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="funeralPresider">Presiding Clergy</label>
+                            <input type="text" id="funeralPresider" placeholder="e.g., The Rev. John Smith">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="wizard-step" data-step="3">
+                <h2 class="step-title">Readings</h2>
+                <p class="step-description">Review and edit the readings for this service. These are automatically fetched based on the date.</p>
+                
+                <div id="readingsLoading" class="loading-content" style="text-align: center; padding: 40px;">
+                    <div class="spinner"></div>
+                    <p>Loading readings...</p>
+                </div>
+                
+                <div id="readingsContainer" style="display: none;">
+                </div>
+            </div>
+            
+            <div class="wizard-step" data-step="4">
+                <h2 class="step-title">Style Selection</h2>
+                <p class="step-description">Choose the visual style for your graphics.</p>
+                
+                <div class="form-section">
+                    <h3>🎨 Lower Third Style</h3>
+                    <div class="form-group">
+                        <label for="lowerThirdStyle">Style</label>
+                        <select id="lowerThirdStyle">
+                            <option value="classic">Classic (Angled Layers)</option>
+                            <option value="minimal">Minimal (Clean Bar)</option>
+                            <option value="modern_glass">Modern Glass (Frosted)</option>
+                            <option value="bold_banner">Bold Banner (Solid)</option>
+                            <option value="elegant">Elegant (Refined Lines)</option>
+                            <option value="christmas_trinity">Christmas Trinity (Gold/Burgundy)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>🌈 Liturgical Season Override</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                        By default, graphics use the liturgical season from the selected date. Override here for special occasions.
+                    </p>
+                    <div class="form-group">
+                        <label for="liturgicalOverride">Season Override</label>
+                        <select id="liturgicalOverride">
+                            <option value="">Use Date's Season (Default)</option>
+                            <option value="advent_blue">Advent - Royal Blue</option>
+                            <option value="advent_purple">Advent - Purple</option>
+                            <option value="advent_pink">Advent - Pink/Rose</option>
+                            <option value="christmas">Christmas (White & Gold)</option>
+                            <option value="season_after_epiphany">Season after Epiphany (Green)</option>
+                            <option value="lent">Lent (Purple)</option>
+                            <option value="easter">Easter (White & Gold)</option>
+                            <option value="pentecost">Pentecost (Red)</option>
+                            <option value="season_after_pentecost">Season after Pentecost (Green)</option>
+                            <option value="memorial">Memorial Service (Black & White)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="wizard-step" data-step="5">
+                <h2 class="step-title">Extras (Optional)</h2>
+                <p class="step-description">Include additional graphics in your package.</p>
+                
+                <div class="checkbox-group">
+                    <div class="checkbox-item" onclick="toggleCheckbox(this)">
+                        <input type="checkbox" id="includeAnnouncements">
+                        <div class="checkbox-item-content">
+                            <h4>📢 Announcements</h4>
+                            <p>Include announcement slides for events, prayers, or general messages</p>
+                        </div>
+                    </div>
+                    <div class="extra-form" id="announcementsForm">
+                        <h4 style="margin-bottom: 15px;">Add Announcements</h4>
+                        <div id="announcementsList">
+                            <div class="announcement-item">
+                                <input type="text" placeholder="Announcement title" class="announcement-title">
+                                <select class="announcement-type" style="width: 120px;">
+                                    <option value="general">General</option>
+                                    <option value="event">Event</option>
+                                    <option value="prayer">Prayer</option>
+                                    <option value="giving">Giving</option>
+                                </select>
+                                <button class="remove-btn" onclick="removeAnnouncement(this)">×</button>
+                            </div>
+                        </div>
+                        <button class="add-btn" onclick="addAnnouncement()">+ Add Another</button>
+                    </div>
+                    
+                    <div class="checkbox-item" onclick="toggleCheckbox(this)">
+                        <input type="checkbox" id="includeServiceOrder">
+                        <div class="checkbox-item-content">
+                            <h4>📋 Service Order</h4>
+                            <p>Generate slides showing the order of service</p>
+                        </div>
+                    </div>
+                    <div class="extra-form" id="serviceOrderForm">
+                        <h4 style="margin-bottom: 15px;">Service Order Items</h4>
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="showOrderNumbering" checked style="width: 18px; height: 18px;">
+                                Show item numbers
+                            </label>
+                        </div>
+                        <div id="serviceOrderList">
+                            <div class="order-item">
+                                <input type="text" placeholder="e.g., Opening Hymn" class="order-text">
+                                <button class="remove-btn" onclick="removeOrderItem(this)">×</button>
+                            </div>
+                        </div>
+                        <button class="add-btn" onclick="addOrderItem()">+ Add Item</button>
+                    </div>
+                    
+                    <div class="checkbox-item" onclick="toggleCheckbox(this)">
+                        <input type="checkbox" id="includeCountdown">
+                        <div class="checkbox-item-content">
+                            <h4>⏱️ Countdown Timer</h4>
+                            <p>Pre-service countdown slides</p>
+                        </div>
+                    </div>
+                    <div class="extra-form" id="countdownForm">
+                        <h4 style="margin-bottom: 15px;">Countdown Settings</h4>
+                        <div class="form-group">
+                            <label>Select countdown times:</label>
+                            <div class="countdown-checkboxes">
+                                <label><input type="checkbox" value="30" class="countdown-time" checked> 30 min</label>
+                                <label><input type="checkbox" value="15" class="countdown-time" checked> 15 min</label>
+                                <label><input type="checkbox" value="10" class="countdown-time" checked> 10 min</label>
+                                <label><input type="checkbox" value="5" class="countdown-time" checked> 5 min</label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="countdownServiceTime">Service Start Time</label>
+                                <input type="text" id="countdownServiceTime" placeholder="e.g., 10:00 AM">
+                            </div>
+                            <div class="form-group">
+                                <label for="countdownWelcome">Welcome Message</label>
+                                <input type="text" id="countdownWelcome" placeholder="e.g., Welcome to Trinity Church">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="wizard-step" data-step="6">
+                <h2 class="step-title">Review & Generate</h2>
+                <p class="step-description">Preview your graphics and generate the complete package.</p>
+                
+                <div id="previewLoading" class="loading-content" style="text-align: center; padding: 40px;">
+                    <div class="spinner"></div>
+                    <p>Generating previews...</p>
+                </div>
+                
+                <div id="previewContent" style="display: none;">
+                    <div id="summarySection" class="form-section">
+                        <h3>📦 Package Summary</h3>
+                        <div id="packageSummary"></div>
+                    </div>
+                    
+                    <div class="preview-category">
+                        <h4>🎬 Title Card</h4>
+                        <div id="titleCardPreview" class="preview-grid"></div>
+                    </div>
+                    
+                    <div class="preview-category" id="readingsPreviewSection">
+                        <h4>📖 Reading Lower Thirds</h4>
+                        <div id="readingsPreview" class="preview-grid"></div>
+                    </div>
+                    
+                    <div class="preview-category" id="serviceDetailsPreviewSection">
+                        <h4>🎵 Service Details Lower Thirds</h4>
+                        <div id="serviceDetailsPreview" class="preview-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="wizard-footer">
+            <button class="btn btn-secondary" id="prevBtn" onclick="prevStep()" style="visibility: hidden;">
+                ← Back
+            </button>
+            <div id="stepIndicator">Step 1 of 6</div>
+            <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">
+                Next →
+            </button>
+        </div>
+    </div>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p id="loadingText">Generating your graphics package...</p>
+        </div>
+    </div>
+    
+    <script>
+        let currentStep = 1;
+        const totalSteps = 6;
+        let wizardData = {};
+        
+        function init() {
+            loadFromStorage();
+            updateStepDisplay();
+            
+            const today = new Date();
+            const nextSunday = new Date(today);
+            nextSunday.setDate(today.getDate() + (7 - today.getDay()));
+            document.getElementById('serviceDate').value = nextSunday.toISOString().split('T')[0];
+            
+            document.getElementById('serviceDate').addEventListener('change', onDateChange);
+            document.getElementById('serviceType').addEventListener('change', onServiceTypeChange);
+            
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+            
+            onDateChange();
+        }
+        
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+        
+        function loadFromStorage() {
+            const saved = localStorage.getItem('wizardData');
+            if (saved) {
+                try {
+                    wizardData = JSON.parse(saved);
+                    restoreFormData();
+                } catch (e) {
+                    wizardData = {};
+                }
+            }
+        }
+        
+        function saveToStorage() {
+            collectFormData();
+            localStorage.setItem('wizardData', JSON.stringify(wizardData));
+        }
+        
+        function collectFormData() {
+            wizardData = {
+                date: document.getElementById('serviceDate').value,
+                serviceType: document.getElementById('serviceType').value,
+                serviceDetails: getServiceDetails(),
+                readings: getReadings(),
+                style: document.getElementById('lowerThirdStyle').value,
+                liturgicalOverride: document.getElementById('liturgicalOverride').value,
+                extras: getExtras()
+            };
+        }
+        
+        function getServiceDetails() {
+            const type = document.getElementById('serviceType').value;
+            let details = {};
+            
+            if (type === 'eucharist' || type === 'special') {
+                details = {
+                    preludeTitle: document.getElementById('preludeTitle').value,
+                    openingHymn: document.getElementById('openingHymn').value,
+                    sequenceHymn: document.getElementById('sequenceHymn').value,
+                    offertoryHymn: document.getElementById('offertoryHymn').value,
+                    communionMotet: document.getElementById('communionMotet').value,
+                    closingHymn: document.getElementById('closingHymn').value,
+                    postludeTitle: document.getElementById('postludeTitle').value,
+                    presiderName: document.getElementById('presiderName').value,
+                    preacherName: document.getElementById('preacherName').value,
+                    organistName: document.getElementById('organistName').value
+                };
+            } else if (type === 'evensong') {
+                details = {
+                    preludeTitle: document.getElementById('evensongPrelude').value,
+                    openingHymn: document.getElementById('evensongOpeningHymn').value,
+                    anthem: document.getElementById('evensongAnthem').value,
+                    closingHymn: document.getElementById('evensongClosingHymn').value,
+                    postludeTitle: document.getElementById('evensongPostlude').value,
+                    presiderName: document.getElementById('evensongOfficiant').value,
+                    organistName: document.getElementById('evensongOrganist').value
+                };
+            } else if (type === 'concert') {
+                details = {
+                    performer: document.getElementById('concertPerformer').value,
+                    time: document.getElementById('concertTime').value
+                };
+            } else if (type === 'funeral') {
+                details = {
+                    deceasedName: document.getElementById('deceasedName').value,
+                    presiderName: document.getElementById('funeralPresider').value
+                };
+            }
+            
+            return details;
+        }
+        
+        function getReadings() {
+            const readings = {};
+            const container = document.getElementById('readingsContainer');
+            const cards = container.querySelectorAll('.reading-card');
+            
+            cards.forEach(card => {
+                const key = card.dataset.key;
+                const reference = card.querySelector('.reference-input')?.value || '';
+                const text = card.querySelector('.text-input')?.value || '';
+                readings[key] = { reference, text };
+            });
+            
+            return readings;
+        }
+        
+        function getExtras() {
+            const extras = {
+                includeAnnouncements: document.getElementById('includeAnnouncements').checked,
+                includeServiceOrder: document.getElementById('includeServiceOrder').checked,
+                includeCountdown: document.getElementById('includeCountdown').checked
+            };
+            
+            if (extras.includeAnnouncements) {
+                extras.announcements = [];
+                document.querySelectorAll('#announcementsList .announcement-item').forEach(item => {
+                    const title = item.querySelector('.announcement-title').value.trim();
+                    const type = item.querySelector('.announcement-type').value;
+                    if (title) {
+                        extras.announcements.push({ title, type, fields: {} });
+                    }
+                });
+            }
+            
+            if (extras.includeServiceOrder) {
+                extras.showOrderNumbering = document.getElementById('showOrderNumbering').checked;
+                extras.serviceOrderItems = [];
+                document.querySelectorAll('#serviceOrderList .order-item').forEach(item => {
+                    const text = item.querySelector('.order-text').value.trim();
+                    if (text) {
+                        extras.serviceOrderItems.push(text);
+                    }
+                });
+            }
+            
+            if (extras.includeCountdown) {
+                extras.countdownTimes = [];
+                document.querySelectorAll('.countdown-time:checked').forEach(cb => {
+                    extras.countdownTimes.push(parseInt(cb.value));
+                });
+                extras.countdownServiceTime = document.getElementById('countdownServiceTime').value;
+                extras.countdownWelcome = document.getElementById('countdownWelcome').value;
+            }
+            
+            return extras;
+        }
+        
+        function restoreFormData() {
+            if (wizardData.date) {
+                document.getElementById('serviceDate').value = wizardData.date;
+            }
+            if (wizardData.serviceType) {
+                document.getElementById('serviceType').value = wizardData.serviceType;
+            }
+        }
+        
+        function updateStepDisplay() {
+            document.querySelectorAll('.wizard-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.querySelector(`.wizard-step[data-step="${currentStep}"]`).classList.add('active');
+            
+            document.querySelectorAll('.progress-step').forEach(step => {
+                const stepNum = parseInt(step.dataset.step);
+                step.classList.remove('active', 'completed');
+                if (stepNum === currentStep) {
+                    step.classList.add('active');
+                } else if (stepNum < currentStep) {
+                    step.classList.add('completed');
+                }
+            });
+            
+            document.getElementById('stepIndicator').textContent = `Step ${currentStep} of ${totalSteps}`;
+            document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+            
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentStep === totalSteps) {
+                nextBtn.textContent = '📦 Generate Package';
+                nextBtn.classList.remove('btn-primary');
+                nextBtn.classList.add('btn-success');
+            } else {
+                nextBtn.textContent = 'Next →';
+                nextBtn.classList.remove('btn-success');
+                nextBtn.classList.add('btn-primary');
+            }
+        }
+        
+        function nextStep() {
+            saveToStorage();
+            
+            if (currentStep === totalSteps) {
+                generatePackage();
+                return;
+            }
+            
+            currentStep++;
+            updateStepDisplay();
+            
+            if (currentStep === 3) {
+                loadReadings();
+            } else if (currentStep === 6) {
+                loadPreviews();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 1) {
+                saveToStorage();
+                currentStep--;
+                updateStepDisplay();
+            }
+        }
+        
+        function onDateChange() {
+            const dateStr = document.getElementById('serviceDate').value;
+            if (!dateStr) return;
+            
+            fetch(`/api/readings/${dateStr}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const infoDiv = document.getElementById('liturgicalInfoDisplay');
+                        infoDiv.style.display = 'block';
+                        document.getElementById('liturgicalCelebration').textContent = 
+                            data.celebration || data.proper || 'Sunday Service';
+                        document.getElementById('liturgicalSeason').textContent = 
+                            data.season || '';
+                    }
+                })
+                .catch(err => console.error('Error fetching liturgical info:', err));
+        }
+        
+        function onServiceTypeChange() {
+            const type = document.getElementById('serviceType').value;
+            
+            document.getElementById('eucharistFields').style.display = 'none';
+            document.getElementById('evensongFields').style.display = 'none';
+            document.getElementById('concertFields').style.display = 'none';
+            document.getElementById('funeralFields').style.display = 'none';
+            
+            if (type === 'eucharist' || type === 'special') {
+                document.getElementById('eucharistFields').style.display = 'block';
+                document.getElementById('serviceTypeLabel').textContent = type === 'special' ? 'special service' : 'Eucharist';
+            } else if (type === 'evensong') {
+                document.getElementById('evensongFields').style.display = 'block';
+                document.getElementById('serviceTypeLabel').textContent = 'Evensong';
+            } else if (type === 'concert') {
+                document.getElementById('concertFields').style.display = 'block';
+                document.getElementById('serviceTypeLabel').textContent = 'concert';
+            } else if (type === 'funeral') {
+                document.getElementById('funeralFields').style.display = 'block';
+                document.getElementById('serviceTypeLabel').textContent = 'funeral service';
+            }
+        }
+        
+        function loadReadings() {
+            const dateStr = document.getElementById('serviceDate').value;
+            const loadingDiv = document.getElementById('readingsLoading');
+            const container = document.getElementById('readingsContainer');
+            
+            loadingDiv.style.display = 'block';
+            container.style.display = 'none';
+            
+            fetch(`/api/readings/${dateStr}`)
+                .then(response => response.json())
+                .then(data => {
+                    loadingDiv.style.display = 'none';
+                    container.style.display = 'block';
+                    
+                    if (data.success && data.readings) {
+                        renderReadings(data.readings);
+                    } else {
+                        container.innerHTML = `
+                            <div class="status-message error">
+                                <p>No readings found for this date. You can still proceed with service details.</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(err => {
+                    loadingDiv.style.display = 'none';
+                    container.style.display = 'block';
+                    container.innerHTML = `
+                        <div class="status-message error">
+                            <p>Error loading readings. Please try again.</p>
+                        </div>
+                    `;
+                });
+        }
+        
+        function renderReadings(readings) {
+            const container = document.getElementById('readingsContainer');
+            container.innerHTML = '';
+            
+            const readingOrder = ['first_reading', 'psalm', 'second_reading', 'gospel'];
+            const readingLabels = {
+                'first_reading': 'First Reading',
+                'psalm': 'Psalm',
+                'second_reading': 'Second Reading',
+                'gospel': 'Gospel'
+            };
+            
+            readingOrder.forEach(key => {
+                if (readings[key]) {
+                    const reading = readings[key];
+                    const card = document.createElement('div');
+                    card.className = 'reading-card';
+                    card.dataset.key = key;
+                    card.innerHTML = `
+                        <h4>${readingLabels[key]}</h4>
+                        <div class="form-group">
+                            <label>Reference</label>
+                            <input type="text" class="reference-input" value="${reading.reference || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label>Text</label>
+                            <textarea class="text-input">${reading.text || ''}</textarea>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                }
+            });
+            
+            if (container.children.length === 0) {
+                container.innerHTML = `
+                    <div class="status-message" style="background: #fff3cd; color: #856404; border: 1px solid #ffc107;">
+                        <p>No readings available for this date. This is common for weekdays or special occasions.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function toggleCheckbox(item) {
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            item.classList.toggle('checked', checkbox.checked);
+            
+            const formId = checkbox.id.replace('include', '').toLowerCase() + 'Form';
+            const form = document.getElementById(formId);
+            if (form) {
+                form.classList.toggle('visible', checkbox.checked);
+            }
+        }
+        
+        function addAnnouncement() {
+            const list = document.getElementById('announcementsList');
+            const item = document.createElement('div');
+            item.className = 'announcement-item';
+            item.innerHTML = `
+                <input type="text" placeholder="Announcement title" class="announcement-title">
+                <select class="announcement-type" style="width: 120px;">
+                    <option value="general">General</option>
+                    <option value="event">Event</option>
+                    <option value="prayer">Prayer</option>
+                    <option value="giving">Giving</option>
+                </select>
+                <button class="remove-btn" onclick="removeAnnouncement(this)">×</button>
+            `;
+            list.appendChild(item);
+        }
+        
+        function removeAnnouncement(btn) {
+            const list = document.getElementById('announcementsList');
+            if (list.children.length > 1) {
+                btn.parentElement.remove();
+            }
+        }
+        
+        function addOrderItem() {
+            const list = document.getElementById('serviceOrderList');
+            const item = document.createElement('div');
+            item.className = 'order-item';
+            item.innerHTML = `
+                <input type="text" placeholder="e.g., Opening Hymn" class="order-text">
+                <button class="remove-btn" onclick="removeOrderItem(this)">×</button>
+            `;
+            list.appendChild(item);
+        }
+        
+        function removeOrderItem(btn) {
+            const list = document.getElementById('serviceOrderList');
+            if (list.children.length > 1) {
+                btn.parentElement.remove();
+            }
+        }
+        
+        function loadPreviews() {
+            collectFormData();
+            
+            const loadingDiv = document.getElementById('previewLoading');
+            const contentDiv = document.getElementById('previewContent');
+            
+            loadingDiv.style.display = 'block';
+            contentDiv.style.display = 'none';
+            
+            fetch('/api/wizard_preview', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(wizardData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingDiv.style.display = 'none';
+                contentDiv.style.display = 'block';
+                
+                if (data.success) {
+                    renderPreviews(data.previews);
+                    renderSummary();
+                } else {
+                    contentDiv.innerHTML = `
+                        <div class="status-message error">
+                            <p>Error generating previews: ${data.error}</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(err => {
+                loadingDiv.style.display = 'none';
+                contentDiv.style.display = 'block';
+                contentDiv.innerHTML = `
+                    <div class="status-message error">
+                        <p>Error loading previews. Please try again.</p>
+                    </div>
+                `;
+            });
+        }
+        
+        function renderPreviews(previews) {
+            const titleCardPreview = document.getElementById('titleCardPreview');
+            const readingsPreview = document.getElementById('readingsPreview');
+            const serviceDetailsPreview = document.getElementById('serviceDetailsPreview');
+            
+            titleCardPreview.innerHTML = '';
+            readingsPreview.innerHTML = '';
+            serviceDetailsPreview.innerHTML = '';
+            
+            previews.forEach(preview => {
+                const card = document.createElement('div');
+                card.className = 'preview-card';
+                card.innerHTML = `
+                    <img src="${preview.image}" alt="${preview.name}">
+                    <div class="preview-name">${preview.name}</div>
+                `;
+                
+                if (preview.category === 'title_cards') {
+                    titleCardPreview.appendChild(card);
+                } else if (preview.category === 'readings') {
+                    readingsPreview.appendChild(card);
+                } else if (preview.category === 'service_details') {
+                    serviceDetailsPreview.appendChild(card);
+                }
+            });
+            
+            document.getElementById('readingsPreviewSection').style.display = 
+                readingsPreview.children.length > 0 ? 'block' : 'none';
+            document.getElementById('serviceDetailsPreviewSection').style.display = 
+                serviceDetailsPreview.children.length > 0 ? 'block' : 'none';
+        }
+        
+        function renderSummary() {
+            const summary = document.getElementById('packageSummary');
+            const date = new Date(wizardData.date);
+            const formattedDate = date.toLocaleDateString('en-US', { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+            
+            let items = ['Title Card', 'Blank Template'];
+            
+            const readingCount = Object.keys(wizardData.readings || {}).filter(k => 
+                wizardData.readings[k]?.reference).length;
+            if (readingCount > 0) {
+                items.push(`${readingCount} Reading Lower Thirds`);
+            }
+            
+            const detailCount = Object.values(wizardData.serviceDetails || {}).filter(v => v).length;
+            if (detailCount > 0) {
+                items.push(`${detailCount} Service Detail Lower Thirds`);
+            }
+            
+            if (wizardData.extras?.includeAnnouncements && wizardData.extras.announcements?.length > 0) {
+                items.push(`${wizardData.extras.announcements.length} Announcement Slides`);
+            }
+            if (wizardData.extras?.includeServiceOrder && wizardData.extras.serviceOrderItems?.length > 0) {
+                items.push(`${wizardData.extras.serviceOrderItems.length} Service Order Slides`);
+            }
+            if (wizardData.extras?.includeCountdown && wizardData.extras.countdownTimes?.length > 0) {
+                items.push(`${wizardData.extras.countdownTimes.length} Countdown Slides`);
+            }
+            
+            summary.innerHTML = `
+                <p><strong>Date:</strong> ${formattedDate}</p>
+                <p><strong>Service Type:</strong> ${wizardData.serviceType.charAt(0).toUpperCase() + wizardData.serviceType.slice(1)}</p>
+                <p><strong>Style:</strong> ${wizardData.style.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
+                <p style="margin-top: 10px;"><strong>Package Contents:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    ${items.map(item => `<li>${item}</li>`).join('')}
+                </ul>
+            `;
+        }
+        
+        function generatePackage() {
+            collectFormData();
+            
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.add('visible');
+            
+            fetch('/api/wizard_export', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(wizardData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error || 'Export failed'); });
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                overlay.classList.remove('visible');
+                
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `service_package_${wizardData.date}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+                
+                localStorage.removeItem('wizardData');
+            })
+            .catch(err => {
+                overlay.classList.remove('visible');
+                alert('Error generating package: ' + err.message);
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

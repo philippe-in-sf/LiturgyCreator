@@ -5606,6 +5606,328 @@ def preview_concert_program():
             'message': 'Failed to generate concert preview'
         }), 500
 
+@app.route('/wizard')
+def wizard():
+    """Service Preparation Wizard - step-by-step graphics generation"""
+    return render_template('wizard.html')
+
+@app.route('/api/wizard_export', methods=['POST'])
+def wizard_export():
+    """Generate complete graphics package from wizard data"""
+    try:
+        data = request.get_json()
+        
+        date_str = data.get('date')
+        service_type = data.get('serviceType', 'eucharist')
+        service_details = data.get('serviceDetails', {})
+        readings = data.get('readings', {})
+        style = data.get('style', 'classic')
+        liturgical_override = data.get('liturgicalOverride', '')
+        extras = data.get('extras', {})
+        
+        if not date_str:
+            return jsonify({'success': False, 'error': 'No date provided'}), 400
+        
+        branding = load_branding_config()
+        calendar_instance = WebLiturgicalCalendar()
+        
+        selected_date = datetime.fromisoformat(date_str)
+        date_folder_name = selected_date.strftime("%Y-%m-%d")
+        
+        is_funeral = service_type == 'funeral'
+        liturgical_season = liturgical_override if liturgical_override else None
+        
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            liturgical_info = calendar_instance.get_liturgical_info(selected_date.date())
+            celebration = liturgical_info.get('celebration', '') or liturgical_info.get('proper', '') or 'Sunday Service'
+            formatted_date = selected_date.strftime("%B %d, %Y")
+            title_text = f"{celebration}\n{formatted_date}"
+            
+            title_card = create_title_card(
+                title_text,
+                liturgical_season=liturgical_season,
+                is_funeral=is_funeral,
+                branding=branding,
+                style=style
+            )
+            img_buffer = io.BytesIO()
+            title_card.save(img_buffer, format='PNG')
+            img_buffer.seek(0)
+            zip_file.writestr(f"{date_folder_name}/title_cards/Title_Card.png", img_buffer.read())
+            
+            if readings:
+                reading_order = ['first_reading', 'psalm', 'second_reading', 'gospel']
+                for reading_key in reading_order:
+                    if reading_key in readings and readings[reading_key]:
+                        reading_data = readings[reading_key]
+                        reference = reading_data.get('reference', '')
+                        text = reading_data.get('text', '')
+                        
+                        reading_name = reading_key.replace('_', ' ').title()
+                        
+                        lower_third = create_lower_third(
+                            reading_type=reading_name,
+                            reference=reference,
+                            liturgical_season=liturgical_season,
+                            is_funeral=is_funeral,
+                            branding=branding,
+                            style=style
+                        )
+                        img_buffer = io.BytesIO()
+                        lower_third.save(img_buffer, format='PNG')
+                        img_buffer.seek(0)
+                        zip_file.writestr(f"{date_folder_name}/lower_thirds/{reading_name.replace(' ', '_')}.png", img_buffer.read())
+                        
+                        if text:
+                            formatted_text = format_text_with_paragraphs(text, width=50)
+                            zip_file.writestr(f"{date_folder_name}/readings/{reading_name.replace(' ', '_')}.txt", formatted_text)
+                        if reference:
+                            zip_file.writestr(f"{date_folder_name}/readings/{reading_name.replace(' ', '_')}_Reference.txt", reference)
+            
+            service_lower_thirds = []
+            
+            if service_details.get('preludeTitle'):
+                service_lower_thirds.append(('Prelude', service_details['preludeTitle']))
+            if service_details.get('openingHymn'):
+                service_lower_thirds.append(('Opening Hymn', service_details['openingHymn']))
+            if service_details.get('sequenceHymn'):
+                service_lower_thirds.append(('Sequence Hymn', service_details['sequenceHymn']))
+            if service_details.get('offertoryHymn'):
+                service_lower_thirds.append(('Offertory Hymn', service_details['offertoryHymn']))
+            if service_details.get('communionMotet'):
+                service_lower_thirds.append(('Communion Motet', service_details['communionMotet']))
+            if service_details.get('closingHymn'):
+                service_lower_thirds.append(('Closing Hymn', service_details['closingHymn']))
+            if service_details.get('postludeTitle'):
+                service_lower_thirds.append(('Postlude', service_details['postludeTitle']))
+            if service_details.get('organistName'):
+                service_lower_thirds.append(('Organist', service_details['organistName']))
+            if service_details.get('presiderName'):
+                service_lower_thirds.append(('Presider', service_details['presiderName']))
+            if service_details.get('preacherName'):
+                service_lower_thirds.append(('Preacher', service_details['preacherName']))
+            
+            for label, content in service_lower_thirds:
+                lower_third = create_lower_third(
+                    reading_type=label,
+                    reference=content,
+                    liturgical_season=liturgical_season,
+                    is_funeral=is_funeral,
+                    branding=branding,
+                    style=style
+                )
+                img_buffer = io.BytesIO()
+                lower_third.save(img_buffer, format='PNG')
+                img_buffer.seek(0)
+                safe_label = label.replace(' ', '_')
+                zip_file.writestr(f"{date_folder_name}/service_details/{safe_label}.png", img_buffer.read())
+            
+            blank_template = create_blank_lower_third(
+                date_str=date_str,
+                is_funeral=is_funeral,
+                liturgical_season=liturgical_season,
+                style=style
+            )
+            img_buffer = io.BytesIO()
+            blank_template.save(img_buffer, format='PNG')
+            img_buffer.seek(0)
+            zip_file.writestr(f"{date_folder_name}/lower_thirds/BLANK_TEMPLATE.png", img_buffer.read())
+            
+            if extras.get('includeAnnouncements') and extras.get('announcements'):
+                announcements = extras['announcements']
+                for idx, announcement in enumerate(announcements, 1):
+                    ann_img = create_announcement_slide(announcement, branding=branding, style=style)
+                    img_buffer = io.BytesIO()
+                    ann_img.save(img_buffer, format='PNG')
+                    img_buffer.seek(0)
+                    ann_type = announcement.get('type', 'general')
+                    ann_title = announcement.get('title', f'Announcement_{idx}')
+                    safe_title = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in ann_title)[:30].strip()
+                    zip_file.writestr(f"{date_folder_name}/announcements/Announcement_{idx}_{safe_title}.png", img_buffer.read())
+            
+            if extras.get('includeServiceOrder') and extras.get('serviceOrderItems'):
+                order_items = extras['serviceOrderItems']
+                show_numbering = extras.get('showOrderNumbering', False)
+                for idx, item_text in enumerate(order_items, 1):
+                    if not item_text.strip():
+                        continue
+                    order_img = create_service_order_slide(
+                        order_item=item_text,
+                        liturgical_season=liturgical_season,
+                        is_memorial=is_funeral,
+                        show_number=show_numbering,
+                        item_number=idx,
+                        branding=branding
+                    )
+                    img_buffer = io.BytesIO()
+                    order_img.save(img_buffer, format='PNG')
+                    img_buffer.seek(0)
+                    safe_item = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in item_text)[:40].strip()
+                    zip_file.writestr(f"{date_folder_name}/service_order/Order_{idx:02d}_{safe_item}.png", img_buffer.read())
+            
+            if extras.get('includeCountdown') and extras.get('countdownTimes'):
+                countdown_times = extras['countdownTimes']
+                welcome_message = extras.get('countdownWelcome', '')
+                service_time = extras.get('countdownServiceTime', '')
+                for minutes in sorted(countdown_times, reverse=True):
+                    countdown_img = create_countdown_slide(
+                        minutes=minutes,
+                        liturgical_season=liturgical_season,
+                        is_memorial=is_funeral,
+                        welcome_message=welcome_message if welcome_message else None,
+                        service_time=service_time if service_time else None,
+                        branding=branding,
+                        style=style
+                    )
+                    img_buffer = io.BytesIO()
+                    countdown_img.save(img_buffer, format='PNG')
+                    img_buffer.seek(0)
+                    zip_file.writestr(f"{date_folder_name}/countdown/Countdown_{minutes:02d}min.png", img_buffer.read())
+            
+            summary_content = []
+            summary_content.append(f"Service Preparation Package")
+            summary_content.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            summary_content.append("=" * 60)
+            summary_content.append(f"Date: {formatted_date}")
+            summary_content.append(f"Celebration: {celebration}")
+            summary_content.append(f"Service Type: {service_type.title()}")
+            summary_content.append(f"Style: {style.replace('_', ' ').title()}")
+            summary_content.append("")
+            summary_content.append("Contents:")
+            summary_content.append("- Title Card")
+            if readings:
+                summary_content.append(f"- Readings: {len(readings)} items")
+            if service_lower_thirds:
+                summary_content.append(f"- Service Details: {len(service_lower_thirds)} lower thirds")
+            if extras.get('includeAnnouncements'):
+                summary_content.append(f"- Announcements: {len(extras.get('announcements', []))} slides")
+            if extras.get('includeServiceOrder'):
+                summary_content.append(f"- Service Order: {len([i for i in extras.get('serviceOrderItems', []) if i.strip()])} slides")
+            if extras.get('includeCountdown'):
+                summary_content.append(f"- Countdown: {len(extras.get('countdownTimes', []))} slides")
+            
+            zip_file.writestr(f"{date_folder_name}/Package_Summary.txt", "\n".join(summary_content))
+        
+        zip_buffer.seek(0)
+        
+        return send_file(
+            io.BytesIO(zip_buffer.read()),
+            as_attachment=True,
+            download_name=f"service_package_{date_folder_name}.zip",
+            mimetype='application/zip'
+        )
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate service package'
+        }), 500
+
+@app.route('/api/wizard_preview', methods=['POST'])
+def wizard_preview():
+    """Generate preview thumbnails for wizard review step"""
+    try:
+        data = request.get_json()
+        
+        date_str = data.get('date')
+        service_type = data.get('serviceType', 'eucharist')
+        service_details = data.get('serviceDetails', {})
+        readings = data.get('readings', {})
+        style = data.get('style', 'classic')
+        liturgical_override = data.get('liturgicalOverride', '')
+        
+        if not date_str:
+            return jsonify({'success': False, 'error': 'No date provided'}), 400
+        
+        branding = load_branding_config()
+        calendar_instance = WebLiturgicalCalendar()
+        
+        selected_date = datetime.fromisoformat(date_str)
+        
+        is_funeral = service_type == 'funeral'
+        liturgical_season = liturgical_override if liturgical_override else None
+        
+        previews = []
+        
+        liturgical_info = calendar_instance.get_liturgical_info(selected_date.date())
+        celebration = liturgical_info.get('celebration', '') or liturgical_info.get('proper', '') or 'Sunday Service'
+        formatted_date = selected_date.strftime("%B %d, %Y")
+        title_text = f"{celebration}\n{formatted_date}"
+        
+        title_card = create_title_card(
+            title_text,
+            liturgical_season=liturgical_season,
+            is_funeral=is_funeral,
+            branding=branding,
+            style=style
+        )
+        img_buffer = io.BytesIO()
+        title_card.save(img_buffer, format='PNG')
+        img_buffer.seek(0)
+        img_b64 = base64.b64encode(img_buffer.read()).decode('utf-8')
+        previews.append({'name': 'Title Card', 'image': f'data:image/png;base64,{img_b64}', 'category': 'title_cards'})
+        
+        if readings:
+            for reading_key in ['first_reading', 'psalm', 'second_reading', 'gospel']:
+                if reading_key in readings and readings[reading_key]:
+                    reading_data = readings[reading_key]
+                    reference = reading_data.get('reference', '')
+                    reading_name = reading_key.replace('_', ' ').title()
+                    
+                    lower_third = create_lower_third(
+                        reading_type=reading_name,
+                        reference=reference,
+                        liturgical_season=liturgical_season,
+                        is_funeral=is_funeral,
+                        branding=branding,
+                        style=style
+                    )
+                    img_buffer = io.BytesIO()
+                    lower_third.save(img_buffer, format='PNG')
+                    img_buffer.seek(0)
+                    img_b64 = base64.b64encode(img_buffer.read()).decode('utf-8')
+                    previews.append({'name': reading_name, 'image': f'data:image/png;base64,{img_b64}', 'category': 'readings'})
+        
+        service_items = []
+        if service_details.get('preludeTitle'):
+            service_items.append(('Prelude', service_details['preludeTitle']))
+        if service_details.get('openingHymn'):
+            service_items.append(('Opening Hymn', service_details['openingHymn']))
+        if service_details.get('closingHymn'):
+            service_items.append(('Closing Hymn', service_details['closingHymn']))
+        
+        for label, content in service_items[:3]:
+            lower_third = create_lower_third(
+                reading_type=label,
+                reference=content,
+                liturgical_season=liturgical_season,
+                is_funeral=is_funeral,
+                branding=branding,
+                style=style
+            )
+            img_buffer = io.BytesIO()
+            lower_third.save(img_buffer, format='PNG')
+            img_buffer.seek(0)
+            img_b64 = base64.b64encode(img_buffer.read()).decode('utf-8')
+            previews.append({'name': label, 'image': f'data:image/png;base64,{img_b64}', 'category': 'service_details'})
+        
+        return jsonify({
+            'success': True,
+            'previews': previews
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to generate previews'
+        }), 500
+
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5000))
