@@ -5929,7 +5929,7 @@ def wizard_export():
             summary_content.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             summary_content.append("=" * 60)
             summary_content.append(f"Date: {formatted_date}")
-            summary_content.append(f"Celebration: {celebration}")
+            summary_content.append(f"Celebration: {liturgical_name}")
             summary_content.append(f"Service Type: {service_type.title()}")
             summary_content.append(f"Style: {style.replace('_', ' ').title()}")
             summary_content.append("")
